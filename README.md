@@ -1,2 +1,2 @@
 # DeepGenotype
-A pipeline to calculate genotype frequencies in CRISPR genome editing experiments
+Calculate genotype frequencies in CRISPR genome editing experiments using deep sequencing reads
