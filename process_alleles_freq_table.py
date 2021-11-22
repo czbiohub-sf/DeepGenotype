@@ -29,7 +29,8 @@ class MyParser(argparse.ArgumentParser):
 
 def parse_args():
     parser= MyParser(description='This script does processes the allele freq. table output from CRISPResso2')
-    parser.add_argument('--path', default="", type=str, help='path to a the allele freq. table output zip file')
+    parser.add_argument('--path', default="", type=str, help='path to the allele freq. table output zip file')
+    parser.add_argument('--allele_freq_file', default="", type=str, help='the name of the freq. table output zip file')
     parser.add_argument('--wt_amp', default="", type=str, help='sequence of the wt amplicon')
     parser.add_argument('--HDR_amp', default="", type=str, help='sequence of the HDR amplicon')
     parser.add_argument('--ENST_ID', default="", type=str, help='ENST ID')
@@ -47,11 +48,16 @@ config = vars(parse_args())
 #####################    
 def main():
     try: 
-        zip_path = config['path'])
-        zip_dir, zip_name = os.path.split(zip_path)
+        zip_dir = config['path']
+        zip_name = config['allele_freq_file']
+        zip_path = os.path.join(zip_dir,zip_name)
         wt_amp = config['wt_amp']
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
+
+        print(zip_dir)
+        print(zip_name)
+        print(zip_path)
 
         #supporting functions
         def translate(seq, strand, frame): #translate DNA sequence according to strand and frame
