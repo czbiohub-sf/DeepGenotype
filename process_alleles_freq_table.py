@@ -203,6 +203,22 @@ def main():
                 gaps.append(m.span())
             return(gaps)
 
+        def cal_leading_gaps(seq):
+            gap = re.compile("^-+")
+            #find gaps
+            gaps=[]
+            for m in gap.finditer(seq):
+                gaps.append(m.span())
+            return(gaps)
+
+        def cal_trailing_gaps(seq):
+            gap = re.compile("-+$")
+            #find gaps
+            gaps=[]
+            for m in gap.finditer(seq):
+                gaps.append(m.span())
+            return(gaps)
+
         def check_deletion_in_cds(read,amp_cds_coords):
             '''
             input: read, amp_cds_coords
@@ -466,12 +482,24 @@ def main():
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
                     
-                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-                    #NEED TO TRIM the gaps on both ends of the ref#
-                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
-                    #print(f"{read}\n{ref}", end='\n')
-                    #print(f"{Reference_Name}\t{Read_Status}\t{n_Reads}\t{perc_Reads}\t{n_deleted}\t{n_inserted}\t{n_mutated}", end='')
-                    
+                    ###########################################################################################################
+                    #TRIM the gaps on both ends of the ref, these those gaps represent extra seq in the reads (not insertions)#
+                    ###########################################################################################################
+                    leading_gaps = []
+                    trailing_gaps = []
+                    if ref.startswith("-"):
+                        leading_gaps = cal_leading_gaps(ref)
+                        ref = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in leading_gaps]))
+                        read = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in leading_gaps]))
+                        #print(f"{read}\n{ref}", end='\n')
+                    if ref.endswith("-"):
+                        trailing_gaps = cal_trailing_gaps(ref)
+                        ref = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in trailing_gaps]))
+                        read = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in trailing_gaps]))
+                        #print(f"{read}\n{ref}", end='\n')
+                    #############################
+                    #Start calculating genotypes#
+                    #############################            
                     #############################
                     #read mapped to HDR amplicon#
                     #############################
@@ -671,6 +699,7 @@ def main():
         ############################
         #calculate allele frequency#
         ############################
+        #calculate allele frequency
         log.info(f"Calculating allele frequency")
         genotype_freq = {"wt_allele":0,
                         "HDR_perfect":0,
@@ -715,9 +744,25 @@ def main():
                         genotype_freq["wt_prot_noPL"] += float(perc_Reads)
                     elif genotype == "wt allele (mutant protein)":
                         genotype_freq["mut_prot_noPL"] += float(perc_Reads)    
-       
+                        
         #write genotype to file
-        log.info(f"Finished calculating allele frequency")
+        with open(os.path.join(zip_dir,'genotype_frequency.txt'),'w') as writehandle:
+            writehandle.write(f"HDR_perfect\t"
+                            f"wt_allele\t"
+                            f"wt_prot_noPL\t"
+                            f"wt_prot_OKPL\t"
+                            f"mut_prot_noPL\t"
+                            f"mut_prot_OKPL\t"
+                            f"mut_prot_mutPL\t"
+                            f"wt_prot_mutPL\n")
+            writehandle.write(f"{genotype_freq['HDR_perfect']}\t"
+                            f"{genotype_freq['wt_allele']}\t"
+                            f"{genotype_freq['wt_prot_noPL']}\t"
+                            f"{genotype_freq['wt_prot_OKPL']}\t"
+                            f"{genotype_freq['mut_prot_noPL']}\t"
+                            f"{genotype_freq['mut_prot_OKPL']}\t"
+                            f"{genotype_freq['mut_prot_mutPL']}\t"
+                            f"{genotype_freq['wt_prot_mutPL']}\n")
 
     except Exception  as e:
         print("Unexpected error:", str(sys.exc_info()))
