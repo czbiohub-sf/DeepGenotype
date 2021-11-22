@@ -55,10 +55,6 @@ def main():
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
 
-        print(zip_dir)
-        print(zip_name)
-        print(zip_path)
-
         #supporting functions
         def translate(seq, strand, frame): #translate DNA sequence according to strand and frame
             coding_dna=seq.replace("-", "")
