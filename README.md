@@ -3,4 +3,4 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
 
 ## Dependencies
 Bio   
-RISPRESSO2
+CRISPRESSO2
