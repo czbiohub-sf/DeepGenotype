@@ -1,7 +1,6 @@
 import argparse
 import sys
 import linecache
-#load packages
 import pandas as pd
 import os
 import subprocess
@@ -30,12 +29,16 @@ def parse_args():
     return config
 
 config = vars(parse_args())
+path2workDir = config["path2workDir"]
 path2fastqDir = config['path2fastqDir']
 path2csv= config['path2csv']
 quantification_win_size= config['quantification_win_size']
 fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
 sample_name_addon = config["sample_name_addon"]
+
+path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
+path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
 
 #####################
 ##      main       ##
@@ -58,11 +61,12 @@ def main():
                        f"--guide_seq", f"{row['gRNA_sequence']}",
                        f"--name", f"{row['Sample_ID']}.out",
                        f"--quantification_window_size", f"{quantification_win_size}",
+                       f"--output_folder", f"{path2_CRISPResso_out}",
                        ]
 
             # print(command)
-            path_to_stderr_file = os.path.join(path2workDir, f"{row['Sample_ID']}.stderr.txt")
-            path_to_stdout_file = os.path.join(path2workDir, f"{row['Sample_ID']}.stdout.txt")
+            path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+            path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
             mystdput = open(path_to_stdout_file, 'w+')
             mystderr = open(path_to_stderr_file, 'w+')
             p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
