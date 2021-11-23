@@ -3,8 +3,8 @@ import sys
 import linecache
 import pandas as pd
 import os
-import subprocess
 from subprocess import Popen
+import shutil
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
@@ -40,6 +40,17 @@ sample_name_addon = config["sample_name_addon"]
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
 
+if os.path.isdir(path2_stdout):
+    shutil.rmtree(path2_stdout)
+os.makedirs(path2_stdout)
+if os.path.isdir(path2_CRISPResso_out):
+    shutil.rmtree(path2_CRISPResso_out)
+os.makedirs(path2_CRISPResso_out)
+
+wd = os.getcwd()  # save current working dir
+os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
+
+
 #####################
 ##      main       ##
 #####################
@@ -47,7 +58,6 @@ def main():
     try:
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
-
         # run CRISPResso for each sample_ID
         for index, row in df.iterrows():
             fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R1_suffix}"
@@ -59,9 +69,8 @@ def main():
                        f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
                        f"--amplicon_name", f"{row['gene_name']}",
                        f"--guide_seq", f"{row['gRNA_sequence']}",
-                       f"--name", f"{row['Sample_ID']}.out",
-                       f"--quantification_window_size", f"{quantification_win_size}",
-                       f"--output_folder", f"{path2_CRISPResso_out}",
+                       f"--name", f"{row['Sample_ID']}",
+                       f"--quantification_window_size", f"{quantification_win_size}"
                        ]
 
             # print(command)
@@ -71,8 +80,25 @@ def main():
             mystderr = open(path_to_stderr_file, 'w+')
             p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
             print(f"Processing sample: {row['Sample_ID']} with CRISPResso ...")
-            p.communicate()  # now wait plus that you can send commands to process
+            p.communicate()  # wait for the commands to process
+
+            #process allele frequency table
+            current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+            script_path = os.path.join(wd,"process_alleles_freq_table.py")
+            command2 = [f"{sys.executable}",f"{script_path}",
+                        f"--path", f"{current_CRISPResso_out_dir}",
+                        f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                        f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                        f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                        f"--ENST_ID", f"{row['ENST_id']}"
+                        ]
+            p = Popen(command2, universal_newlines=True)
+            print(f"Processing allele frequency table and re-calculating allele frequencies")
+            p.communicate()  # wait for the commands to process
         print("done")
+
+        os.chdir(wd)  # change to the saved working dir
+
 
     except Exception as e:
         print("Unexpected error:", str(sys.exc_info()))
