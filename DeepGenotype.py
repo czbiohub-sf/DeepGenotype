@@ -58,43 +58,57 @@ def main():
     try:
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
-        # run CRISPResso for each sample_ID
-        for index, row in df.iterrows():
-            fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R1_suffix}"
-            fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R2_suffix}"
-            command = [f"CRISPResso",
-                       f"--fastq_r1", f"{fastq_r1}",
-                       f"--fastq_r2", f"{fastq_r2}",
-                       f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
-                       f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
-                       f"--amplicon_name", f"{row['gene_name']}",
-                       f"--guide_seq", f"{row['gRNA_sequence']}",
-                       f"--name", f"{row['Sample_ID']}",
-                       f"--quantification_window_size", f"{quantification_win_size}"
-                       ]
+        with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
+            writehandle.write(f"Sample\tHDR_perfect\t"
+                            f"wt_allele\t"
+                            f"wt_prot_noPL\t"
+                            f"wt_prot_OKPL\t"
+                            f"mut_prot_noPL\t"
+                            f"mut_prot_OKPL\t"
+                            f"mut_prot_mutPL\t"
+                            f"wt_prot_mutPL\n") #write header
 
-            # print(command)
-            path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-            path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-            mystdput = open(path_to_stdout_file, 'w+')
-            mystderr = open(path_to_stderr_file, 'w+')
-            p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-            print(f"Processing sample: {row['Sample_ID']} with CRISPResso ...")
-            p.communicate()  # wait for the commands to process
+            # run CRISPResso for each sample_ID
+            for index, row in df.iterrows():
+                fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R1_suffix}"
+                fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R2_suffix}"
+                command = [f"CRISPResso",
+                           f"--fastq_r1", f"{fastq_r1}",
+                           f"--fastq_r2", f"{fastq_r2}",
+                           f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
+                           f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
+                           f"--amplicon_name", f"{row['gene_name']}",
+                           f"--guide_seq", f"{row['gRNA_sequence']}",
+                           f"--name", f"{row['Sample_ID']}",
+                           f"--quantification_window_size", f"{quantification_win_size}"
+                           ]
 
-            #process allele frequency table
-            current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-            script_path = os.path.join(wd,"process_alleles_freq_table.py")
-            command2 = [f"{sys.executable}",f"{script_path}",
-                        f"--path", f"{current_CRISPResso_out_dir}",
-                        f"--allele_freq_file", f"Alleles_frequency_table.zip",
-                        f"--wt_amp", f"{row['WT_amplicon_sequence']}",
-                        f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                        f"--ENST_ID", f"{row['ENST_id']}"
-                        ]
-            p = Popen(command2, universal_newlines=True)
-            print(f"Processing allele frequency table and re-calculating allele frequencies")
-            p.communicate()  # wait for the commands to process
+                # print(command)
+                path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                mystdput = open(path_to_stdout_file, 'w+')
+                mystderr = open(path_to_stderr_file, 'w+')
+                p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                print(f"Processing sample: {row['Sample_ID']} with CRISPResso ...")
+                p.communicate()  # wait for the commands to process
+
+                #process allele frequency table
+                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+                script_path = os.path.join(wd,"process_alleles_freq_table.py")
+                command2 = [f"{sys.executable}",f"{script_path}",
+                            f"--path", f"{current_CRISPResso_out_dir}",
+                            f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                            f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                            f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                            f"--ENST_ID", f"{row['ENST_id']}"
+                            ]
+                p = Popen(command2, universal_newlines=True)
+                print(f"Parsing allele frequency table and re-calculating allele frequencies")
+                p.communicate()  # wait for the commands to process
+                with open(os.path.join(current_CRISPResso_out_dir,"genotype_frequency.csv"), "r") as handle:
+                    next(handle)
+                    writehandle.write(f"{row['Sample_ID']},")
+                    writehandle.write(handle.readline())
         print("done")
 
         os.chdir(wd)  # change to the saved working dir

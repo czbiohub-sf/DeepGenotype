@@ -109,7 +109,7 @@ def main():
         #get cds coordinate in amplicons
         #align each cds to amplicon and mark cds segments
         def get_cds_coord_in_amplicon(cds_seqs, amplicon):
-            log.info(f"Searching for cds segments in amplicon...")
+            #log.info(f"Searching for cds segments in amplicon...")
             #add revcom cds
             cds_seqs_revcom = []
             for cds in cds_seqs:
@@ -159,7 +159,7 @@ def main():
                     cds_coord_in_amp.append((aln[0].start,aln[0].end,"-", frame))
                     #log.info(f"Found a cds segment (revcom) in the amplicon")            
                     
-            log.info(f"Done searching cds segments in the amplicon")
+            #log.info(f"Done searching cds segments in the amplicon")
             return(cds_coord_in_amp)
 
         #get cds seq
@@ -283,7 +283,7 @@ def main():
             # First, fetch the transcript sequence
             url = base_url + f"/sequence/id/{ensembl_transcript_id}"
 
-            log.info(f"Querying Ensembl for sequence of {ensembl_transcript_id}")
+            #log.info(f"Querying Ensembl for sequence of {ensembl_transcript_id}")
             response = requests.get(url, { "type": "genomic",
                                         "content-type": "application/json" })
 
@@ -316,9 +316,9 @@ def main():
                 
                 seq_str = response_data['seq']
 
-                log.info(f"Retrieved sequence {response_data['desc']} of length "
-                        f"{sequence_right - sequence_left} for species {species} on "
-                        f"strand {transcript_strand}")
+                #log.info(f"Retrieved sequence {response_data['desc']} of length "
+                #       f"{sequence_right - sequence_left} for species {species} on "
+                #       f"strand {transcript_strand}")
             except (KeyError, ValueError) as e:
                 log.error(e)
                 log.error('Error parsing sequence metadata from Ensembl REST response - '
@@ -333,7 +333,7 @@ def main():
 
                 url = base_url + f"/overlap/id/{ensembl_transcript_id}"
 
-                log.info(f"Querying Ensembl for overlaps of {ensembl_transcript_id}")
+                #log.info(f"Querying Ensembl for overlaps of {ensembl_transcript_id}")
                 response = requests.get(url, { "feature": ["cds", "exon"],
                                             "content-type": "application/json" })
                 try:
@@ -372,9 +372,9 @@ def main():
                     num_cds_boundaries = len([f for f in record.features
                                             if f.type == 'cds'])
 
-                    log.info(f"Retrieved {num_exon_boundaries} exons and "
-                            f"{num_cds_boundaries} coding regions for transcript "
-                            f"{ensembl_transcript_id}")
+                    #log.info(f"Retrieved {num_exon_boundaries} exons and "
+                    #        f"{num_cds_boundaries} coding regions for transcript "
+                    #        f"{ensembl_transcript_id}")
                 except (KeyError, ValueError) as e:
                     log.error(e)
                     log.error('Error parsing overlap metadata from Ensembl REST response - '
@@ -696,13 +696,13 @@ def main():
             os.chdir(wd) #change to the saved working dir
         if os.path.exists(os.path.join(zip_dir,'Alleles_frequency_table_genotype.txt')): #remove unzipped raw output
             os.remove(os.path.join(zip_dir,'Alleles_frequency_table_genotype.txt'))    
-        log.info(f"Done processing alignments, saved the results in zip file: {new_zip_path}")
+        #log.info(f"Done processing alignments, saved the results in zip file: {new_zip_path}")
 
         ############################
         #calculate allele frequency#
         ############################
         #calculate allele frequency
-        log.info(f"Calculating allele frequency")
+        #log.info(f"Calculating allele frequency")
         genotype_freq = {"wt_allele":0,
                         "HDR_perfect":0,
                         "wt_prot_noPL":0,
@@ -748,22 +748,22 @@ def main():
                         genotype_freq["mut_prot_noPL"] += float(perc_Reads)    
                         
         #write genotype to file
-        with open(os.path.join(zip_dir,'genotype_frequency.txt'),'w') as writehandle:
-            writehandle.write(f"HDR_perfect\t"
-                            f"wt_allele\t"
-                            f"wt_prot_noPL\t"
-                            f"wt_prot_OKPL\t"
-                            f"mut_prot_noPL\t"
-                            f"mut_prot_OKPL\t"
-                            f"mut_prot_mutPL\t"
+        with open(os.path.join(zip_dir,'genotype_frequency.csv'),'w') as writehandle:
+            writehandle.write(f"HDR_perfect,"
+                            f"wt_allele,"
+                            f"wt_prot_noPL,"
+                            f"wt_prot_OKPL,"
+                            f"mut_prot_noPL,"
+                            f"mut_prot_OKPL,"
+                            f"mut_prot_mutPL,"
                             f"wt_prot_mutPL\n")
-            writehandle.write(f"{genotype_freq['HDR_perfect']}\t"
-                            f"{genotype_freq['wt_allele']}\t"
-                            f"{genotype_freq['wt_prot_noPL']}\t"
-                            f"{genotype_freq['wt_prot_OKPL']}\t"
-                            f"{genotype_freq['mut_prot_noPL']}\t"
-                            f"{genotype_freq['mut_prot_OKPL']}\t"
-                            f"{genotype_freq['mut_prot_mutPL']}\t"
+            writehandle.write(f"{genotype_freq['HDR_perfect']},"
+                            f"{genotype_freq['wt_allele']},"
+                            f"{genotype_freq['wt_prot_noPL']},"
+                            f"{genotype_freq['wt_prot_OKPL']},"
+                            f"{genotype_freq['mut_prot_noPL']},"
+                            f"{genotype_freq['mut_prot_OKPL']},"
+                            f"{genotype_freq['mut_prot_mutPL']},"
                             f"{genotype_freq['wt_prot_mutPL']}\n")
 
     except Exception  as e:
