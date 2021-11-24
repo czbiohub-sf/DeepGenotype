@@ -59,13 +59,14 @@ def main():
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
         with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
-            writehandle.write(f"Sample\tHDR_perfect\t"
-                            f"wt_allele\t"
-                            f"wt_prot_noPL\t"
-                            f"wt_prot_OKPL\t"
-                            f"mut_prot_noPL\t"
-                            f"mut_prot_OKPL\t"
-                            f"mut_prot_mutPL\t"
+            writehandle.write(f"Sample,"
+                              f"HDR_perfect,"
+                            f"wt_allele,"
+                            f"wt_prot_noPL,"
+                            f"wt_prot_OKPL,"
+                            f"mut_prot_noPL,"
+                            f"mut_prot_OKPL,"
+                            f"mut_prot_mutPL,"
                             f"wt_prot_mutPL\n") #write header
 
             # run CRISPResso for each sample_ID
