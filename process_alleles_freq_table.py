@@ -109,7 +109,7 @@ def main():
         #get cds coordinate in amplicons
         #align each cds to amplicon and mark cds segments
         def get_cds_coord_in_amplicon(cds_seqs, amplicon):
-            #log.info(f"Searching for cds segments in amplicon...")
+            log.info(f"Searching for cds segments in amplicon...")
             #add revcom cds
             cds_seqs_revcom = []
             for cds in cds_seqs:
@@ -135,11 +135,18 @@ def main():
                     if frame == 2: frame = 3
                     if frame == 0: frame = 2
                 
-                    cds_coord_in_amp.append((aln[0].start,aln[0].end,"+",frame))
+                    seq1_start = int(format_alignment(*aln[0]).split("\n")[0].split()[0])
+                    seq1_match = format_alignment(*aln[0]).split("\n")[0].split()[1]
+                    seq1_match = re.sub(r'-+','',seq1_match)
+                    st = seq1_start - 1
+                    en = seq1_start + len(seq1_match) -1
+                    #cds_coord_in_amp.append((aln[0].start,aln[0].end,"+",frame)) #old code
+                    cds_coord_in_amp.append((st,en,"+",frame))
+                    #print(f"{aln[0].start}-{aln[0].end} vs {st}-{en}") #compare old output and new output
                     #log.info(f"Found a cds segment in the amplicon")
                     
-            for cds in cds_seqs_revcom:
-                aln = align.localms(amplicon, cds, 2, -1, -.5, -.1)
+            for cds_revcom in cds_seqs_revcom:
+                aln = align.localms(amplicon, cds_revcom, 2, -1, -.5, -.1)
                 #print(format_alignment(*aln[0]))
                 #print((aln[0].start,aln[0].end))
                 #decide if alignment is legit
@@ -156,10 +163,17 @@ def main():
                     if frame == 2: frame = 3
                     if frame == 0: frame = 2
                     
-                    cds_coord_in_amp.append((aln[0].start,aln[0].end,"-", frame))
+                    seq1_start = int(format_alignment(*aln[0]).split("\n")[0].split()[0])
+                    seq1_match = format_alignment(*aln[0]).split("\n")[0].split()[1]
+                    seq1_match = re.sub(r'-+','',seq1_match)
+                    st = seq1_start - 1
+                    en = seq1_start + len(seq1_match) -1
+                    #cds_coord_in_amp.append((aln[0].start,aln[0].end,"+",frame)) #old code
+                    cds_coord_in_amp.append((st,en,"+",frame))
+                    #print(f"{aln[0].start}-{aln[0].end} vs {st}-{en}") #compare old output and new output
                     #log.info(f"Found a cds segment (revcom) in the amplicon")            
                     
-            #log.info(f"Done searching cds segments in the amplicon")
+            log.info(f"Done searching cds segments in the amplicon")
             return(cds_coord_in_amp)
 
         #get cds seq
