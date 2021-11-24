@@ -60,8 +60,8 @@ def main():
         df = pd.read_csv(os.path.join(path2csv))
         with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
             writehandle.write(f"Sample,"
-                              f"HDR_perfect,"
-                            f"wt_allele,"
+                              f"wt_allele,"
+                            f"HDR_perfect,"
                             f"wt_prot_noPL,"
                             f"wt_prot_OKPL,"
                             f"mut_prot_noPL,"
@@ -96,20 +96,23 @@ def main():
                 #process allele frequency table
                 current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
                 script_path = os.path.join(wd,"process_alleles_freq_table.py")
-                command2 = [f"{sys.executable}",f"{script_path}",
-                            f"--path", f"{current_CRISPResso_out_dir}",
-                            f"--allele_freq_file", f"Alleles_frequency_table.zip",
-                            f"--wt_amp", f"{row['WT_amplicon_sequence']}",
-                            f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                            f"--ENST_ID", f"{row['ENST_id']}"
-                            ]
-                p = Popen(command2, universal_newlines=True)
-                print(f"Parsing allele frequency table and re-calculating allele frequencies")
-                p.communicate()  # wait for the commands to process
-                with open(os.path.join(current_CRISPResso_out_dir,"genotype_frequency.csv"), "r") as handle:
-                    next(handle)
-                    writehandle.write(f"{row['Sample_ID']},")
-                    writehandle.write(handle.readline())
+                if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
+                    command2 = [f"{sys.executable}",f"{script_path}",
+                                f"--path", f"{current_CRISPResso_out_dir}",
+                                f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                                f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                                f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                                f"--ENST_ID", f"{row['ENST_id']}"
+                                ]
+                    p = Popen(command2, universal_newlines=True)
+                    print(f"Parsing allele frequency table and re-calculating allele frequencies")
+                    p.communicate()  # wait for the commands to process
+                if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
+                    with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
+                        next(handle)
+                        writehandle.write(f"{row['Sample_ID']},")
+                        writehandle.write(handle.readline())
+
         print("done")
 
         os.chdir(wd)  # change to the saved working dir

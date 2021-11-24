@@ -749,16 +749,16 @@ def main():
                         
         #write genotype to file
         with open(os.path.join(zip_dir,'genotype_frequency.csv'),'w') as writehandle:
-            writehandle.write(f"HDR_perfect,"
-                            f"wt_allele,"
+            writehandle.write(f"wt_allele,"
+                            f"HDR_perfect,"
                             f"wt_prot_noPL,"
                             f"wt_prot_OKPL,"
                             f"mut_prot_noPL,"
                             f"mut_prot_OKPL,"
                             f"mut_prot_mutPL,"
                             f"wt_prot_mutPL\n")
-            writehandle.write(f"{genotype_freq['HDR_perfect']},"
-                            f"{genotype_freq['wt_allele']},"
+            writehandle.write(f"{genotype_freq['wt_allele']},"
+                            f"{genotype_freq['HDR_perfect']},"
                             f"{genotype_freq['wt_prot_noPL']},"
                             f"{genotype_freq['wt_prot_OKPL']},"
                             f"{genotype_freq['mut_prot_noPL']},"
