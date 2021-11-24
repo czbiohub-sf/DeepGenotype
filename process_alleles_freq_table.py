@@ -109,7 +109,7 @@ def main():
         #get cds coordinate in amplicons
         #align each cds to amplicon and mark cds segments
         def get_cds_coord_in_amplicon(cds_seqs, amplicon):
-            log.info(f"Searching for cds segments in amplicon...")
+            #log.info(f"Searching for cds segments in amplicon...")
             #add revcom cds
             cds_seqs_revcom = []
             for cds in cds_seqs:
@@ -173,7 +173,7 @@ def main():
                     #print(f"{aln[0].start}-{aln[0].end} vs {st}-{en}") #compare old output and new output
                     #log.info(f"Found a cds segment (revcom) in the amplicon")            
                     
-            log.info(f"Done searching cds segments in the amplicon")
+            #log.info(f"Done searching cds segments in the amplicon")
             return(cds_coord_in_amp)
 
         #get cds seq
