@@ -585,16 +585,16 @@ def main():
                             #check if insertion are in payload cds
                             insertion_in_payload_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = [payload_coord])["insertion_in_cds_flag"]
                             #produce output
-                            if (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==True):
+                            if (insertion_in_HDR_amp_cds_noPL_Flag==True and insertion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")
-                            elif (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==False):
+                            elif (insertion_in_HDR_amp_cds_noPL_Flag==True and insertion_in_payload_Flag==False):
                                 #print("\tHDR allele (mutant protein + correct payload)", end="\n")
                                 writehandle.write("\tHDR allele (mutant protein + correct payload)\n")
-                            elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==True):
+                            elif (insertion_in_HDR_amp_cds_noPL_Flag==False and insertion_in_payload_Flag==True):
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (wt protein + mutant payload)\n")
-                            elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==False):
+                            elif (insertion_in_HDR_amp_cds_noPL_Flag==False and insertion_in_payload_Flag==False):
                                 #print("\tHDR allele (wt protein + correct payload)", end="\n") 
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n") 
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
