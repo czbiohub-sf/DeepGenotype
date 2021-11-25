@@ -27,7 +27,7 @@ Python DeepGenotype.py --path2csv test.csv --path2workDir test_dir/ --path2fastq
 ```
 
 ## Dependencies
-Python > 3.7
+Python > 3.7  
 Bio   
 CRISPRESSO2
   
