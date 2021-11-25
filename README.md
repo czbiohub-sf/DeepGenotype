@@ -10,7 +10,7 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
   - WT_amplicon_sequence
   - HDR_amplicon_sequence
   - gRNA_sequence
-  - (Optional but important) Fastq_extra_suffix    
+  - Fastq_extra_suffix (Optional)     
         
       This column contains extra suffixs that help to map Sample_ID to corresponding fastq files
       in addition to the two standard fastq suffixes below:  
@@ -24,7 +24,7 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
 
 ## Usuage:
 ```
-Python DeepGenotype.py --path2csv test.csv --path2workDir test_dir/ --path2fastqDir fastq_dir/ --sample_name_addon addon
+Python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/ --sample_name_addon addon
 ```
 
 ## Dependencies
