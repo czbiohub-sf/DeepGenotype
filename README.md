@@ -9,9 +9,10 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
   - WT_amplicon_sequence
   - HDR_amplicon_sequence
   - gRNA_sequence
-  - (Optional but important) Sample_name_addon    
-    
-      This columns helps to map Sample_ID to corresponding fastq files in addition to the two standard fastq suffixes below :
+  - (Optional but important) Fastq_extra_suffix    
+        
+      This column contains extra suffix that helps to map Sample_ID to corresponding fastq files
+      in addition to the two standard fastq suffixes below:
       "R1_001.fastq.gz"
       "R2_001.fastq.gz"
       
@@ -21,12 +22,12 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
       Then you should add "_S90_" to the "Sample_name_addon" column
 
 ## Usuage:
-Python DeepGenotype.
---path2csv "/Users/duo.peng/My Drive/protospaceX_collaboration-20211111T220826Z-001/protospaceX_collaboration/example_mNG11_data/mNGplate19_MiSeq_analysis_sample_sheet.csv" 
---path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/testing2" 
---path2fastqDir "/Users/duo.peng/My Drive/protospaceX_collaboration-20211111T220826Z-001/protospaceX_collaboration/example_mNG11_data/plate19fastqs" 
---sample_name_addon _S_
+```
+Python DeepGenotype.py --path2csv test.csv --path2workDir test_dir/ --path2fastqDir fastq_dir/ --sample_name_addon addon
+```
+
 ## Dependencies
+Python > 3.7
 Bio   
 CRISPRESSO2
   
