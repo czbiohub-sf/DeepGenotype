@@ -56,18 +56,9 @@ def main():
         ENST_ID = config['ENST_ID']
 
         #supporting functions
-        def translate(seq, strand, frame): #translate DNA sequence according to strand and frame
-            coding_dna=seq.replace("-", "")
-            if strand == "-":
-                coding_dna = str(Seq(coding_dna).reverse_complement()) #revcom
-                coding_dna = adjust_frame(coding_dna,frame) #adjust frame
-                trans = str(Seq(coding_dna).translate())    #translate
-                return(trans)      
-            else:
-                coding_dna = adjust_frame(coding_dna,frame) #adjust frame
-                trans = str(Seq(coding_dna).translate())    #translate
-                return(trans)      
-            
+        def revcom(seq):
+            return str(Seq(seq).reverse_complement())
+
         def adjust_frame(seq, frame): #adjusts the frame 
             if frame == 1:
                 return(seq)
@@ -78,18 +69,38 @@ def main():
             else:
                 return("invalid frame!")
             
-        def translate2(seq, start, end, strand, frame): #adjusts the frame 
-            coding_dna = seq[start:end].replace("-", "")
+        def translate_amp(seq, start, end, strand, frame): # for amplicons, the start, end refers to the revcom if strand = "-"
+            #seq = seq[start:end].replace("-", "")
             if strand == "-":
-                coding_dna = str(Seq(coding_dna).reverse_complement()) #revcom
-                coding_dna = adjust_frame(coding_dna,frame) #adjust frame
+                seq = revcom(seq) #revcom
+                seq = seq[start:end]
+                coding_dna = adjust_frame(seq,frame) #adjust frame
+                coding_dna=coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
             else:
-                coding_dna = adjust_frame(coding_dna,frame) #adjust frame
+                seq = seq[start:end]
+                coding_dna = adjust_frame(seq,frame) #adjust frame
+                coding_dna = coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
 
+        def translate_payload(seq, start, end, strand, frame): # for payloads, the start, end refers to the seq (HDR amplicon) , not the revcom 
+            #seq = seq[start:end].replace("-", "")
+            if strand == "-":
+                seq = seq[start:end]
+                seq = revcom(seq) #revcom
+                coding_dna = adjust_frame(seq,frame) #adjust frame
+                coding_dna=coding_dna.replace("-", "")
+                trans = str(Seq(coding_dna).translate())    #translate
+                return(trans)      
+            else:
+                seq = seq[start:end]
+                coding_dna = adjust_frame(seq,frame) #adjust frame
+                coding_dna = coding_dna.replace("-", "")
+                trans = str(Seq(coding_dna).translate())    #translate
+                return(trans)  
+            
         def infer_strand(tag_for,tag_rev,HDR_amp): #use the provided tag sequence to infer the strand and frame of the coding sequence
             mFor = re.finditer(tag_for, HDR_amp)
             mRev = re.finditer(tag_rev, HDR_amp)  
@@ -108,73 +119,80 @@ def main():
                 
         #get cds coordinate in amplicons
         #align each cds to amplicon and mark cds segments
-        def get_cds_coord_in_amplicon(cds_seqs, amplicon):
-            #log.info(f"Searching for cds segments in amplicon...")
-            #add revcom cds
-            cds_seqs_revcom = []
-            for cds in cds_seqs:
-                cds_seqs_revcom.append(str(Seq(cds).reverse_complement()))
-                
-            cds_coord_in_amp = []
+        def get_cds_coord_in_amplicon(whole_cds, amplicon):
+            """
+            Aligns CDS to amplicon, and get the coordinates of coding part of amplicon
+        
+            Notes:
+            whole_cds is always +1 frame
             
-            for cds in cds_seqs:
-                aln = align.localms(amplicon, cds, 2, -1, -.5, -.1)
+            """
+            #log.info(f"Searching for cds segments in amplicon...")
+
+            #alignment
+            aln = align.localms(amplicon, whole_cds, 0.1, -10, -0.2, -.1)
+            aln_rc = align.localms(revcom(amplicon), whole_cds, 0.1, -10, -0.2, -.1)
+
+            #get coding sequence coordinates
+            cds_coord_in_amp = []
+            if aln[0].score >= aln_rc[0].score:  # amplicon matched to sense CDS
+                #print("amp matched to CDS")
                 #print(format_alignment(*aln[0]))
-                #print((aln[0].start,aln[0].end))
-                #decide if alignment is legit
-                match_count = format_alignment(*aln[0]).split("\n")[1].count('|')
-                total_len = len(format_alignment(*aln[0]).split("\n")[1])
-                if match_count/total_len >=0.8:
-                    #print(format_alignment(*aln[0]))
-                    #print((aln[0].start,aln[0].end))
-                    
-                    #get frame
-                    aln2 = align.localms(cds,amplicon, 2, -1, -.5, -.1)
-                    cds_match_start = format_alignment(*aln2[0]).split("\n")[0].split()[0]
-                    frame = int(cds_match_start)%3
-                    if frame == 2: frame = 3
-                    if frame == 0: frame = 2
-                
-                    seq1_start = int(format_alignment(*aln[0]).split("\n")[0].split()[0])
-                    seq1_match = format_alignment(*aln[0]).split("\n")[0].split()[1]
-                    seq1_match = re.sub(r'-+','',seq1_match)
-                    st = seq1_start - 1
-                    en = seq1_start + len(seq1_match) -1
-                    #cds_coord_in_amp.append((aln[0].start,aln[0].end,"+",frame)) #old code
-                    cds_coord_in_amp.append((st,en,"+",frame))
-                    #print(f"{aln[0].start}-{aln[0].end} vs {st}-{en}") #compare old output and new output
-                    #log.info(f"Found a cds segment in the amplicon")
-                    
-            for cds_revcom in cds_seqs_revcom:
-                aln = align.localms(amplicon, cds_revcom, 2, -1, -.5, -.1)
-                #print(format_alignment(*aln[0]))
-                #print((aln[0].start,aln[0].end))
-                #decide if alignment is legit
-                match_count = format_alignment(*aln[0]).split("\n")[1].count('|')
-                total_len = len(format_alignment(*aln[0]).split("\n")[1])
-                if match_count/total_len >=0.8:
-                    #print(format_alignment(*aln[0]))
-                    #print((aln[0].start,aln[0].end))
-                    
-                    #get frame
-                    aln2 = align.localms(cds,amplicon, 2, -1, -.5, -.1)
-                    cds_match_start = format_alignment(*aln2[0]).split("\n")[0].split()[0]
-                    frame = int(cds_match_start)%3
-                    if frame == 2: frame = 3
-                    if frame == 0: frame = 2
-                    
-                    seq1_start = int(format_alignment(*aln[0]).split("\n")[0].split()[0])
-                    seq1_match = format_alignment(*aln[0]).split("\n")[0].split()[1]
-                    seq1_match = re.sub(r'-+','',seq1_match)
-                    st = seq1_start - 1
-                    en = seq1_start + len(seq1_match) -1
-                    #cds_coord_in_amp.append((aln[0].start,aln[0].end,"+",frame)) #old code
-                    cds_coord_in_amp.append((st,en,"+",frame))
-                    #print(f"{aln[0].start}-{aln[0].end} vs {st}-{en}") #compare old output and new output
-                    #log.info(f"Found a cds segment (revcom) in the amplicon")            
+                coords = get_st_en_from_aln(aln) #get start and end of amplicon match, and cds match
+                #print(f"start and end of amplicon match, and cds match\n{coords['seq1_st']}-{coords['seq1_en']} {coords['seq2_st']}-{coords['seq2_en']}")
+
+                #get frame
+                frame = int(coords['seq2_st'])%3
+                if frame ==0:
+                    frame =1
+                elif frame == 1: 
+                    frame = 3
+                elif frame == 2: 
+                    frame = 2
+
+                #print(f"strand= '-'\n{frame}")
+                #return coordinates
+                cds_coord_in_amp.append((coords['seq1_st'],coords['seq1_en'],"+",frame))
+
+            else: # revcom amp matched to CDS
+                #print("revcom amp matched to CDS")
+                #print(format_alignment(*aln_rc[0]))
+                coords = get_st_en_from_aln(aln_rc)
+                #print(f"start and end of amplicon match, and cds match\n{coords['seq1_st']}-{coords['seq1_en']} {coords['seq2_st']}-{coords['seq2_en']}")
+
+                #get frame
+                frame = int(coords['seq2_st'])%3
+                if frame ==0:
+                    frame =1
+                elif frame == 1: 
+                    frame = 3
+                elif frame == 2: 
+                    frame = 2
+
+                #print(f"strand= '-'\nframe={frame}")
+                #return coordinates
+                cds_coord_in_amp.append((coords['seq1_st'],coords['seq1_en'],"-",frame))
                     
             #log.info(f"Done searching cds segments in the amplicon")
             return(cds_coord_in_amp)
+
+        def get_st_en_from_aln(aln):
+            seq1_start = int(format_alignment(*aln[0]).split("\n")[0].split()[0])
+            seq1_match = format_alignment(*aln[0]).split("\n")[0].split()[1]
+            seq1_match = re.sub(r'-+','',seq1_match)
+            seq1_st = seq1_start - 1
+            seq1_en = seq1_start + len(seq1_match) -1
+            
+            seq2_start = int(format_alignment(*aln[0]).split("\n")[2].split()[0])
+            seq2_match = format_alignment(*aln[0]).split("\n")[2].split()[1]
+            seq2_match = re.sub(r'-+','',seq2_match)
+            seq2_st = seq2_start - 1
+            seq2_en = seq2_start + len(seq2_match) -1    
+
+            return({"seq1_st":seq1_st,
+                    "seq1_en":seq1_en,
+                    "seq2_st":seq2_st,
+                    "seq2_en":seq2_en})
 
         #get cds seq
         def get_cds_seq_in_transcript(mytranscript):
@@ -235,10 +253,24 @@ def main():
                 gaps.append(m.span())
             return(gaps)
 
+        def get_amp_abs_coords(seq, coords_list): # get the coords in reference to the amp, not the revcom in cases of '-'
+            new_coord_list = []
+            for coords in coords_list:
+                if coords[2]=="+":
+                    new_coord_list.append(coords)
+                else:
+                    st = coords[0]
+                    en = coords[1]
+                    new_st = len(seq) - en
+                    new_en = len(seq) - st
+                    new_coord_list.append((new_st, new_en, coords[2], coords[3]))
+            return(new_coord_list)
+
+
         def check_deletion_in_cds(read,amp_cds_coords):
             '''
             input: read, amp_cds_coords
-            this function will first map the gap in the reads to the ref
+            this function will first map the gap in the reads to the amplicon
             then check if any of the gap(deletions) are in the cds
             returns a flag indicating if deletions are found in the cds
             '''
@@ -252,12 +284,13 @@ def main():
             return({"deletion_in_cds_flag":deletion_in_cds_flag,
                     "read_gap_loc":read_gap_loc})
 
+
         def check_insertion_in_cds(ref,amp_cds_coords):
             '''
             input: ref, amp_cds_coords
-            this function will first map the gap(insertions) in the ref to the original ref
+            this function will first map the gap(insertions) in the ref to the amplicon
             then check if any of the gap(insertions) are in the cds
-            returns a flag indicating if deletions are found in the cds
+            returns a flag indicating if insertions are found in the cds
             '''
             #input: ref, wt_amp_cds_coords
             ref_gap_loc = cal_gap_positions(ref)
@@ -331,8 +364,8 @@ def main():
                 seq_str = response_data['seq']
 
                 #log.info(f"Retrieved sequence {response_data['desc']} of length "
-                #       f"{sequence_right - sequence_left} for species {species} on "
-                #       f"strand {transcript_strand}")
+                #        f"{sequence_right - sequence_left} for species {species} on "
+                #        f"strand {transcript_strand}")
             except (KeyError, ValueError) as e:
                 log.error(e)
                 log.error('Error parsing sequence metadata from Ensembl REST response - '
@@ -417,63 +450,73 @@ def main():
         #get cds seqs
         cdsSeqs = get_cds_seq_in_transcript(mytranscript)
 
-        #annotate coding window in wt_amplicon
-        wt_amp_cds_coords = get_cds_coord_in_amplicon(cdsSeqs, wt_amp)
+        #concatenate cds segments
+        whole_cds = ''
+        if mytranscript.annotations['transcript_strand'] == 1:
+            for part in cdsSeqs:
+                whole_cds = whole_cds + part
+        else:
+            for part in reversed(cdsSeqs):
+                whole_cds = whole_cds + part
+        #print(f"whole CDS:\n{whole_cds}")
 
-        #get coding window in HDR amp
-        HDR_amp_cds_coords = []
+        #annotate coding window in wt_amplicon
+        wt_amp_cds_coords = get_cds_coord_in_amplicon(whole_cds, wt_amp) # if strand = "-", the start and end cooresponds to the revcom sequence
+        #print(f"\nwt amp cds coords:\n{wt_amp_cds_coords}")
+
+        #get wt coding window in HDR amp (not including payloads)
+        HDR_amp_cds_coords = get_cds_coord_in_amplicon(whole_cds, HDR_amp) # if strand = "-", the start and end cooresponds to the revcom sequence
+        #print(f"\nHDR amp cds coords:\n{HDR_amp_cds_coords}")
+
+
+        #get payload coordinates in HDR amp 
+        payload_seq = ""
+        payload_len = 0
+        payload_coord_in_HDR_amp = [] # *regardless of strand*, the start and end cooresponds to the HDR amplicon
+        payload_strand = "+"
+        if mytranscript.annotations['transcript_strand'] == -1:
+            payload_strand = "-"
+            
         aln = align.localms(wt_amp,HDR_amp,2, -1, -.5, -.1)
         wt_aln = format_alignment(*aln[0]).split("\n")[0]
-        payload_coord = ''
         for m in re.finditer("-+",wt_aln):
             if m:
-                payload_coord = m.span()
-        for coord_set in wt_amp_cds_coords:
-            if payload_coord[0]>=coord_set[0] and payload_coord[0]<=coord_set[1]: #payload start is in the coding region
-                    HDR_amp_cds_coords.append((coord_set[0], 
-                                            coord_set[1]+payload_coord[1]-payload_coord[0],
-                                            coord_set[2], coord_set[3]))
+                payload_len = m.span()[1]-m.span()[0]
+                payload_seq = HDR_amp[m.span()[0]:m.span()[1]]
+                payload_coord_in_HDR_amp = [m.span()[0],m.span()[1]]
 
-        #get coding window in HDR amp subtracting payload coords
-        HDR_amp_cds_coords_noPL = [] 
-        for coord_set in HDR_amp_cds_coords:
-            st = coord_set[0]
-            en = coord_set[1]
-            if en < payload_coord[0] or st > payload_coord[1]: #no overlap
-                HDR_amp_cds_coords_noPL.append(coord_set)
-            elif payload_coord[0] >= st and payload_coord[1] <= en:  #payload is in cds
-                if payload_coord[0] == st and payload[1] == end:
-                    next
-                elif payload_coord[0] == st:
-                    HDR_amp_cds_coords_noPL.append((payload_coord[1],coord_set[1],coord_set[2], coord_set[3]))
-                elif payload_coord[1] == en:
-                    HDR_amp_cds_coords_noPL.append((coord_set[0],payload_coord[0],coord_set[2], coord_set[3]))
-                else:
-                    HDR_amp_cds_coords_noPL.extend([(coord_set[0],payload_coord[0],coord_set[2], coord_set[3]),
-                                                    (payload_coord[1],coord_set[1],coord_set[2], coord_set[3])])
-            elif st >= payload_coord[0] and st <= payload_coord[1]: #payload overlaps on the left
-                HDR_amp_cds_coords_noPL.append((payload_coord[1],coord_set[1],coord_set[2], coord_set[3]))
-            elif en >= payload_coord[0] and en <= payload_coord[1]: #payload overlaps on the right
-                HDR_amp_cds_coords_noPL.append((coord_set[0],payload_coord[0],coord_set[2], coord_set[3]))    
-                
+        #print(f"\npayload coord in HDR amp: {payload_coord_in_HDR_amp}")
+        #print(f"payload length: {payload_len}") 
+        #print(f"payload strand: {payload_strand}") 
+        #print(f"payload seq: {payload_seq}") 
+
+            
         #translate wt amplicon
         wt_translation=[]
         for coord_set in wt_amp_cds_coords:
-            translation = translate2(seq=wt_amp, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
+            translation = translate_amp(seq=wt_amp, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
             wt_translation.append(translation)
             #print(translation)
             
         #translate HDR amplicaon
         HDR_translation=[]
         for coord_set in HDR_amp_cds_coords:
-            translation = translate2(seq=HDR_amp, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
+            translation = translate_amp(seq=HDR_amp, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
             HDR_translation.append(translation)
             #print(translation)
             
         #translate payload
-        payload_translation = translate2(seq=HDR_amp, start = payload_coord[0], end = payload_coord[1], strand = HDR_amp_cds_coords[0][2], frame = HDR_amp_cds_coords[0][3])
-        #print(payload_translation)
+        payload_translation = translate_payload(seq=HDR_amp, start = payload_coord_in_HDR_amp[0], end = payload_coord_in_HDR_amp[1], strand = payload_strand, frame = 1)
 
+        #print(f"\nwt amp translation {wt_translation}")
+        #print(f"HDR_translation {HDR_translation}")
+        #print(f"payload_translation {payload_translation}")
+
+
+        payload_coord = payload_coord_in_HDR_amp # map legacy name to current name, #no need to convert coordinates, because they are already in reference to the + strand HDR amp
+        HDR_amp_cds_coords_noPL = HDR_amp_cds_coords # map legacy name to current name
+        HDR_amp_cds_coords_noPL = get_amp_abs_coords(HDR_amp, HDR_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand HDR amp
+        wt_amp_cds_coords = get_amp_abs_coords(wt_amp, wt_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand wt amp
 
         ########################
         #process the alignments#
@@ -497,7 +540,7 @@ def main():
                     n_mutated = fields[6]
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
-                    
+                            
                     ###########################################################################################################
                     #TRIM the gaps on both ends of the ref, these those gaps represent extra seq in the reads (not insertions)#
                     ###########################################################################################################
@@ -531,19 +574,19 @@ def main():
                             payload_correct = False
                             protein_correct = False
                             #check payload
-                            for coord_set in HDR_amp_cds_coords:
-                                translation = translate2(seq=read, start = payload_coord[0], end = payload_coord[1], strand = coord_set[2], frame = coord_set[3])
-                                if translation == payload_translation: payload_correct = True
+                            translation = translate_payload(seq=read, start =  payload_coord_in_HDR_amp[0], end = payload_coord_in_HDR_amp[1], strand = payload_strand, frame = 1)
+                            if translation == payload_translation:
+                                payload_correct = True
                             #check wt protein
                             counter=0
-                            for idx, coord_set in enumerate(HDR_amp_cds_coords):
-                                translation = translate2(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
+                            for idx, coord_set in enumerate(HDR_amp_cds_coords_noPL):
+                                translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
                                 #print("\n")
                                 #print(wt_translation[idx].strip('*'))
                                 #print(translation)
-                                if re.search(wt_translation[idx].strip('*'), translation, flags=re.IGNORECASE) is not None:
+                                if HDR_translation[idx] == translation:
                                     counter+=1
-                            if counter==len(HDR_amp_cds_coords):
+                            if counter==len(HDR_amp_cds_coords_noPL):
                                 protein_correct=True
                             #produce output
                             if (protein_correct==True and payload_correct==True):
@@ -648,7 +691,7 @@ def main():
                             #check wt protein
                             counter=0
                             for idx, coord_set in enumerate(wt_amp_cds_coords):
-                                translation = translate2(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
+                                translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
                                 if wt_translation[idx] == translation:
                                     counter+=1
                             if counter==len(wt_amp_cds_coords):
@@ -684,14 +727,13 @@ def main():
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords)["insertion_in_cds_flag"]
-                            ref_gap_loc = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords)["ref_gap_loc"]
                             #trim off inserted seq (in both reads and ref)
                             reg_gap_windows = cal_gap_win(seq = ref)
                             ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
                             read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))    
                             #check if deletions are in cds (using the trimmed sequences, this is IMPORTANT!)
                             deletion_in_cds_flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["deletion_in_cds_flag"]
-                            read_gap_loc = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["read_gap_loc"]
+                            #read_gap_loc = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["read_gap_loc"]
                             if any([insertion_in_cds_flag, deletion_in_cds_flag]):
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
