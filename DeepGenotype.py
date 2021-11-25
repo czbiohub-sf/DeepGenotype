@@ -19,8 +19,8 @@ def parse_args():
     parser.add_argument('--path2workDir', default="", type=str, help='path to a directory for saving output from CRISPResso', metavar='')
     parser.add_argument('--path2fastqDir', default="", type=str, help='path to a directory containing the fastq files', metavar='')
     parser.add_argument('--quantification_win_size', default=50, type=int, help='quantification window size, default = 50', metavar='')
-    parser.add_argument('--fastq_R1_suffix', default="R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
-    parser.add_argument('--fastq_R2_suffix', default="R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
+    parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
+    parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
     parser.add_argument('--sample_name_addon', default="R2_001.fastq.gz", type=str, help='(optional) name of a column in csv file containing additional suffix to help map sample name to fastq file name', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
