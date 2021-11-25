@@ -21,7 +21,6 @@ def parse_args():
     parser.add_argument('--quantification_win_size', default=50, type=int, help='quantification window size, default = 50', metavar='')
     parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
     parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
-    parser.add_argument('--sample_name_addon', default="R2_001.fastq.gz", type=str, help='(optional) name of a column in csv file containing additional suffix to help map sample name to fastq file name', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -35,7 +34,6 @@ path2csv= config['path2csv']
 quantification_win_size= config['quantification_win_size']
 fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
-sample_name_addon = config["sample_name_addon"]
 
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
@@ -71,8 +69,11 @@ def main():
 
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
-                fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R1_suffix}"
-                fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{row[sample_name_addon]}{fastq_R2_suffix}"
+                fq_ex_suffix = ""
+                if 'Fastq_extra_suffix' in df.columns: #get extra suffix in the fastq file name
+                    fq_ex_suffix = row["Fastq_extra_suffix"]
+                fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}"
+                fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"
                 command = [f"CRISPResso",
                            f"--fastq_r1", f"{fastq_r1}",
                            f"--fastq_r2", f"{fastq_r2}",
