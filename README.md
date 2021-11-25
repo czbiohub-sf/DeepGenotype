@@ -21,7 +21,11 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
       Then you should add "_S90_" to the "Sample_name_addon" column
 
 ## Usuage:
-
+Python DeepGenotype.
+--path2csv "/Users/duo.peng/My Drive/protospaceX_collaboration-20211111T220826Z-001/protospaceX_collaboration/example_mNG11_data/mNGplate19_MiSeq_analysis_sample_sheet.csv" 
+--path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/testing2" 
+--path2fastqDir "/Users/duo.peng/My Drive/protospaceX_collaboration-20211111T220826Z-001/protospaceX_collaboration/example_mNG11_data/plate19fastqs" 
+--sample_name_addon _S_
 ## Dependencies
 Bio   
 CRISPRESSO2
