@@ -19,7 +19,9 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
       &nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
       &nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
       Then you should add "_S90_" to the "Sample_name_addon" column
-      
+
+## Usuage:
+
 ## Dependencies
 Bio   
 CRISPRESSO2
