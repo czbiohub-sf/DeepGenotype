@@ -813,14 +813,14 @@ def main():
                             f"mut_prot_OKPL,"
                             f"mut_prot_mutPL,"
                             f"wt_prot_mutPL\n")
-            writehandle.write(f"{genotype_freq['wt_allele']},"
-                            f"{genotype_freq['HDR_perfect']},"
-                            f"{genotype_freq['wt_prot_noPL']},"
-                            f"{genotype_freq['wt_prot_OKPL']},"
-                            f"{genotype_freq['mut_prot_noPL']},"
-                            f"{genotype_freq['mut_prot_OKPL']},"
-                            f"{genotype_freq['mut_prot_mutPL']},"
-                            f"{genotype_freq['wt_prot_mutPL']}\n")
+            writehandle.write(f"{float(genotype_freq['wt_allele']):.4f},"
+                            f"{float(genotype_freq['HDR_perfect']):.4f},"
+                            f"{float(genotype_freq['wt_prot_noPL']):.4f},"
+                            f"{float(genotype_freq['wt_prot_OKPL']):.4f},"
+                            f"{float(genotype_freq['mut_prot_noPL']):.4f},"
+                            f"{float(genotype_freq['mut_prot_OKPL']):.4f},"
+                            f"{float(genotype_freq['mut_prot_mutPL']):.4f},"
+                            f"{float(genotype_freq['wt_prot_mutPL']):.4f}\n")
 
     except Exception  as e:
         print("Unexpected error:", str(sys.exc_info()))

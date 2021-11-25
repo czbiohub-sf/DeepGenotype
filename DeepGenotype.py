@@ -62,12 +62,12 @@ def main():
             writehandle.write(f"Sample,"
                               f"wt_allele,"
                             f"HDR_perfect,"
-                            f"wt_prot_noPL,"
-                            f"wt_prot_OKPL,"
-                            f"mut_prot_noPL,"
-                            f"mut_prot_OKPL,"
-                            f"mut_prot_mutPL,"
-                            f"wt_prot_mutPL\n") #write header
+                            f"wtProt_noPL,"
+                            f"wtProt_okPL,"
+                            f"mutProt_noPL,"
+                            f"mutProt_okPL,"
+                            f"mutProt_mutPL,"
+                            f"wtProt_mutPL\n") #write header
 
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
