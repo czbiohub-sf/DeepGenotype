@@ -24,7 +24,7 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
 
 ## Usuage:
 ```
-Python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/ --sample_name_addon addon
+Python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
 
 ## Dependencies
