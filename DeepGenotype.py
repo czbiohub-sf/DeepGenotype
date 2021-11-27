@@ -5,6 +5,11 @@ import pandas as pd
 import os
 from subprocess import Popen
 import shutil
+import warnings
+import logging
+warnings.filterwarnings('ignore')
+log = logging.getLogger("DeepGenotype.py")
+log.setLevel(logging.INFO) #set the level of warning displayed
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
@@ -85,36 +90,47 @@ def main():
                            f"--quantification_window_size", f"{quantification_win_size}"
                            ]
 
-                # print(command)
-                path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                mystdput = open(path_to_stdout_file, 'w+')
-                mystderr = open(path_to_stderr_file, 'w+')
-                p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-                print(f"Processing sample: {row['Sample_ID']} with CRISPResso ...")
-                p.communicate()  # wait for the commands to process
-
-                #process allele frequency table
-                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-                script_path = os.path.join(wd,"process_alleles_freq_table.py")
-                if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
-                    command2 = [f"{sys.executable}",f"{script_path}",
-                                f"--path", f"{current_CRISPResso_out_dir}",
-                                f"--allele_freq_file", f"Alleles_frequency_table.zip",
-                                f"--wt_amp", f"{row['WT_amplicon_sequence']}",
-                                f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                                f"--ENST_ID", f"{row['ENST_id']}"
-                                ]
-                    p = Popen(command2, universal_newlines=True)
-                    print(f"Parsing allele frequency table and re-calculating allele frequencies")
+                log.info(f"Processing sample: {row['Sample_ID']}")
+                #run CRISPResso
+                if os.path.isfile("{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile("{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    
+                    log.info(f"...running CRISPResso")
                     p.communicate()  # wait for the commands to process
-                if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
-                    with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
-                        next(handle)
-                        writehandle.write(f"{row['Sample_ID']},")
-                        writehandle.write(handle.readline())
+                    log.info(f"...done")
 
-        print("done")
+                    #process allele frequency table
+                    current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+                    script_path = os.path.join(wd,"process_alleles_freq_table.py")
+                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
+                        command2 = [f"{sys.executable}",f"{script_path}",
+                                    f"--path", f"{current_CRISPResso_out_dir}",
+                                    f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                                    f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                                    f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                                    f"--ENST_ID", f"{row['ENST_id']}"
+                                    ]
+                        p = Popen(command2, universal_newlines=True)
+                        log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
+                        p.communicate()  # wait for the commands to process
+                        log.info(f"...done")
+                    else:
+                        log.warning("..cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
+                        log.info("Writing/appending alleles frequencies to: genotype_frequency.csv (in the working directory)")
+                        with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
+                            next(handle)
+                            writehandle.write(f"{row['Sample_ID']},")
+                            writehandle.write(handle.readline())
+                        log.info("...done")
+                else:
+                    log.warning(f"...cannot find the fastq files, please check the filenames and the paths")
+
+        log.info("Done processing all samples in the csv file")
 
         os.chdir(wd)  # change to the saved working dir
 
