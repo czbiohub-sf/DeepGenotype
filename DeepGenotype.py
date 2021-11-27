@@ -9,7 +9,7 @@ import warnings
 import logging
 warnings.filterwarnings('ignore')
 log = logging.getLogger("DeepGenotype.py")
-log.setLevel(logging.INFO) #set the level of warning displayed
+log.setLevel(logging.DEBUG) #set the level of warning displayed
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
