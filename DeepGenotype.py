@@ -147,6 +147,13 @@ def main():
                            ]
 
                 log.info(f"Processing sample: {row['Sample_ID']}")
+
+                #check edit_type
+                if not any(row['edit_type'] == "HDR", row['edit_type'] == "SNP"):
+                    log.warning(f"...edit_type must be \"HDR\" or \"SNP\"")
+                    log.warning(f"...{row['Sample_ID']} is not processed")
+                    continue
+
                 #run CRISPResso
                 if os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
                     path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
