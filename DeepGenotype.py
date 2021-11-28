@@ -169,7 +169,14 @@ def main():
 
                         #process allele frequency table
                         current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-                        script_path = os.path.join(wd,"process_alleles_freq_table.py")
+
+                        #map edit_type to python scripts that process alleles freq tables
+                        if row['edit_type'] == "HDR":
+                            script_path = os.path.join(wd, "process_alleles_freq_table_HDR.py")
+                        elif row['edit_type'] == "SNP":
+                            script_path = os.path.join(wd, "process_alleles_freq_table_SNP.py")
+
+                        #build and execute the shell command
                         if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
                             command2 = [f"{sys.executable}",f"{script_path}",
                                         f"--path", f"{current_CRISPResso_out_dir}",
