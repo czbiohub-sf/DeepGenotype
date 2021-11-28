@@ -117,81 +117,83 @@ def main():
     try:
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
-        with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
-            writehandle.write(f"Sample,"
-                              f"wt_allele,"
-                            f"HDR_perfect,"
-                            f"wtProt_noPL,"
-                            f"wtProt_okPL,"
-                            f"mutProt_noPL,"
-                            f"mutProt_okPL,"
-                            f"mutProt_mutPL,"
-                            f"wtProt_mutPL\n") #write header
+        keys2check = ['Sample_ID','WT_amplicon_sequence','HDR_amplicon_sequence','gene_name', 'gRNA_sequence','edit_type']
+        if keys2check.issubset(df.columns):
+            with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
+                writehandle.write(f"Sample,"
+                                  f"wt_allele,"
+                                f"HDR_perfect,"
+                                f"wtProt_noPL,"
+                                f"wtProt_okPL,"
+                                f"mutProt_noPL,"
+                                f"mutProt_okPL,"
+                                f"mutProt_mutPL,"
+                                f"wtProt_mutPL\n") #write header
 
-            # run CRISPResso for each sample_ID
-            for index, row in df.iterrows():
-                fq_ex_suffix = ""
-                if 'Fastq_extra_suffix' in df.columns: #get extra suffix in the fastq file name
-                    fq_ex_suffix = row["Fastq_extra_suffix"]
-                fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}"
-                fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"
-                command = [f"CRISPResso",
-                           f"--fastq_r1", f"{fastq_r1}",
-                           f"--fastq_r2", f"{fastq_r2}",
-                           f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
-                           f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
-                           f"--amplicon_name", f"{row['gene_name']}",
-                           f"--guide_seq", f"{row['gRNA_sequence']}",
-                           f"--name", f"{row['Sample_ID']}",
-                           f"--quantification_window_size", f"{quantification_win_size}"
-                           ]
+                # run CRISPResso for each sample_ID
+                for index, row in df.iterrows():
+                    fq_ex_suffix = ""
+                    if 'Fastq_extra_suffix' in df.columns: #get extra suffix in the fastq file name
+                        fq_ex_suffix = row["Fastq_extra_suffix"]
+                    fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}"
+                    fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"
+                    command = [f"CRISPResso",
+                               f"--fastq_r1", f"{fastq_r1}",
+                               f"--fastq_r2", f"{fastq_r2}",
+                               f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
+                               f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
+                               f"--amplicon_name", f"{row['gene_name']}",
+                               f"--guide_seq", f"{row['gRNA_sequence']}",
+                               f"--name", f"{row['Sample_ID']}",
+                               f"--quantification_window_size", f"{quantification_win_size}"
+                               ]
 
-                log.info(f"Processing sample: {row['Sample_ID']}")
+                    log.info(f"Processing sample: {row['Sample_ID']}")
 
-                #check edit_type
-                if not any(row['edit_type'] == "HDR", row['edit_type'] == "SNP"):
-                    log.warning(f"...edit_type must be \"HDR\" or \"SNP\"")
-                    log.warning(f"...{row['Sample_ID']} is not processed")
-                    continue
+                    #check edit_type
+                    if not any(row['edit_type'] == "HDR", row['edit_type'] == "SNP"):
+                        log.warning(f"...edit_type must be \"HDR\" or \"SNP\"")
+                        log.warning(f"...{row['Sample_ID']} is not processed")
+                        continue
 
-                #run CRISPResso
-                if os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    #run CRISPResso
+                    if os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
+                        path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                        path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                        mystdput = open(path_to_stdout_file, 'w+')
+                        mystderr = open(path_to_stderr_file, 'w+')
+                        p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
 
-                    log.info(f"...running CRISPResso")
-                    p.communicate()  # wait for the commands to process
-
-                    #process allele frequency table
-                    current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-                    script_path = os.path.join(wd,"process_alleles_freq_table.py")
-                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
-                        command2 = [f"{sys.executable}",f"{script_path}",
-                                    f"--path", f"{current_CRISPResso_out_dir}",
-                                    f"--allele_freq_file", f"Alleles_frequency_table.zip",
-                                    f"--wt_amp", f"{row['WT_amplicon_sequence']}",
-                                    f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                                    f"--ENST_ID", f"{row['ENST_id']}"
-                                    ]
-                        p = Popen(command2, universal_newlines=True)
-                        log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
+                        log.info(f"...running CRISPResso")
                         p.communicate()  # wait for the commands to process
-                    else:
-                        log.warning("...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
-                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
-                        with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
-                            next(handle)
-                            writehandle.write(f"{row['Sample_ID']},")
-                            writehandle.write(handle.readline())
-                    log.info("...done")
-                else:
-                    log.warning(f"...cannot find the fastq files, please check the filenames and the paths")
-                    log.warning(f"...{row['Sample_ID']} is not processed")
 
-        log.info("Done processing all samples in the csv file")
+                        #process allele frequency table
+                        current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+                        script_path = os.path.join(wd,"process_alleles_freq_table.py")
+                        if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
+                            command2 = [f"{sys.executable}",f"{script_path}",
+                                        f"--path", f"{current_CRISPResso_out_dir}",
+                                        f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                                        f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                                        f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                                        f"--ENST_ID", f"{row['ENST_id']}"
+                                        ]
+                            p = Popen(command2, universal_newlines=True)
+                            log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
+                            p.communicate()  # wait for the commands to process
+                        else:
+                            log.warning("...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                        if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
+                            with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
+                                next(handle)
+                                writehandle.write(f"{row['Sample_ID']},")
+                                writehandle.write(handle.readline())
+                        log.info("...done")
+                    else:
+                        log.warning(f"...cannot find the fastq files, please check the filenames and the paths")
+                        log.warning(f"...{row['Sample_ID']} is not processed")
+
+            log.info("Done processing all samples in the csv file")
 
         os.chdir(wd)  # change to the saved working dir
 
