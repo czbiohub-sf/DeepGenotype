@@ -151,7 +151,7 @@ def main():
                     log.info(f"Processing sample: {row['Sample_ID']}")
 
                     #check edit_type
-                    if not any(row['edit_type'] == "HDR", row['edit_type'] == "SNP"):
+                    if not any([row['edit_type'] == "HDR", row['edit_type'] == "SNP"]):
                         log.warning(f"...edit_type must be \"HDR\" or \"SNP\"")
                         log.warning(f"...{row['Sample_ID']} is not processed")
                         continue
