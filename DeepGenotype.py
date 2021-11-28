@@ -152,9 +152,14 @@ def main():
 
                     #check edit_type
                     if not any([row['edit_type'] == "HDR", row['edit_type'] == "SNP"]):
-                        log.warning(f"...edit_type must be \"HDR\" or \"SNP\"")
-                        log.warning(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...edit_type must be \"HDR\" or \"SNP\"")
+                        log.error(f"...{row['Sample_ID']} is not processed")
                         continue
+                    if row['edit_type'] == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
+                        if len(row['WT_amplicon_sequence']) != len(row['HDR_amplicon_sequence']):
+                            log.warning(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
+                            log.warning(f"...{row['Sample_ID']} is not processed")
+                            continue
 
                     #run CRISPResso
                     if os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
