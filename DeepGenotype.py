@@ -117,7 +117,7 @@ def main():
     try:
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
-        keys2check = set(['Sample_ID','WT_amplicon_sequence','HDR_amplicon_sequence','gene_name', 'gRNA_sequence','edit_type'])
+        keys2check = set(['Sample_ID','gene_name','WT_amplicon_sequence','HDR_amplicon_sequence', 'gRNA_sequence','edit_type'])
         if keys2check.issubset(df.columns):
             with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
                 writehandle.write(f"Sample,"
@@ -195,7 +195,7 @@ def main():
 
             log.info("Done processing all samples in the csv file")
         else:
-            log.error("Missing columns in the input csv file\n Required columns:")
+            log.error("Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
         os.chdir(wd)  # change to the saved working dir
 
 
