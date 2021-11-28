@@ -10,6 +10,7 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
   - WT_amplicon_sequence
   - HDR_amplicon_sequence
   - gRNA_sequence
+  - edit_type (HDR or SNP)
   - Fastq_extra_suffix (Optional)     
         
       This column contains extra suffixs that help to map Sample_ID to corresponding fastq files
