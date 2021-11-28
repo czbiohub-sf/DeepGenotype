@@ -173,8 +173,16 @@ def main():
                         #map edit_type to python scripts that process alleles freq tables
                         if row['edit_type'] == "HDR":
                             script_path = os.path.join(wd, "process_alleles_freq_table_HDR.py")
+                            if not os.path.isfile(script_path): #check script file existence
+                                log.error("Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                                log.error(f"...{row['Sample_ID']} is not processed")
+                                continue
                         elif row['edit_type'] == "SNP":
                             script_path = os.path.join(wd, "process_alleles_freq_table_SNP.py")
+                            if not os.path.isfile(script_path): #check script file existence
+                                log.error("Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                                log.error(f"...{row['Sample_ID']} is not processed")
+                                continue
 
                         #build and execute the shell command
                         if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
@@ -189,28 +197,32 @@ def main():
                             log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                             p.communicate()  # wait for the commands to process
                         else:
-                            log.warning("...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                            log.error("...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                            log.error(f"...{row['Sample_ID']} is not processed")
                         if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
                             with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
                                 next(handle)
                                 writehandle.write(f"{row['Sample_ID']},")
                                 writehandle.write(handle.readline())
-                        log.info("...done")
+                            log.info("...done")
+                        else:
+                            current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
+                            log.error(f"cannot find intermediate file {current_result_file}")
+                            log.error(f"...{row['Sample_ID']} is not processed")
                     else:
-                        log.warning(f"...cannot find the fastq files, please check the filenames and the paths")
-                        log.warning(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...cannot find the fastq files, please check the filenames and the paths")
+                        log.error(f"...{row['Sample_ID']} is not processed")
 
             log.info("Done processing all samples in the csv file")
         else:
             log.error("Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
+            log.info(f"Please fix the input csv file and try again")
         os.chdir(wd)  # change to the saved working dir
-
 
     except Exception as e:
         print("Unexpected error:", str(sys.exc_info()))
         print("additional information:", e)
         PrintException()
-
 
 ##########################
 ## function definitions ##
@@ -223,6 +235,5 @@ def PrintException():
     linecache.checkcache(filename)
     line = linecache.getline(filename, lineno, f.f_globals)
     print('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno, line.strip(), exc_obj))
-
 
 if __name__ == "__main__": main()
