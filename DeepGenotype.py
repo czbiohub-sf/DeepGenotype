@@ -182,6 +182,7 @@ def main():
                     log.info("...done")
                 else:
                     log.warning(f"...cannot find the fastq files, please check the filenames and the paths")
+                    log.warning(f"...{row['Sample_ID']} is not processed")
 
         log.info("Done processing all samples in the csv file")
 
