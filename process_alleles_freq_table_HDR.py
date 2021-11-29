@@ -513,8 +513,7 @@ def main():
 
 
         payload_coord = payload_coord_in_HDR_amp # map legacy name to current name, #no need to convert coordinates, because they are already in reference to the + strand HDR amp
-        HDR_amp_cds_coords_noPL = HDR_amp_cds_coords # map legacy name to current name
-        HDR_amp_cds_coords_noPL = get_amp_abs_coords(HDR_amp, HDR_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand HDR amp
+        HDR_amp_cds_coords_noPL = get_amp_abs_coords(HDR_amp, HDR_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand HDR amp, HDR_amp_cds_coords_noPL canbe only used to check indels locations and *not translation*
         wt_amp_cds_coords = get_amp_abs_coords(wt_amp, wt_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand wt amp
 
         ########################
@@ -578,14 +577,14 @@ def main():
                                 payload_correct = True
                             #check wt protein
                             counter=0
-                            for idx, coord_set in enumerate(HDR_amp_cds_coords_noPL):
+                            for idx, coord_set in enumerate(HDR_amp_cds_coords):
                                 translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
                                 #print("\n")
                                 #print(wt_translation[idx].strip('*'))
                                 #print(translation)
                                 if HDR_translation[idx] == translation:
                                     counter+=1
-                            if counter==len(HDR_amp_cds_coords_noPL):
+                            if counter==len(HDR_amp_cds_coords):
                                 protein_correct=True
                             #produce output
                             if (protein_correct==True and payload_correct==True):
