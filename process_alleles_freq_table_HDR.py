@@ -513,8 +513,8 @@ def main():
 
 
         payload_coord = payload_coord_in_HDR_amp # map legacy name to current name, #no need to convert coordinates, because they are already in reference to the + strand HDR amp
-        HDR_amp_cds_coords_noPL = get_amp_abs_coords(HDR_amp, HDR_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand HDR amp, HDR_amp_cds_coords_noPL canbe only used to check indels locations and *not translation*
-        wt_amp_cds_coords = get_amp_abs_coords(wt_amp, wt_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand wt amp
+        HDR_amp_cds_coords_PosRef = get_amp_abs_coords(HDR_amp, HDR_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand HDR amp, HDR_amp_cds_coords_PosRef canbe only used to check indels locations and *not translation*
+        wt_amp_cds_coords_PosRef = get_amp_abs_coords(wt_amp, wt_amp_cds_coords) # convert coordinate so that they are all in reference to the + strand wt amp, wt_amp_cds_coords_PosRef canbe only used to check indels locations and *not translation*
 
         ########################
         #process the alignments#
@@ -604,7 +604,7 @@ def main():
                         ########################
                         elif (int(n_deleted)!=0 and int(n_inserted)==0):  #deletion in the read，no insertion
                             #check if deletions are in wt cds
-                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read, amp_cds_coords = HDR_amp_cds_coords_noPL)["deletion_in_cds_flag"]
+                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
                             #check if deletions are in payload cds
                             deletion_in_payload_Flag = check_deletion_in_cds(read = read, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"]
                             #produce output
@@ -622,7 +622,7 @@ def main():
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n")      
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in wt cds
-                            insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_noPL)["insertion_in_cds_flag"]
+                            insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             #check if insertion are in payload cds
                             insertion_in_payload_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = [payload_coord])["insertion_in_cds_flag"]
                             #produce output
@@ -640,7 +640,7 @@ def main():
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n") 
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
                             #check if insertion are in wt cds
-                            insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_noPL)["insertion_in_cds_flag"]
+                            insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             #check if insertion are in payload cds
                             insertion_in_payload_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = [payload_coord])["insertion_in_cds_flag"]            
                         
@@ -650,7 +650,7 @@ def main():
                             read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))                     
         
                             #check if deletions are in wt cds
-                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = HDR_amp_cds_coords_noPL)["deletion_in_cds_flag"]
+                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
                             #check if deletions are in payload cds
                             deletion_in_payload_Flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"]
                             
@@ -706,7 +706,7 @@ def main():
                         #######################
                         elif (int(n_deleted)!=0 and int(n_inserted)==0):  #deletion in the read，no insertion
                             #check if deletions are in cds
-                            deletion_in_cds_flag = check_deletion_in_cds(read = read, amp_cds_coords = wt_amp_cds_coords)["deletion_in_cds_flag"]
+                            deletion_in_cds_flag = check_deletion_in_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
                             if deletion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
@@ -715,7 +715,7 @@ def main():
                                 writehandle.write("\twt allele (wt protein)\n")
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in cds
-                            insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords)["insertion_in_cds_flag"]
+                            insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             if insertion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
@@ -724,13 +724,13 @@ def main():
                                 writehandle.write("\twt allele (wt protein)\n")
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
                             #check if insertion are in cds
-                            insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords)["insertion_in_cds_flag"]
+                            insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             #trim off inserted seq (in both reads and ref)
                             reg_gap_windows = cal_gap_win(seq = ref)
                             ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
                             read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))    
                             #check if deletions are in cds (using the trimmed sequences, this is IMPORTANT!)
-                            deletion_in_cds_flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["deletion_in_cds_flag"]
+                            deletion_in_cds_flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
                             #read_gap_loc = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["read_gap_loc"]
                             if any([insertion_in_cds_flag, deletion_in_cds_flag]):
                                 #print("\twt allele (mutant protein)", end="\n")
