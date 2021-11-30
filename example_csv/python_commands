@@ -1,0 +1,18 @@
+test_INS:
+python DeepGenotype.py \
+--path2csv "/Users/duo.peng/My Drive/genotyping_pipeline/test_INS/test_INS.csv" \
+--path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_INS" \
+--path2fastqDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_INS/fastq_dir"
+
+test_SNP:
+python DeepGenotype.py \
+--path2csv "/Users/duo.peng/My Drive/genotyping_pipeline/test_SNP/test_SNP.csv" \
+--path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_SNP" \
+--path2fastqDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_SNP/raw_fastq_APP_gRNA2"
+
+test_pacbio:
+python DeepGenotype.py \
+--path2csv "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio/test_pacbio.csv" \
+--path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio" \
+--path2fastqDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio/raw_fastq_HEK_CLTA_sfGFP"
+--single_fastq_suffix .fastq
