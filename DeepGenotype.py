@@ -138,7 +138,7 @@ def main():
         edit_type = list(set(df['edit_type']))[0]
         log.info(f"Genome edit type: {edit_type}")
         if not edit_type in ['INS', 'SNP']:
-            log.error(f"{edit_type} is not support, only INS and SNP are supported edit types")
+            log.error(f"{edit_type} is not support, only INS and SNP (case sensitive) are supported edit types")
             log.info(f"Please fix the inputs and try again")
             sys.exit()            
 
@@ -169,7 +169,6 @@ def main():
                 log.error(f"Missing the \"SNP_payload_cluster\" column in the input csv file\n This column is required to define the payload SNP")
                 log.info(f"Please fix the input csv file and try again")
                 sys.exit()
-        log.debug(f"SNP_payload_cluster: {SNP_payload_cluster}")                
 
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
@@ -197,6 +196,13 @@ def main():
                     log.error(f"...{row['Sample_ID']} was not processed")
                     continue
 
+                #check SNP_payload_cluster
+                if edit_type == "SNP":
+                    if not str(row['SNP_payload_cluster']).isdigit():
+                        log.error(f"...the parameter \"SNP_payload_cluster\" needs to take an integer number")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                        continue
+
                 #build CRISPResso command
                 command = [f"CRISPResso",
                            f"--fastq_r1", f"{fastq_r1}",
@@ -208,13 +214,6 @@ def main():
                            f"--name", f"{row['Sample_ID']}",
                            f"--quantification_window_size", f"{quantification_win_size}"
                            ]
-                if edit_type == "SNP":
-                    command = command + [f"--SNP_block_of_interest",
-                                        f"{row['SNP_payload_cluster']}"]
-                    if not row['SNP_payload_cluster'].isdigit():
-                        log.error(f"...the parameter \"SNP_payload_cluster\" needs to take an integer number")
-                        log.error(f"...{row['Sample_ID']} was not processed")
-                        continue
 
                 log.info(f"Processing sample: {row['Sample_ID']}")
 
@@ -248,6 +247,13 @@ def main():
                                     f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
                                     f"--ENST_ID", f"{row['ENST_id']}"
                                     ]
+
+                        if edit_type == "SNP":
+                            command2 = command2 + [f"--SNP_block_of_interest",
+                                                 f"{row['SNP_payload_cluster']}"]
+                            log.debug(f"SNP_payload_cluster: {row['SNP_payload_cluster']}")
+
+                        #run command2
                         p = Popen(command2, universal_newlines=True)
                         log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                         p.communicate()  # wait for the commands to process
