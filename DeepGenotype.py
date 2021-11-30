@@ -142,21 +142,21 @@ def main():
         if edit_type == "HDR":
             script_path = os.path.join(wd, "process_alleles_freq_table_HDR.py")
             if not os.path.isfile(script_path):  # check script file existence
-                log.error("Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
-                log.error(f"...{row['Sample_ID']} is not processed")
+                log.error(f"Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                log.error(f"...{row['Sample_ID']} was not processed")
                 sys.exit()
         elif edit_type == "SNP":
             script_path = os.path.join(wd, "process_alleles_freq_table_SNP.py")
             if not os.path.isfile(script_path):  # check script file existence
-                log.error("Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
-                log.error(f"...{row['Sample_ID']} is not processed")
+                log.error(f"Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                log.error(f"...{row['Sample_ID']} was not processed")
                 sys.exit()
         log.debug(f"script path: {script_path}")
 
         #check csv columns
         keys2check = set(['Sample_ID','gene_name','WT_amplicon_sequence','HDR_amplicon_sequence', 'gRNA_sequence','edit_type'])
         if not keys2check.issubset(df.columns):
-            log.error("Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
+            log.error(f"Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
             log.info(f"Please fix the input csv file and try again")
             sys.exit()
 
@@ -178,12 +178,12 @@ def main():
 
                 #check fastq file
                 if not os.path.isfile(fastq_r1):
-                    log.error("...Can not locate fastq file: {fastq_r1}")
-                    log.error(f"...{row['Sample_ID']} is not processed")
+                    log.error(f"...Can not locate fastq file: {fastq_r1}")
+                    log.error(f"...{row['Sample_ID']} was not processed")
                     continue
                 if not os.path.isfile(fastq_r2):
-                    log.error("...Can not locate fastq file: {fastq_r2}")
-                    log.error(f"...{row['Sample_ID']} is not processed")
+                    log.error(f"...Can not locate fastq file: {fastq_r2}")
+                    log.error(f"...{row['Sample_ID']} was not processed")
                     continue
 
                 #build CRISPResso command
@@ -204,7 +204,7 @@ def main():
                 if edit_type == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
                     if len(row['WT_amplicon_sequence']) != len(row['HDR_amplicon_sequence']):
                         log.error(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
-                        log.error(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...{row['Sample_ID']} was not processed")
                         continue
 
                 #run CRISPResso
@@ -234,23 +234,23 @@ def main():
                         log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                         p.communicate()  # wait for the commands to process
                     else:
-                        log.error("...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
-                        log.error(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                        log.error(f"...{row['Sample_ID']} was not processed")
                     if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
                         with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
                             next(handle)
                             writehandle.write(f"{row['Sample_ID']},")
                             writehandle.write(handle.readline())
-                        log.info("...done")
+                        log.info(f"...done")
                     else:
                         current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
                         log.error(f"cannot find intermediate file {current_result_file}")
-                        log.error(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...{row['Sample_ID']} was not processed")
                 else:
                     log.error(f"...cannot find the fastq files, please check the filenames and the paths")
-                    log.error(f"...{row['Sample_ID']} is not processed")
+                    log.error(f"...{row['Sample_ID']} was not processed")
 
-        log.info("Done processing all samples in the csv file")
+        log.info(f"Done processing all samples in the csv file")
 
         os.chdir(wd)  # change to the saved working dir
 
