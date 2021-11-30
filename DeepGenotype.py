@@ -8,6 +8,7 @@ import shutil
 import warnings
 import logging
 import re
+import unicodedata
 warnings.filterwarnings('ignore')
 
 #################
@@ -116,6 +117,17 @@ os.makedirs(path2_CRISPResso_out)
 wd = os.getcwd()  # save current working dir
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
 
+###################
+#text manipulation#
+###################
+
+def slugify(value): #adapted from the Django project
+
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
+    value = re.sub(rb'[^\w\s-]', b'_', value).strip()
+    value = re.sub(rb'[-\s]+', b'-', value)
+
+    return value.decode('utf-8')
 
 #####################
 ##      main       ##
@@ -255,7 +267,7 @@ def main():
                 #CRISPResso_out_dir
                 #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
                 sample_name = row['Sample_ID']
-                sample_name = re.sub("\.", "_", sample_name)
+                sample_name = slugify(sample_name)
                 current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
 
                 #build and execute the shell command
