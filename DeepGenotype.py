@@ -66,7 +66,7 @@ class ColoredLogger(logging.Logger):
 logging.setLoggerClass(ColoredLogger)
 #logging.basicConfig()
 log = logging.getLogger("DeepGenotype.py")
-log.setLevel(logging.DEBUG) #set the level of warning displayed
+log.setLevel(logging.INFO) #set the level of warning displayed
 
 ############
 #Arguments #
@@ -136,7 +136,7 @@ def main():
         if len(set(df['edit_type'])) >= 2:
             sys.exit("There are multiple \"edit_type\" values, please include only one type of edits (either SNP or HDR, not both).\nThe reason behind this is: SNP and HDR have different format of the output allele frequency spreadsheet generated from all samples")
         edit_type = list(set(df['edit_type']))[0]
-        log.debug(f"edit type: {edit_type}")
+        log.info(f"Edit type: {edit_type}")
 
         # map edit_type to python scripts that process alleles freq tables
         if edit_type == "HDR":
@@ -161,7 +161,8 @@ def main():
             sys.exit()
 
         #start processing samples through CRISPResso and recalculate allele frequency
-        with open(os.path.join(path2workDir,"allele_freq.csv"), "w", buffering=1) as writehandle:
+        out_basename = os.path.basename(path2csv).strip(r".csv")
+        with open(os.path.join(path2workDir,f"{out_basename}_allele_freq.csv"), "w", buffering=1) as writehandle:
             if edit_type == "HDR":
                 writehandle.write(f"Sample,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL\n") #write header
             elif edit_type == "SNP":
