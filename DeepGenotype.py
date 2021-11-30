@@ -141,7 +141,7 @@ def main():
 
         #check csv columns
         keys2check = set(['Sample_ID','gene_name','WT_amplicon_sequence','HDR_amplicon_sequence', 'gRNA_sequence','edit_type'])
-        if keys2check.issubset(df.columns):
+        if not keys2check.issubset(df.columns):
             log.error("Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
             log.info(f"Please fix the input csv file and try again")
             sys.exit()
@@ -151,7 +151,7 @@ def main():
             if edit_type == "HDR":
                 writehandle.write(f"Sample,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL\n") #write header
             elif edit_type == "SNP":
-                writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP\n"))  # write header
+                writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP\n")  # write header
 
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
