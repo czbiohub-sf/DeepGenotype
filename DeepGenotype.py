@@ -7,9 +7,11 @@ from subprocess import Popen
 import shutil
 import warnings
 import logging
-
 warnings.filterwarnings('ignore')
 
+#################
+#custom logging #
+#################
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 #The background is set with 40 plus the number of the color, and the foreground with 30
@@ -61,12 +63,14 @@ class ColoredLogger(logging.Logger):
         self.addHandler(console)
         return
 
-
 logging.setLoggerClass(ColoredLogger)
 #logging.basicConfig()
 log = logging.getLogger("DeepGenotype.py")
 log.setLevel(logging.DEBUG) #set the level of warning displayed
 
+############
+#Arguments #
+############
 class MyParser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write('error: %s\n' % message)
@@ -115,6 +119,16 @@ os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to
 #####################
 def main():
     try:
+        # check input paths
+        if not os.path.isfile(os.path.join(path2csv)):
+            log.error(f"Can not locate the input csv file at {path2csv}, please check the path")
+            log.info(f"Please fix the path to the input csv file and try again")
+            sys.exit()
+        if not os.path.isdir(os.path.join(path2workDir)):
+            log.error(f"Can not locate the working directory at {path2workDir}, please check the path")
+            log.info(f"Please fix the path to the working directory  and try again")
+            sys.exit()
+
         # read input csv file
         df = pd.read_csv(os.path.join(path2csv))
 
@@ -160,6 +174,18 @@ def main():
                     fq_ex_suffix = row["Fastq_extra_suffix"]
                 fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}"
                 fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"
+
+                #check fastq file
+                if not os.path.isfile(fastq_r1):
+                    log.error("...Can not locate fastq file: {fastq_r1}")
+                    log.error(f"...{row['Sample_ID']} is not processed")
+                    continue
+                if not os.path.isfile(fastq_r2):
+                    log.error("...Can not locate fastq file: {fastq_r2}")
+                    log.error(f"...{row['Sample_ID']} is not processed")
+                    continue
+
+                #build CRISPResso command
                 command = [f"CRISPResso",
                            f"--fastq_r1", f"{fastq_r1}",
                            f"--fastq_r2", f"{fastq_r2}",
@@ -176,8 +202,8 @@ def main():
                 #check amplicon length
                 if edit_type == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
                     if len(row['WT_amplicon_sequence']) != len(row['HDR_amplicon_sequence']):
-                        log.warning(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
-                        log.warning(f"...{row['Sample_ID']} is not processed")
+                        log.error(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
+                        log.error(f"...{row['Sample_ID']} is not processed")
                         continue
 
                 #run CRISPResso
@@ -193,8 +219,6 @@ def main():
 
                     #process allele frequency table
                     current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-
-
 
                     #build and execute the shell command
                     if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
