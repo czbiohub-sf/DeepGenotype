@@ -137,8 +137,13 @@ def main():
             sys.exit("There are multiple \"edit_type\" values, please include only one type of edits (either INS or SNP, not both).\nThe reason behind this is: SNP and INS have different format of the output allele frequency spreadsheet generated from all samples")
         edit_type = list(set(df['edit_type']))[0]
         log.info(f"Genome edit type: {edit_type}")
+        if not edit_type in ['INS', 'SNP']:
+            log.error(f"{edit_type} is not support, only INS and SNP are supported edit types")
+            log.info(f"Please fix the inputs and try again")
+            sys.exit()            
 
         # map edit_type to python scripts that process alleles freq tables
+        script_path=''
         if edit_type == "INS":
             script_path = os.path.join(wd, "process_alleles_freq_table_INS.py")
             if not os.path.isfile(script_path):  # check script file existence
