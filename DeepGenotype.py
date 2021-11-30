@@ -86,6 +86,7 @@ def parse_args():
     parser.add_argument('--quantification_win_size', default=50, type=int, help='quantification window size, default = 50', metavar='')
     parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
     parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
+    parser.add_argument('--single_fastq_suffix', default="", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -99,6 +100,7 @@ path2csv= config['path2csv']
 quantification_win_size= config['quantification_win_size']
 fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
+single_fastq_suffix= config['single_fastq_suffix']
 
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
@@ -185,16 +187,23 @@ def main():
                     fq_ex_suffix = row["Fastq_extra_suffix"]
                 fastq_r1 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}"
                 fastq_r2 = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"
+                fastq = f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{single_fastq_suffix}"
 
                 #check fastq file
-                if not os.path.isfile(fastq_r1):
-                    log.error(f"...Can not locate fastq file: {fastq_r1}")
-                    log.error(f"...{row['Sample_ID']} was not processed")
-                    continue
-                if not os.path.isfile(fastq_r2):
-                    log.error(f"...Can not locate fastq file: {fastq_r2}")
-                    log.error(f"...{row['Sample_ID']} was not processed")
-                    continue
+                if single_fastq_suffix=="":
+                    if not os.path.isfile(fastq_r1):
+                        log.error(f"...Can not locate fastq file: {fastq_r1}")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                        continue
+                    if not os.path.isfile(fastq_r2):
+                        log.error(f"...Can not locate fastq file: {fastq_r2}")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                        continue
+                else:
+                    if not os.path.isfile(fastq):
+                        log.error(f"...Can not locate fastq file: {fastq}")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                        continue
 
                 #check SNP_payload_cluster
                 if edit_type == "SNP":
@@ -203,10 +212,15 @@ def main():
                         log.error(f"...{row['Sample_ID']} was not processed")
                         continue
 
-                #build CRISPResso command
-                command = [f"CRISPResso",
-                           f"--fastq_r1", f"{fastq_r1}",
-                           f"--fastq_r2", f"{fastq_r2}",
+                #create fastq list for building the CRISPResso command
+                if single_fastq_suffix == "":
+                    fastq_list = [f"--fastq_r1", f"{fastq_r1}",
+                                 f"--fastq_r2", f"{fastq_r2}"]
+                else:
+                    fastq_list = [f"--fastq_r1", f"{fastq}"]
+
+                # build CRISPResso command
+                command = [f"CRISPResso"] + fastq_list + [
                            f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
                            f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
                            f"--amplicon_name", f"{row['gene_name']}",
