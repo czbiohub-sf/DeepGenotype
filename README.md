@@ -10,26 +10,48 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
   - WT_amplicon_sequence
   - HDR_amplicon_sequence
   - gRNA_sequence
-  - edit_type (HDR or SNP)
-  - Fastq_extra_suffix (Optional)     
-        
-      This column contains extra suffixs that help to map Sample_ID to corresponding fastq files
-      in addition to the two standard fastq suffixes below:  
-      "_R1_001.fastq.gz"  
-      "_R2_001.fastq.gz"  
+  - edit_type (e.g. INS or SNP,  DEL is not currently supported)  
+      &nbsp;&nbsp;&nbsp; INS = insertion, SNP = you know this, DEL = deletion  
+  - SNP_payload_cluster (e.g. 1 or 2 ...)  
+      &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
+      &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload**  
+      &nbsp;&nbsp;&nbsp; clusters are ordered from left to right in respect to the amplicon sequence.  
+      &nbsp;&nbsp;&nbsp; For example of 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
       
-      For example if your fastq file names are:  
-      &nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
-      &nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
-      Then you should add "_S90_" to the "Sample_name_addon" column
+  - Fastq_extra_suffix (Optional) 
+     
+      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq files 
+      
+      &nbsp;&nbsp;&nbsp;**Already included by default:**  
+      &nbsp;&nbsp;&nbsp;"_R1_001.fastq.gz"    
+      &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"    
+
+      &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
+      &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column
 
 ## Usuage:
 ```
-Python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
+python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
 
+### Optional aruments
+--fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
+--fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
+
 ## Dependencies
-Python > 3.7  
-Bio   
-CRISPRESSO2
-  
+
+- python >= 3.7 
+
+### python-based standalone software  
+- CRISPResso2  
+&nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
+&nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
+
+### python packages  
+- Bio  
+&nbsp;&nbsp;&nbsp;aka. biopython, https://biopython.org/wiki/Packages
+- pandas
+- requests
