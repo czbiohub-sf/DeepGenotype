@@ -31,26 +31,28 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column
 
+&nbsp;&nbsp;
 ## Usuage:
 ```
 python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
 
-### Optional aruments
+#### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
 
+&nbsp;&nbsp;
 ## Dependencies
 
 - python >= 3.7 
 
-### python-based standalone software  
+#### python-based standalone software  
 - CRISPResso2  
 &nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
 &nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
 
-### python packages  
+#### python packages  
 - Bio  
 &nbsp;&nbsp;&nbsp;aka. biopython, https://biopython.org/wiki/Packages
 - pandas
