@@ -7,6 +7,7 @@ from subprocess import Popen
 import shutil
 import warnings
 import logging
+import re
 warnings.filterwarnings('ignore')
 
 #################
@@ -250,7 +251,12 @@ def main():
                 p.communicate()  # wait for the commands to process
 
                 #process allele frequency table
-                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+
+                #CRISPResso_out_dir
+                #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
+                sample_name = row['Sample_ID']
+                sample_name = re.sub("\.", "_", sample_name)
+                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
 
                 #build and execute the shell command
                 if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
@@ -272,7 +278,9 @@ def main():
                     log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                     p.communicate()  # wait for the commands to process
                 else:
-                    log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
+                    log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip with the following path:")
+                    path_not_found = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
+                    log.error(f"{path_not_found}")
                     log.error(f"...{row['Sample_ID']} was not processed")
                 if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
                     with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
