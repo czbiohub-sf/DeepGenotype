@@ -66,7 +66,7 @@ class ColoredLogger(logging.Logger):
 logging.setLoggerClass(ColoredLogger)
 #logging.basicConfig()
 log = logging.getLogger("DeepGenotype.py")
-log.setLevel(logging.INFO) #set the level of warning displayed
+log.setLevel(logging.DEBUG) #set the level of warning displayed
 
 ############
 #Arguments #
@@ -218,6 +218,7 @@ def main():
                                  f"--fastq_r2", f"{fastq_r2}"]
                 else:
                     fastq_list = [f"--fastq_r1", f"{fastq}"]
+                log.debug(f"{fastq_list}")
 
                 # build CRISPResso command
                 command = [f"CRISPResso"] + fastq_list + [
@@ -239,54 +240,51 @@ def main():
                         continue
 
                 #run CRISPResso
-                if os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R1_suffix}") and os.path.isfile(f"{path2fastqDir}/{row['Sample_ID']}{fq_ex_suffix}{fastq_R2_suffix}"):
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                mystdput = open(path_to_stdout_file, 'w+')
+                mystderr = open(path_to_stderr_file, 'w+')
+                p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
 
-                    log.info(f"...running CRISPResso")
+                log.info(f"...running CRISPResso")
+                p.communicate()  # wait for the commands to process
+
+                #process allele frequency table
+                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
+
+                #build and execute the shell command
+                if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
+                    command2 = [f"{sys.executable}",f"{script_path}",
+                                f"--path", f"{current_CRISPResso_out_dir}",
+                                f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                                f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                                f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                                f"--ENST_ID", f"{row['ENST_id']}"
+                                ]
+
+                    if edit_type == "SNP":
+                        command2 = command2 + [f"--SNP_block_of_interest",
+                                             f"{row['SNP_payload_cluster']}"]
+                        log.debug(f"SNP_payload_cluster: {row['SNP_payload_cluster']}")
+
+                    #run command2
+                    p = Popen(command2, universal_newlines=True)
+                    log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                     p.communicate()  # wait for the commands to process
-
-                    #process allele frequency table
-                    current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{row['Sample_ID']}")
-
-                    #build and execute the shell command
-                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
-                        command2 = [f"{sys.executable}",f"{script_path}",
-                                    f"--path", f"{current_CRISPResso_out_dir}",
-                                    f"--allele_freq_file", f"Alleles_frequency_table.zip",
-                                    f"--wt_amp", f"{row['WT_amplicon_sequence']}",
-                                    f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                                    f"--ENST_ID", f"{row['ENST_id']}"
-                                    ]
-
-                        if edit_type == "SNP":
-                            command2 = command2 + [f"--SNP_block_of_interest",
-                                                 f"{row['SNP_payload_cluster']}"]
-                            log.debug(f"SNP_payload_cluster: {row['SNP_payload_cluster']}")
-
-                        #run command2
-                        p = Popen(command2, universal_newlines=True)
-                        log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
-                        p.communicate()  # wait for the commands to process
-                    else:
-                        log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
-                        log.error(f"...{row['Sample_ID']} was not processed")
-                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
-                        with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
-                            next(handle)
-                            writehandle.write(f"{row['Sample_ID']},")
-                            writehandle.write(handle.readline())
-                        log.info(f"...done")
-                    else:
-                        current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
-                        log.error(f"cannot find intermediate file {current_result_file}")
-                        log.error(f"...{row['Sample_ID']} was not processed")
                 else:
-                    log.error(f"...cannot find the fastq files, please check the filenames and the paths")
+                    log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip ")
                     log.error(f"...{row['Sample_ID']} was not processed")
+                if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
+                    with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
+                        next(handle)
+                        writehandle.write(f"{row['Sample_ID']},")
+                        writehandle.write(handle.readline())
+                    log.info(f"...done")
+                else:
+                    current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
+                    log.error(f"cannot find intermediate file {current_result_file}")
+                    log.error(f"...{row['Sample_ID']} was not processed")
+
 
         log.info(f"Done processing all samples in the csv file")
 
