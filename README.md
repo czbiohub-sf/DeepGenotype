@@ -15,7 +15,7 @@ Calculate genotype frequencies in CRISPR genome editing experiments using deep s
   - SNP_payload_cluster (e.g. 1 or 2 ...)  
       &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
       &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload**  
-      &nbsp;&nbsp;&nbsp; clusters are ordered from left to right in respect to the amplicon sequence.  
+      &nbsp;&nbsp;&nbsp; Clusters are ordered from left to right in respect to the amplicon sequence.  
       &nbsp;&nbsp;&nbsp; For example of 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
       
   - Fastq_extra_suffix (Optional) 
