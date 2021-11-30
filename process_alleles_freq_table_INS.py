@@ -18,7 +18,7 @@ from Bio import SeqIO
 import warnings
 warnings.filterwarnings('ignore')
 log = logging.getLogger("Process_alleles_freq_table.py")
-log.setLevel(logging.CRITICAL) #set the level of warning displayed
+log.setLevel(logging.ERROR) #set the level of warning displayed
 
 class MyParser(argparse.ArgumentParser):
     def error(self, message):

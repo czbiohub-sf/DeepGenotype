@@ -134,21 +134,21 @@ def main():
 
         # check edit type
         if len(set(df['edit_type'])) >= 2:
-            sys.exit("There are multiple \"edit_type\" values, please include only one type of edits (either SNP or HDR, not both).\nThe reason behind this is: SNP and HDR have different format of the output allele frequency spreadsheet generated from all samples")
+            sys.exit("There are multiple \"edit_type\" values, please include only one type of edits (either INS or SNP, not both).\nThe reason behind this is: SNP and INS have different format of the output allele frequency spreadsheet generated from all samples")
         edit_type = list(set(df['edit_type']))[0]
-        log.info(f"Edit type: {edit_type}")
+        log.info(f"Genome edit type: {edit_type}")
 
         # map edit_type to python scripts that process alleles freq tables
-        if edit_type == "HDR":
-            script_path = os.path.join(wd, "process_alleles_freq_table_HDR.py")
+        if edit_type == "INS":
+            script_path = os.path.join(wd, "process_alleles_freq_table_INS.py")
             if not os.path.isfile(script_path):  # check script file existence
-                log.error(f"Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                log.error(f"Python script not found, please place file \"process_alleles_freq_table_INS.py\" in the same directory as \"DeepGenotype.py\"")
                 log.error(f"...{row['Sample_ID']} was not processed")
                 sys.exit()
         elif edit_type == "SNP":
             script_path = os.path.join(wd, "process_alleles_freq_table_SNP.py")
             if not os.path.isfile(script_path):  # check script file existence
-                log.error(f"Python script not found, please place file \"process_alleles_freq_table_HDR.py\" in the same directory as \"DeepGenotype.py\"")
+                log.error(f"Python script not found, please place file \"process_alleles_freq_table_INS.py\" in the same directory as \"DeepGenotype.py\"")
                 log.error(f"...{row['Sample_ID']} was not processed")
                 sys.exit()
         log.debug(f"script path: {script_path}")
@@ -159,11 +159,17 @@ def main():
             log.error(f"Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
             log.info(f"Please fix the input csv file and try again")
             sys.exit()
+        if edit_type == "SNP":
+            if not "SNP_payload_cluster" in df.columns:
+                log.error(f"Missing the \"SNP_payload_cluster\" column in the input csv file\n This column is required to define the payload SNP")
+                log.info(f"Please fix the input csv file and try again")
+                sys.exit()
+        log.debug(f"SNP_payload_cluster: {SNP_payload_cluster}")                
 
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
         with open(os.path.join(path2workDir,f"{out_basename}_allele_freq.csv"), "w", buffering=1) as writehandle:
-            if edit_type == "HDR":
+            if edit_type == "INS":
                 writehandle.write(f"Sample,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL\n") #write header
             elif edit_type == "SNP":
                 writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP\n")  # write header
@@ -197,6 +203,13 @@ def main():
                            f"--name", f"{row['Sample_ID']}",
                            f"--quantification_window_size", f"{quantification_win_size}"
                            ]
+                if edit_type == "SNP":
+                    command = command + [f"--SNP_block_of_interest",
+                                        f"{row['SNP_payload_cluster']}"]
+                    if not row['SNP_payload_cluster'].isdigit():
+                        log.error(f"...the parameter \"SNP_payload_cluster\" needs to take an integer number")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                        continue
 
                 log.info(f"Processing sample: {row['Sample_ID']}")
 
