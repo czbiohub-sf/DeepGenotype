@@ -66,7 +66,7 @@ class ColoredLogger(logging.Logger):
 logging.setLoggerClass(ColoredLogger)
 #logging.basicConfig()
 log = logging.getLogger("DeepGenotype.py")
-log.setLevel(logging.DEBUG) #set the level of warning displayed
+log.setLevel(logging.INFO) #set the level of warning displayed
 
 ############
 #Arguments #
