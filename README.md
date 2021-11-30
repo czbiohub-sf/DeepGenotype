@@ -40,6 +40,7 @@ python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --p
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
+--single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
 --quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
 
 &nbsp;&nbsp;
