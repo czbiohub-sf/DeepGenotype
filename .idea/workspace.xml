@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5e32a6ab-5f2a-4dec-b03a-eb3b518cfc7b" name="Changes" comment="" />
+    <list default="true" id="5e32a6ab-5f2a-4dec-b03a-eb3b518cfc7b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DeepGenotype.py" beforeDir="false" afterPath="$PROJECT_DIR$/DeepGenotype.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,6 +31,7 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
@@ -48,6 +53,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DeepGenotype.py" />
       <option name="PARAMETERS" value="--path2csv &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_SNP/test_SNP.csv&quot; --path2workDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_SNP&quot; --path2fastqDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_SNP/raw_fastq_APP_gRNA2&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -69,6 +75,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DeepGenotype.py" />
       <option name="PARAMETERS" value="--path2csv &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_pacbio/test_pacbio.csv&quot; --path2workDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_pacbio&quot; --path2fastqDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_pacbio/raw_fastq_HEK_CLTA_sfGFP&quot; --single_fastq_suffix .fastq" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -90,6 +97,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DeepGenotype.py" />
       <option name="PARAMETERS" value="--path2csv &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_INS/test_INS.csv&quot; --path2workDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_INS&quot; --path2fastqDir &quot;$USER_HOME$/My Drive/genotyping_pipeline/test_INS/fastq_dir&quot;" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -111,6 +119,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -135,8 +144,13 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1637637786758</updated>
+      <workItem from="1638373645898" duration="47000" />
+      <workItem from="1638373701994" duration="497000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
