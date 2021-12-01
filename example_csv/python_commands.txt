@@ -14,5 +14,5 @@ test_pacbio:
 python DeepGenotype.py \
 --path2csv "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio/test_pacbio.csv" \
 --path2workDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio" \
---path2fastqDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio/raw_fastq_HEK_CLTA_sfGFP"
+--path2fastqDir "/Users/duo.peng/My Drive/genotyping_pipeline/test_pacbio/raw_fastq_HEK_CLTA_sfGFP" \
 --single_fastq_suffix .fastq
