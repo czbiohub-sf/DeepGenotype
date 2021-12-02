@@ -41,7 +41,7 @@ using deep sequencing reads.
 &nbsp;
 ## Outputs:
 - Genotype frequencies for each sample (.csv file)
-- Alleles frequencies table (A folder containing a tabular table for each sample)
+- Alleles frequencies table (A folder containing a table of read-to-genotype assignments for each sample)
 
 &nbsp;
 ## Usuage:
