@@ -106,6 +106,7 @@ single_fastq_suffix= config['single_fastq_suffix']
 
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
+path2_allelsFreqTabs = os.path.join(path2workDir, "Alleles_freq_tables_with_genotypes")
 
 if os.path.isdir(path2_stdout):
     shutil.rmtree(path2_stdout)
@@ -113,6 +114,9 @@ os.makedirs(path2_stdout)
 if os.path.isdir(path2_CRISPResso_out):
     shutil.rmtree(path2_CRISPResso_out)
 os.makedirs(path2_CRISPResso_out)
+if os.path.isdir(path2_allelsFreqTabs):
+    shutil.rmtree(path2_allelsFreqTabs)
+os.makedirs(path2_allelsFreqTabs)
 
 wd = os.getcwd()  # save current working dir
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
@@ -187,7 +191,7 @@ def main():
 
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
-        with open(os.path.join(path2workDir,f"{out_basename}_allele_freq.csv"), "w", buffering=1) as writehandle:
+        with open(os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
             if edit_type == "INS":
                 writehandle.write(f"Sample,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)\n") #write header
             elif edit_type == "SNP":
@@ -305,6 +309,11 @@ def main():
                     log.error(f"cannot find intermediate file {current_result_file}")
                     log.error(f"...{row['Sample_ID']} was not processed")
 
+                # move the genotype zip file
+                zip_path = os.path.join(current_CRISPResso_out_dir, "Alleles_frequency_table.zip")
+                old_zip_path = "_".join([zip_path.rstrip(r'.zip'), "genotype.zip"])
+                moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
+                shutil.move(old_zip_path, moved_zip_path)
 
         log.info(f"Done processing all samples in the csv file")
 
