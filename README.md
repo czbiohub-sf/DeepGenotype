@@ -69,4 +69,4 @@ python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --p
 ## Developed by:
 Duo Peng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Development)  
 Abigail Glascock &nbsp; &nbsp;                                         (Testing)  
-Joan Wong &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;      (supervision)  
+Joan Wong &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;      (Supervision)  
