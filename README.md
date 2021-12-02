@@ -1,5 +1,5 @@
 # DeepGenotype
-Calculate genotype outcome frequencies in CRISPR genome editing experiments with deep sequencing reads
+Calculate genotype outcome frequencies in CRISPR genome editing experiments with deep sequencing reads  
 
 ## Features
 - Genotypes are in respective to protein expressiblity.
@@ -35,9 +35,9 @@ Calculate genotype outcome frequencies in CRISPR genome editing experiments with
       &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
-      &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column
+      &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column  
 
-&nbsp;&nbsp;
+&nbsp;
 ## Usuage:
 ```
 python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
@@ -47,9 +47,9 @@ python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --p
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
---quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
 
-&nbsp;&nbsp;
+&nbsp;
 ## Dependencies
 
 - python >= 3.7 
@@ -64,3 +64,9 @@ python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --p
 &nbsp;&nbsp;&nbsp;aka. biopython, https://biopython.org/wiki/Packages
 - pandas
 - requests
+
+&nbsp;
+## Developed by:
+Duo Peng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Development)  
+Abigail Glascock &nbsp; &nbsp;                                         (Testing)  
+Joan Wong &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;      (supervision)  
