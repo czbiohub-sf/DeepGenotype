@@ -1,5 +1,6 @@
 # DeepGenotype
-Calculate genotype outcome frequencies in CRISPR genome editing experiments with deep sequencing reads  
+Calculate the outcome genotype frequencies in CRISPR genome editing experiments
+using deep sequencing reads.  
 
 ## Features
 - Genotypes are in respective to protein expressiblity.
