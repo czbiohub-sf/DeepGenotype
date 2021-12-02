@@ -54,6 +54,7 @@ def main():
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
 
+
         #supporting functions
         def revcom(seq):
             return str(Seq(seq).reverse_complement())
@@ -67,7 +68,7 @@ def main():
                 return(seq[2:])
             else:
                 return("invalid frame!")
-            
+
         def translate_amp(seq, start, end, strand, frame): # for amplicons, the start, end refers to the revcom if strand = "-"
             #seq = seq[start:end].replace("-", "")
             if strand == "-":
@@ -99,7 +100,7 @@ def main():
                 coding_dna = coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)  
-            
+
         def infer_strand(tag_for,tag_rev,HDR_amp): #use the provided tag sequence to infer the strand and frame of the coding sequence
             mFor = re.finditer(tag_for, HDR_amp)
             mRev = re.finditer(tag_rev, HDR_amp)  
@@ -115,16 +116,16 @@ def main():
                     frame = (len(HDR_amp)-en)%3+1
                     #print(f"{row['gene_name']} {st} {en} - {frame}")
                     return(["-",frame, st, en])    
-                
+
         #get cds coordinate in amplicons
         #align each cds to amplicon and mark cds segments
         def get_cds_coord_in_amplicon(whole_cds, amplicon):
             """
             Aligns CDS to amplicon, and get the coordinates of coding part of amplicon
-        
+
             Notes:
             whole_cds is always +1 frame
-            
+
             """
             log.info(f"Searching for cds segments in amplicon...")
 
@@ -171,7 +172,7 @@ def main():
                 #print(f"strand= '-'\nframe={frame}")
                 #return coordinates
                 cds_coord_in_amp.append((coords['seq1_st'],coords['seq1_en'],"-",frame))
-                    
+
             log.info(f"Done searching cds segments in the amplicon")
             return(cds_coord_in_amp)
 
@@ -181,7 +182,7 @@ def main():
             seq1_match = re.sub(r'-+','',seq1_match)
             seq1_st = seq1_start - 1
             seq1_en = seq1_start + len(seq1_match) -1
-            
+
             seq2_start = int(format_alignment(*aln[0]).split("\n")[2].split()[0])
             seq2_match = format_alignment(*aln[0]).split("\n")[2].split()[1]
             seq2_match = re.sub(r'-+','',seq2_match)
@@ -278,11 +279,10 @@ def main():
             deletion_in_cds_flag = False
             for coord_set in amp_cds_coords:
                 for read_gap in read_gap_loc:
-                    if read_gap>=coord_set[0] and read_gap<=coord_set[1]:
+                    if (read_gap-1)>=coord_set[0] and (read_gap-1)<=coord_set[1]: # read gap is 1-based index, to match 0-based index of coord, use read_gap-1
                         deletion_in_cds_flag = True
             return({"deletion_in_cds_flag":deletion_in_cds_flag,
                     "read_gap_loc":read_gap_loc})
-
 
         def check_insertion_in_cds(ref,amp_cds_coords):
             '''
@@ -297,10 +297,22 @@ def main():
             insertion_in_cds_flag = False
             for coord_set in amp_cds_coords:
                 for ref_gap in ref_gap_loc:
-                    if ref_gap>=coord_set[0] and ref_gap<=coord_set[1]:
+                    if (ref_gap-1)>=coord_set[0] and (ref_gap-1)<=coord_set[1]: # ref gap is 1-based index, to match 0-based index of coord, use ref_gap-1
                         insertion_in_cds_flag = True 
             return({"insertion_in_cds_flag":insertion_in_cds_flag,
                     "ref_gap_loc":ref_gap_loc,})
+
+        def check_deletion_overlap_cds(read,amp_cds_coords):
+            read_gap_win = cal_gap_win(read)
+            #check for overlap between gap and cds
+            deletion_overlap_cds_flag = False
+            for coord_set in amp_cds_coords:
+                for gap_win in read_gap_win:
+                    if ( gap_win[0] <= coord_set[0] <= gap_win[1]) or (gap_win[0] <= coord_set[1] <= gap_win[1]):
+                        deletion_overlap_cds_flag = True    
+            return({"deletion_overlap_cds_flag":deletion_overlap_cds_flag,
+                    "read_gap_win":read_gap_win})    
+
 
         #fetch ensembl transcript
         def fetch_ensembl_transcript(
@@ -604,9 +616,11 @@ def main():
                         ########################
                         elif (int(n_deleted)!=0 and int(n_inserted)==0):  #deletion in the read，no insertion
                             #check if deletions are in wt cds
-                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
+                            deletion_in_HDR_amp_cds_noPL_Flag = any([check_deletion_in_cds(read = read, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"],
+                                                                    check_deletion_overlap_cds(read = read, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]])
                             #check if deletions are in payload cds
-                            deletion_in_payload_Flag = check_deletion_in_cds(read = read, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"]
+                            deletion_in_payload_Flag = any([check_deletion_in_cds(read = read, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"],
+                                                        check_deletion_overlap_cds(read = read, amp_cds_coords = [payload_coord])["deletion_overlap_cds_flag"]])
                             #produce output
                             if (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
@@ -618,7 +632,7 @@ def main():
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (wt protein + mutant payload)\n")    
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==False):
-                                #print("\tHDR allele (wt protein + correct payload)", end="\n")   
+                                print("\tHDR allele (wt protein + correct payload1)", end="\n")   
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n")      
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in wt cds
@@ -643,17 +657,21 @@ def main():
                             insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             #check if insertion are in payload cds
                             insertion_in_payload_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = [payload_coord])["insertion_in_cds_flag"]            
-                        
+
                             #trim off inserted seq (in both reads and ref)
                             reg_gap_windows = cal_gap_win(seq = ref)
                             ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
                             read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))                     
-        
+
                             #check if deletions are in wt cds
-                            deletion_in_HDR_amp_cds_noPL_Flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
-                            #check if deletions are in payload cds
-                            deletion_in_payload_Flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"]
+                            deletion_in_HDR_amp_cds_noPL_Flag = any([check_deletion_in_cds(read = read_trimmed, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_in_cds_flag"],
+                                                                    check_deletion_overlap_cds(read = read_trimmed, amp_cds_coords = HDR_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]
+                                                                    ])
                             
+                            #check if deletions are in payload cds
+                            deletion_in_payload_Flag = any([check_deletion_in_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"],
+                                                        check_deletion_overlap_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_overlap_cds_flag"]
+                                                        ])
                             #summarize flag
                             indel_in_HDR_amp_cds_noPL_Flag = any([insertion_in_HDR_amp_cds_noPL_Flag,
                                                                 deletion_in_HDR_amp_cds_noPL_Flag])
@@ -706,7 +724,9 @@ def main():
                         #######################
                         elif (int(n_deleted)!=0 and int(n_inserted)==0):  #deletion in the read，no insertion
                             #check if deletions are in cds
-                            deletion_in_cds_flag = check_deletion_in_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
+                            deletion_in_cds_flag = any([check_deletion_in_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"],
+                                                        check_deletion_overlap_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]
+                                                    ])
                             if deletion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
@@ -717,7 +737,7 @@ def main():
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             if insertion_in_cds_flag == True:
-                                #print("\twt allele (mutant protein)", end="\n")
+                                print("\twt allele (mutant protein)1", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
@@ -730,7 +750,9 @@ def main():
                             ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
                             read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))    
                             #check if deletions are in cds (using the trimmed sequences, this is IMPORTANT!)
-                            deletion_in_cds_flag = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"]
+                            deletion_in_cds_flag = any([check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"],
+                                                        check_deletion_overlap_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]
+                                                    ])
                             #read_gap_loc = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["read_gap_loc"]
                             if any([insertion_in_cds_flag, deletion_in_cds_flag]):
                                 #print("\twt allele (mutant protein)", end="\n")
