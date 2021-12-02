@@ -39,6 +39,11 @@ using deep sequencing reads.
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column  
 
 &nbsp;
+## Outputs:
+- Genotype frequencies for each sample (.csv file)
+- Alleles frequencies table (A folder containing a tabular table for each sample)
+
+&nbsp;
 ## Usuage:
 ```
 python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
