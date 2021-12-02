@@ -1,5 +1,11 @@
 # DeepGenotype
-Calculate genotype frequencies in CRISPR genome editing experiments using deep sequencing reads
+Calculate genotype outcome frequencies in CRISPR genome editing experiments with deep sequencing reads
+
+## Features
+- Automatically map coding region to your region of interest (amplicon region)
+- Genotypes are in respective to protein expressiblity.
+- Supported editing types: Tagging/insertion and SNP/base-editing
+- Works with Pacbio reads
 
 ## Inputs
 - Fastq files
