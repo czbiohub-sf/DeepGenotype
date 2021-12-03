@@ -281,11 +281,10 @@ def main():
             deletion_in_cds_flag = False
             for coord_set in amp_cds_coords:
                 for read_gap in read_gap_loc:
-                    if read_gap>=coord_set[0] and read_gap<=coord_set[1]:
+                    if (read_gap-1)>=coord_set[0] and (read_gap-1)<=coord_set[1]: # read gap is 1-based index, to match 0-based index of coord, use read_gap-1
                         deletion_in_cds_flag = True
             return({"deletion_in_cds_flag":deletion_in_cds_flag,
                     "read_gap_loc":read_gap_loc})
-
 
         def check_insertion_in_cds(ref,amp_cds_coords):
             '''
@@ -300,10 +299,11 @@ def main():
             insertion_in_cds_flag = False
             for coord_set in amp_cds_coords:
                 for ref_gap in ref_gap_loc:
-                    if ref_gap>=coord_set[0] and ref_gap<=coord_set[1]:
+                    if (ref_gap-1)>=coord_set[0] and (ref_gap-1)<=coord_set[1]: # ref gap is 1-based index, to match 0-based index of coord, use ref_gap-1
                         insertion_in_cds_flag = True 
             return({"insertion_in_cds_flag":insertion_in_cds_flag,
                     "ref_gap_loc":ref_gap_loc,})
+
 
         def find_next_num_div3(num):
             if num%3==0:
@@ -348,7 +348,7 @@ def main():
             return({"deletion_overlap_cds_flag":deletion_overlap_cds_flag,
                     "read_gap_win":read_gap_win})   
 
-        def check_protein_and_payload(read):
+        def check_protein_and_payload(read): #must remove insertions in read before calling this function    
             payload_genotype = "missing or nc"
             protein_correct = False
 
@@ -391,7 +391,7 @@ def main():
 
             return({"payload_genotype":payload_genotype,
                     "protein_correct":protein_correct})
-    
+                    
         #fetch ensembl transcript
         def fetch_ensembl_transcript(
             ensembl_transcript_id, 
@@ -683,9 +683,6 @@ def main():
                         ##########################
                         elif int(n_deleted)==0 and int(n_inserted)==0: 
                             #print(f"\n{read}\n{ref}\t{n_deleted}\t{n_inserted}\t{n_mutated}\t{n_Reads}\t{perc_Reads}", end='\n')
-                            payload_genotype = "missing or nc"
-                            protein_correct = False
-
                             #check wt protein and payload
                             protein_correct = check_protein_and_payload(read)["protein_correct"]
                             payload_genotype = check_protein_and_payload(read)["payload_genotype"]
@@ -710,6 +707,10 @@ def main():
                             protein_correct = check_protein_and_payload(read)["protein_correct"]
                             payload_genotype = check_protein_and_payload(read)["payload_genotype"]
                             
+                            if protein_correct == False:
+                                deletion_in_HDR_amp_cds_noPL_Flag = True # hitch a ride
+                            
+                            #no need to check deletion in SNP, because the SNP translation will take care it this
                             #produce output
                             if deletion_in_HDR_amp_cds_noPL_Flag==True:
                                 #print("\twt allele (mutant protein + mutant payload)", end="\n")
@@ -811,6 +812,10 @@ def main():
                             protein_correct = check_protein_and_payload(read)["protein_correct"]
                             payload_genotype = check_protein_and_payload(read)["payload_genotype"]
                             
+                            if protein_correct == False:
+                                deletion_in_wt_amp_cds_noPL_Flag = True #hitch a ride
+                            
+                            #no need to check deletion in SNP, because the SNP translation will take care it this
                             #produce output
                             if deletion_in_wt_amp_cds_noPL_Flag==True:
                                 #print("\twt allele (mutant protein + mutant payload)", end="\n")
