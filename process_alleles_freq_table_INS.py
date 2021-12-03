@@ -54,7 +54,6 @@ def main():
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
 
-
         #supporting functions
         def revcom(seq):
             return str(Seq(seq).reverse_complement())
@@ -75,13 +74,13 @@ def main():
                 seq = revcom(seq) #revcom
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna=coding_dna.replace("-", "N")
+                coding_dna=coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
             else:
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna = coding_dna.replace("-", "N")
+                coding_dna = coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
 
@@ -91,13 +90,13 @@ def main():
                 seq = seq[start:end]
                 seq = revcom(seq) #revcom
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna=coding_dna.replace("-", "N")
+                coding_dna=coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
             else:
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna = coding_dna.replace("-", "N")
+                coding_dna = coding_dna.replace("-", "")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)  
 
@@ -311,8 +310,28 @@ def main():
                     if ( gap_win[0] <= coord_set[0] <= gap_win[1]) or (gap_win[0] <= coord_set[1] <= gap_win[1]):
                         deletion_overlap_cds_flag = True    
             return({"deletion_overlap_cds_flag":deletion_overlap_cds_flag,
-                    "read_gap_win":read_gap_win})    
+                    "read_gap_win":read_gap_win})  
 
+        def check_protein_correctness(read,wt_or_HDR_amp_cds_coords,wt_or_HDR_translation): #must remove insertions in read before calling this function    
+            payload_correct = False
+            protein_correct = False
+            #check payload
+            translation = translate_payload(seq=read, start =  payload_coord_in_HDR_amp[0], end = payload_coord_in_HDR_amp[1], strand = payload_strand, frame = 1)
+            if translation == payload_translation:
+                payload_correct = True
+            #check wt protein
+            counter=0
+            for idx, coord_set in enumerate(wt_or_HDR_amp_cds_coords):
+                translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
+                #print("\n")
+                #print(wt_translation[idx].strip('*'))
+                #print(translation)
+                if wt_or_HDR_translation[idx] == translation:
+                    counter+=1
+            if counter==len(wt_or_HDR_amp_cds_coords):
+                protein_correct=True
+            return({"payload_correct":payload_correct,
+                    "protein_correct":protein_correct})
 
         #fetch ensembl transcript
         def fetch_ensembl_transcript(
@@ -581,23 +600,9 @@ def main():
                         ##########################
                         elif int(n_deleted)==0 and int(n_inserted)==0: 
                             #print(f"\n{read}\n{ref}", end='\n')
-                            payload_correct = False
-                            protein_correct = False
-                            #check payload
-                            translation = translate_payload(seq=read, start =  payload_coord_in_HDR_amp[0], end = payload_coord_in_HDR_amp[1], strand = payload_strand, frame = 1)
-                            if translation == payload_translation:
-                                payload_correct = True
-                            #check wt protein
-                            counter=0
-                            for idx, coord_set in enumerate(HDR_amp_cds_coords):
-                                translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
-                                #print("\n")
-                                #print(wt_translation[idx].strip('*'))
-                                #print(translation)
-                                if HDR_translation[idx] == translation:
-                                    counter+=1
-                            if counter==len(HDR_amp_cds_coords):
-                                protein_correct=True
+                            payload_correct = check_protein_correctness(read,HDR_amp_cds_coords,HDR_translation)["payload_correct"]
+                            protein_correct = check_protein_correctness(read,HDR_amp_cds_coords,HDR_translation)["protein_correct"]
+
                             #produce output
                             if (protein_correct==True and payload_correct==True):
                                 #print("\tHDR allele (wt protein + correct payload)", end="\n")
@@ -621,6 +626,15 @@ def main():
                             #check if deletions are in payload cds
                             deletion_in_payload_Flag = any([check_deletion_in_cds(read = read, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"],
                                                         check_deletion_overlap_cds(read = read, amp_cds_coords = [payload_coord])["deletion_overlap_cds_flag"]])
+                            
+                            payload_correct = check_protein_correctness(read,HDR_amp_cds_coords,HDR_translation)["payload_correct"]
+                            protein_correct = check_protein_correctness(read,HDR_amp_cds_coords,HDR_translation)["protein_correct"]
+                            
+                            if payload_correct == False:
+                                deletion_in_payload_Flag = True #hitch a ride with the deletion flag
+                            if protein_correct == False:
+                                deletion_in_HDR_amp_cds_noPL_Flag = True #hitch a ride with the deletion flag
+
                             #produce output
                             if (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
@@ -632,7 +646,7 @@ def main():
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (wt protein + mutant payload)\n")    
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==False):
-                                #print("\tHDR allele (wt protein + correct payload1)", end="\n")
+                                #print("\tHDR allele (wt protein + correct payload1)", end="\n")   
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n")      
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in wt cds
@@ -640,6 +654,20 @@ def main():
                             #check if insertion are in payload cds
                             insertion_in_payload_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = [payload_coord])["insertion_in_cds_flag"]
                             #produce output
+                            
+                            #trim off inserted seq (in both reads and ref)
+                            reg_gap_windows = cal_gap_win(seq = ref)
+                            ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
+                            read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))   
+                            
+                            payload_correct = check_protein_correctness(read_trimmed,HDR_amp_cds_coords,HDR_translation)["payload_correct"]
+                            protein_correct = check_protein_correctness(read_trimmed,HDR_amp_cds_coords,HDR_translation)["protein_correct"]
+                            
+                            if payload_correct == False:
+                                insertion_in_payload_Flag = True #hitch a ride with the deletion flag
+                            if protein_correct == False:
+                                insertion_in_HDR_amp_cds_noPL_Flag = True #hitch a ride with the deletion flag
+                                
                             if (insertion_in_HDR_amp_cds_noPL_Flag==True and insertion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")
@@ -672,11 +700,17 @@ def main():
                             deletion_in_payload_Flag = any([check_deletion_in_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_in_cds_flag"],
                                                         check_deletion_overlap_cds(read = read_trimmed, amp_cds_coords = [payload_coord])["deletion_overlap_cds_flag"]
                                                         ])
+
+                            payload_correct = check_protein_correctness(read_trimmed,HDR_amp_cds_coords,HDR_translation)["payload_correct"]
+                            protein_correct = check_protein_correctness(read_trimmed,HDR_amp_cds_coords,HDR_translation)["protein_correct"]
+                            
                             #summarize flag
                             indel_in_HDR_amp_cds_noPL_Flag = any([insertion_in_HDR_amp_cds_noPL_Flag,
-                                                                deletion_in_HDR_amp_cds_noPL_Flag])
+                                                                deletion_in_HDR_amp_cds_noPL_Flag,
+                                                                (not protein_correct)])  #hitch a ride with the indel flag
                             indel_in_payload_Flag = any([insertion_in_payload_Flag,
-                                                        deletion_in_payload_Flag])     
+                                                        deletion_in_payload_Flag,
+                                                        not payload_correct])   #hitch a ride with the indel flag   
                             #produce output
                             if (indel_in_HDR_amp_cds_noPL_Flag==True and indel_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
@@ -703,15 +737,7 @@ def main():
                         ##########################
                         elif int(n_deleted)==0 and int(n_inserted)==0: 
                             #print(f"\n{read}\n{ref}", end='\n')
-                            protein_correct = False
-                            #check wt protein
-                            counter=0
-                            for idx, coord_set in enumerate(wt_amp_cds_coords):
-                                translation = translate_amp(seq=read, start = coord_set[0], end = coord_set[1], strand = coord_set[2], frame = coord_set[3])
-                                if wt_translation[idx] == translation:
-                                    counter+=1
-                            if counter==len(wt_amp_cds_coords):
-                                protein_correct=True
+                            protein_correct = check_protein_correctness(read,wt_amp_cds_coords,wt_translation)["protein_correct"]
                             #produce output
                             if (protein_correct==True):
                                 #print("\twt allele (wt protein + no payload)", end="\n")
@@ -727,6 +753,11 @@ def main():
                             deletion_in_cds_flag = any([check_deletion_in_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_in_cds_flag"],
                                                         check_deletion_overlap_cds(read = read, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]
                                                     ])
+                            
+                            protein_correct = check_protein_correctness(read,wt_amp_cds_coords,wt_translation)["protein_correct"]
+                            if protein_correct == False:
+                                deletion_in_cds_flag= True #hitch a ride with the del flag
+                        
                             if deletion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
@@ -736,6 +767,17 @@ def main():
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
+                            
+                            #trim off inserted seq (in both reads and ref)
+                            reg_gap_windows = cal_gap_win(seq = ref)
+                            ref_trimmed = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))
+                            read_trimmed = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in reg_gap_windows]))    
+                            
+                            protein_correct = check_protein_correctness(read_trimmed,wt_amp_cds_coords,wt_translation)["protein_correct"]
+                            
+                            if protein_correct == False:
+                                insertion_in_cds_flag= True #hitch a ride with the del flag
+                                
                             if insertion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
@@ -754,12 +796,18 @@ def main():
                                                         check_deletion_overlap_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords_PosRef)["deletion_overlap_cds_flag"]
                                                     ])
                             #read_gap_loc = check_deletion_in_cds(read = read_trimmed, amp_cds_coords = wt_amp_cds_coords)["read_gap_loc"]
+                            protein_correct = check_protein_correctness(read_trimmed,wt_amp_cds_coords,wt_translation)["protein_correct"]
+                            
+                            if protein_correct == False:
+                                deletion_in_cds_flag= True #hitch a ride with the del flag
+                            
                             if any([insertion_in_cds_flag, deletion_in_cds_flag]):
                                 #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
                                 writehandle.write("\twt allele (wt protein)\n")
+
 
         #write the allele frequency table to a new zip file
         new_zip_path = "_".join([zip_path.rstrip(r'.zip'),"genotype.zip"])
