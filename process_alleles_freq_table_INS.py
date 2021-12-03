@@ -632,7 +632,7 @@ def main():
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
                                 writehandle.write("\tHDR allele (wt protein + mutant payload)\n")    
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==False):
-                                print("\tHDR allele (wt protein + correct payload1)", end="\n")   
+                                #print("\tHDR allele (wt protein + correct payload1)", end="\n")
                                 writehandle.write("\tHDR allele (wt protein + correct payload)\n")      
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in wt cds
@@ -737,7 +737,7 @@ def main():
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
                             if insertion_in_cds_flag == True:
-                                print("\twt allele (mutant protein)1", end="\n")
+                                #print("\twt allele (mutant protein)", end="\n")
                                 writehandle.write("\twt allele (mutant protein)\n")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
