@@ -75,13 +75,13 @@ def main():
                 seq = revcom(seq) #revcom
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna=coding_dna.replace("-", "")
+                coding_dna=coding_dna.replace("-", "N")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
             else:
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna = coding_dna.replace("-", "")
+                coding_dna = coding_dna.replace("-", "N")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
 
@@ -91,13 +91,13 @@ def main():
                 seq = seq[start:end]
                 seq = revcom(seq) #revcom
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna=coding_dna.replace("-", "")
+                coding_dna=coding_dna.replace("-", "N")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)      
             else:
                 seq = seq[start:end]
                 coding_dna = adjust_frame(seq,frame) #adjust frame
-                coding_dna = coding_dna.replace("-", "")
+                coding_dna = coding_dna.replace("-", "N")
                 trans = str(Seq(coding_dna).translate())    #translate
                 return(trans)  
 
