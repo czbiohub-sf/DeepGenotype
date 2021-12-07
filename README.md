@@ -3,10 +3,10 @@ Calculate the outcome genotype frequencies in CRISPR genome editing experiments
 using deep sequencing reads.  
 
 ## Features
-- Genotypes are in respective to protein expressiblity and correctness.
-- Automatically map coding regions to regions of interest (amplicon region).
+- Genotypes are in respect to protein expressiblity and correctness.
 - Supported CRISPR editing types: Tagging/insertion and SNP/base-editing.
 - Works with both Illumina and Pacbio reads.
+- Automatically map coding regions to regions of interest (amplicon region).
 
 ## Inputs
 - Fastq files
