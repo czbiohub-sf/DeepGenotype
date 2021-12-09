@@ -48,6 +48,9 @@ using deep sequencing reads.
 ```
 python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
+Please make sure the following two python scripts are in the same directory as DeepGenotype.py:  
+ &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
+ &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
 
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
