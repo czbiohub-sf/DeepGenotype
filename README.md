@@ -3,11 +3,11 @@ Calculate the outcome genotype frequencies in CRISPR genome editing experiments
 using deep sequencing reads.  
 
 ## Features
-- Genotypes are in respect to protein/payload expressiblity and correctness (main feature over CRISPREsso2).
-- Supported CRISPR editing types: Tagging/insertion and SNP/base-editing.
-- Works with both Illumina and Pacbio reads.
-- Automatically finds coding regions.
-- Invokes CRISPResso2 to perform read processing and alignment 
+- Genotypes are in respect to protein/payload expressiblity and correctness (main feature over CRISPREsso2).  
+- Supported CRISPR editing types: Tagging/insertion and SNP/base-editing.  
+- Works with both Illumina and Pacbio reads.  
+- Automatically finds coding regions.  
+- Invokes CRISPResso2 to perform read processing and alignment.   
 
 ## Inputs
 - Fastq files
