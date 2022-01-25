@@ -44,7 +44,7 @@ Calculate the frequencies of protein-level mutations from deep-sequencing reads 
 - Alleles frequencies table (A folder containing a table of read-to-genotype assignments for each sample)
 
 &nbsp;
-## Usuage:
+## Usage:
 ```
 python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
