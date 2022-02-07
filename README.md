@@ -2,7 +2,7 @@
 Calculate the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells.
 
 ## Features
-- Genotypes are in respect to protein/payload expressiblity and correctness (main feature over CRISPREsso2).  
+- Genotypes are in respect to protein/payload expressiblity and correctness.  
 - Supported CRISPR editing types: Tagging/insertion and SNP/base-editing.  
 - Works with both Illumina and Pacbio reads.  
 - Automatically finds coding regions.  
