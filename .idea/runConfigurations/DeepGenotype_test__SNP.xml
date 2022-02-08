@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="DeepGenotype test  SNP" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="DeepGenotype test  SNP" type="PythonConfigurationType" factoryName="Python" singleton="false">
     <module name="DeepGenotype" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
