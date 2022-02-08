@@ -19,3 +19,4 @@
 .idea/runConfigurations/DeepGenotype_test_INS.xml
 .idea/runConfigurations/DeepGenotype_test__pacbio.xml
 .idea/runConfigurations/DeepGenotype_test_INS.xml
+*.xml
