@@ -1,13 +1,13 @@
 # DeepGenotype
-Calculate the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells.
+Calculates the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells
 
 ## Features
-- Genotypes are in respect to protein/payload expressiblity and correctness. 
+- Calculates genotypes with respect to protein/payload expressiblity and correctness  
 - Automatically processes a list of samples 
-- Supported CRISPR editing types: Tagging/insertion and SNP/base-editing.  
-- Works with both Illumina and Pacbio reads.  
-- Automatically finds coding regions.  
-- Invokes CRISPResso2 to perform read processing and alignment.   
+- Supports CRISPR editing types: tagging/insertion and SNP/base-editing  
+- Works with both Illumina and PacBio reads  
+- Automatically finds coding regions  
+- Invokes CRISPResso2 to perform read processing and alignment   
 
 ## Inputs
 - Fastq files
