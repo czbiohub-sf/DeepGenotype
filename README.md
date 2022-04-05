@@ -20,11 +20,11 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
   - gRNA_sequence
   - edit_type (e.g. INS or SNP, note that deletions,DEL is not supported at this point)  
       &nbsp;&nbsp;&nbsp; INS = insertion, SNP = you know this, DEL = deletion  
-  - SNP_payload_cluster (e.g. 1 or 2 ...)  
+  - SNP_payload_cluster (e.g. 1 or 2 ...) (TODO: check if this setting is really necessary)  
       &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
       &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload**  
       &nbsp;&nbsp;&nbsp; Clusters are ordered from left to right in respect to the amplicon sequence.  
-      &nbsp;&nbsp;&nbsp; For example of 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
+      &nbsp;&nbsp;&nbsp; For examplp: there are 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
       
   - Fastq_extra_suffix (Optional) 
      
@@ -37,6 +37,7 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
       &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C"
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column  
 
 &nbsp;
