@@ -35,9 +35,9 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
       &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"    
 
       &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz  
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz  
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C"  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz"  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz"  
+      &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C"  
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column  
 
 &nbsp;
