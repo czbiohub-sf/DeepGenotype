@@ -18,8 +18,8 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
   - WT_amplicon_sequence
   - HDR_amplicon_sequence
   - gRNA_sequence
-  - edit_type (e.g. INS or SNP, note that deletions,DEL is not supported at this point)  
-      &nbsp;&nbsp;&nbsp; INS = insertion, SNP = you know this, DEL = deletion  
+  - edit_type (e.g. INS or SNP, note that deletions, DEL is not supported at this point)  
+      &nbsp;&nbsp;&nbsp; INS = insertion, SNP = single nucleotide polymorphism, DEL = deletion  
   - SNP_payload_cluster (e.g. 1 or 2 ...) (TODO: check if this setting is really necessary)  
       &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
       &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload**  
