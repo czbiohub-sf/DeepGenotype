@@ -28,16 +28,16 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
       
   - Fastq_extra_suffix (Optional) 
      
-      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq files 
-      
-      &nbsp;&nbsp;&nbsp;**Already included by default:**  
+      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq files
+ 
+      &nbsp;&nbsp;&nbsp;**Please note that the common (as opposed to extra) suffixes are the following values by default:**  
       &nbsp;&nbsp;&nbsp;"_R1_001.fastq.gz"    
-      &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"    
-
+      &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"
+      
       &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz"  
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz"  
-      &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C"  
+      &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C", and "_S90_" is another variable part of the name
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Sample_name_addon" column  
 
 &nbsp;
@@ -52,7 +52,7 @@ python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --p
 ```
 Please make sure the following two python scripts are in the same directory as DeepGenotype.py:  
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
- &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
+ &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
 
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
