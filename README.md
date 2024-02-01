@@ -71,7 +71,7 @@ Please make sure the following two python scripts are in the same directory as D
 &nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
 
 #### python packages  
-- Bio  
+- Bio (v1.78)  
 &nbsp;&nbsp;&nbsp;aka. biopython, https://biopython.org/wiki/Packages
 - pandas
 - requests
