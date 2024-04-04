@@ -73,7 +73,7 @@ To create an environment and install python + dependencies:
 ```
 conda create -n DeepGenotype python=3.8
 conda activate DeepGenotype
-pip install Bio==1.78 pandas requests
+pip install biopython==1.78 pandas requests
 ```
 
 #### python-based standalone software  
