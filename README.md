@@ -74,7 +74,7 @@ Please make sure the following two python scripts are in the same directory as D
 &nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
 &nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
 
-## To create an environment and install ependencies:
+## To create an environment and install dependencies:
 ```
 conda create -n DeepGenotype python=3.9
 conda activate DeepGenotype
