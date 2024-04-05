@@ -10,7 +10,7 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 - Invokes CRISPResso2 to perform read processing and alignment   
 
 ## Inputs
-- Fastq files
+- Fastq files (plain or gzipped)
 - A csv file (examples provided) containing columns with the exact names:
   - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)
   - gene_name (e.g. DDX6)  
