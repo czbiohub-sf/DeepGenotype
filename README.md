@@ -48,11 +48,22 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 &nbsp;
 ## Usage:
 ```
-python DeepGenotype.py --path2csv test_dir/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
+python DeepGenotype.py --path2csv example_csv/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
+All paths are relative to `DeepGenotype.py`  
 Please make sure the following two python scripts are in the same directory as DeepGenotype.py:  
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
+
+
+To run pacbio test dataset
+```
+python DeepGenotype.py \
+--path2csv example_csv/test_pacbio.csv \
+--path2workDir test_PacBio \
+--path2fastqDir test_PacBio/fastq \
+--single_fastq_suffix .fastq
+```
 
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
