@@ -69,18 +69,21 @@ Please make sure the following two python scripts are in the same directory as D
 - pandas
 - requests
 
-To create an environment and install python + dependencies:
-```
-conda create -n DeepGenotype python=3.8
-conda activate DeepGenotype
-pip install biopython==1.78 pandas requests
-```
-
 #### python-based standalone software  
 - CRISPResso2  
 &nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
 &nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
 
+To create an environment and install ependencies:
+```
+conda create -n DeepGenotype python=3.9
+conda activate DeepGenotype
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda install CRISPResso2
+pip install biopython==1.78 pandas requests
+```
 
 &nbsp;
 ## Developed by:
