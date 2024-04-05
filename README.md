@@ -83,6 +83,15 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 conda install CRISPResso2
 pip install biopython==1.78 pandas requests
+git clone https://github.com/czbiohub-sf/DeepGenotype
+```
+verify CRISPResso2
+```
+CRISPResso -h
+```
+verify DeepGenotype
+```
+DeepGenotype
 ```
 
 &nbsp;
