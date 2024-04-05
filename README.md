@@ -43,7 +43,7 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 &nbsp;
 ## Outputs:
 - Protein-level genotype frequencies table in a csv file
-- CRISPRESSO2 output that includes
+- CRISPResso2 output that includes
   - Read aligning rate
   - Sequence-level genotype frequencies table
   - read-to-genotype assignments information
