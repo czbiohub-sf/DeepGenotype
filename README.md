@@ -103,7 +103,7 @@ CRISPResso -h
 verify DeepGenotype
 ```
 cd DeepGenotype
-python DeepGenotype
+python DeepGenotype.py
 ```
 
 &nbsp;
