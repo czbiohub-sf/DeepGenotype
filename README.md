@@ -90,7 +90,7 @@ python DeepGenotype.py \
 - requests
 
 #### python-based standalone software  
-- CRISPResso2  
+- CRISPResso2 (v2.2.6) 
 &nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
 &nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
 
@@ -101,7 +101,7 @@ conda activate DeepGenotype
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
-conda install CRISPResso2
+conda install CRISPResso2==2.2.6
 pip install biopython==1.78 pandas requests
 git clone https://github.com/czbiohub-sf/DeepGenotype
 ```
