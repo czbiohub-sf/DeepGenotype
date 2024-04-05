@@ -96,9 +96,9 @@ def parse_args():
     return config
 
 config = vars(parse_args())
-path2workDir = config["path2workDir"]
-path2fastqDir = config['path2fastqDir']
-path2csv= config['path2csv']
+path2workDir = os.path.join(os.getcwd(), config["path2workDir"])
+path2fastqDir = os.path.join(os.getcwd(), config['path2fastqDir'])
+path2csv= os.path.join(os.getcwd(), config['path2csv'])
 quantification_win_size= config['quantification_win_size']
 fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
@@ -121,6 +121,7 @@ os.makedirs(path2_allelsFreqTabs)
 wd = os.getcwd()  # save current working dir
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
 
+
 ###################
 #text manipulation#
 ###################
@@ -139,7 +140,7 @@ def slugify(value): #adapted from the Django project
 def main():
     try:
         # check input paths
-        if not os.path.isfile(os.path.join(path2csv)):
+        if not os.path.isfile(path2csv):
             log.error(f"Can not locate the input csv file at {path2csv}, please check the path")
             log.info(f"Please fix the path to the input csv file and try again")
             sys.exit()
@@ -149,7 +150,7 @@ def main():
             sys.exit()
 
         # read input csv file
-        df = pd.read_csv(os.path.join(path2csv))
+        df = pd.read_csv(os.path.join(os.getcwd(),path2csv))
 
         # check edit type
         if len(set(df['edit_type'])) >= 2:
