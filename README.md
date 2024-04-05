@@ -61,12 +61,18 @@ Please make sure the following two python scripts are in the same directory as D
 
 To run pacbio test dataset
 ```
+module load anaconda
+conda activate DeepGenotype
+```
+```
+conda activate DeepGenotype
 python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
 --path2workDir test_PacBio \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
 ```
+
 
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
