@@ -245,7 +245,9 @@ def main():
                            f"--amplicon_name", f"{row['gene_name']}",
                            f"--guide_seq", f"{row['gRNA_sequence']}",
                            f"--name", f"{row['Sample_ID']}",
-                           f"--quantification_window_size", f"{quantification_win_size}"
+                           f"--quantification_window_size", f"{quantification_win_size}",
+                           #f"--plot_window_size", "20", # reduce plot size
+                           #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size
                            ]
 
                 log.info(f"Processing sample: {row['Sample_ID']}")
@@ -271,8 +273,9 @@ def main():
 
                 #CRISPResso_out_dir
                 #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
+                #NOTE: upgrading CRISPResso from v2.2.6 to 2.2.14 no longer have the above behavior, thus commenting the following line out
                 sample_name = row['Sample_ID']
-                sample_name = slugify(sample_name)
+                #sample_name = slugify(sample_name)
                 current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
 
                 #build and execute the shell command
