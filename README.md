@@ -107,9 +107,38 @@ The completed `nohup.out` should look like this
 [DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
 [DeepGenotype.py][INFO]  ...done
 [DeepGenotype.py][INFO]  Done processing all samples in the csv file
-
 ```
 
+### To run MiSeq test dataset *in the background* (and thus safe to close the terminal)
+load conda, and activate the DeepGenotype conda environment
+```
+module load anaconda
+conda activate DeepGenotype
+```
+run DeepGenotype in the background
+```
+nohup python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq \
+--path2fastqDir test_MiSeq/fastq &
+```
+To check the terminal output (while running in the background
+```
+cat nohup.out
+```
+The completed `nohup.out` should look like this (only first 9 lines shown)
+```
+[DeepGenotype.py][INFO]  Genome edit type: INS
+[DeepGenotype.py][INFO]  Processing sample: mNGplate19_sorted_A2_DDX6-C
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+[DeepGenotype.py][INFO]  Processing sample: mNGplate19_sorted_A3_LSM14A-N
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+...
+```
 
 #### Optional aruments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
