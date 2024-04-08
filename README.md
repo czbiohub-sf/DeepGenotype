@@ -59,18 +59,55 @@ Please make sure the following two python scripts are in the same directory as D
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
 
 
-To run pacbio test dataset
+### To run pacbio test dataset
+load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
 conda activate DeepGenotype
 ```
+run DeepGenotype
 ```
-conda activate DeepGenotype
 python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
 --path2workDir test_PacBio \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
+```
+### To run pacbio test dataset *in the background* (and thus safe to close the terminal)
+load conda, and activate the DeepGenotype conda environment
+```
+module load anaconda
+conda activate DeepGenotype
+```
+run DeepGenotype in the background
+```
+nohup python DeepGenotype.py \
+--path2csv example_csv/test_pacbio.csv \
+--path2workDir test_PacBio \
+--path2fastqDir test_PacBio/fastq \
+--single_fastq_suffix .fastq &
+```
+To check the terminal output (while running in the background
+```
+cat nohup.out
+```
+The completed `nohup.out` should look like this
+```
+[DeepGenotype.py][INFO]  Genome edit type: INS
+[DeepGenotype.py][INFO]  Processing sample: HEK-nocap-CLTA-R1_ccs.lbc89--lbc89.lbc89--lbc89
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+[DeepGenotype.py][INFO]  Processing sample: HEK-nocap-CLTA-R2_ccs.lbc90--lbc90.lbc90--lbc90
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+[DeepGenotype.py][INFO]  Processing sample: HEK-nocap-CLTA-R3_ccs.lbc91--lbc91.lbc91--lbc91
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+[DeepGenotype.py][INFO]  Done processing all samples in the csv file
+
 ```
 
 
