@@ -80,6 +80,7 @@ python DeepGenotype.py \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
 ```
+&nbsp;
 ## To run pacbio test dataset *in the background* (and thus safe to close the terminal)
 load conda, and activate the DeepGenotype conda environment
 ```
