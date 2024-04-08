@@ -59,7 +59,14 @@ Please make sure the following two python scripts are in the same directory as D
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
 
 
-### To run pacbio test dataset
+#### Optional aruments
+--fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
+--fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
+--single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
+
+&nbsp;
+## To run pacbio test dataset
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -73,7 +80,7 @@ python DeepGenotype.py \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
 ```
-### To run pacbio test dataset *in the background* (and thus safe to close the terminal)
+## To run pacbio test dataset *in the background* (and thus safe to close the terminal)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -109,7 +116,8 @@ The completed `nohup.out` should look like this
 [DeepGenotype.py][INFO]  Done processing all samples in the csv file
 ```
 
-### To run MiSeq test dataset *in the background* (and thus safe to close the terminal)
+&nbsp;
+## To run MiSeq test dataset *in the background* (and thus safe to close the terminal)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -139,12 +147,6 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 [DeepGenotype.py][INFO]  ...done
 ...
 ```
-
-#### Optional aruments
---fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
---fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
---single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
---quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
 
 &nbsp;
 ## Dependencies
