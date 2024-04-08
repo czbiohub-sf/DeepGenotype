@@ -1,0 +1,3 @@
+Amplicon	Unmodified%	Modified%	Reads_in_input	Reads_aligned_all_amplicons	Reads_aligned	Unmodified	Modified	Discarded	Insertions	Deletions	Substitutions	Only Insertions	Only Deletions	Only Substitutions	Insertions and Deletions	Insertions and Substitutions	Deletions and Substitutions	Insertions Deletions and Substitutions
+LRP6	1.97978767	98.02021233	82738	80940	31367	621	30746	0	9234	21686	6684	5277	18765	283	20	3500	2464	437
+HDR	37.21178868	62.78821132	82738	80940	49573	18447	31126	0	12080	17955	20300	5004	3757	6062	2065	2105	9227	2906
