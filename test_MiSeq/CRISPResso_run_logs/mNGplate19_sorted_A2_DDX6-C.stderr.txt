@@ -1,0 +1,99 @@
+INFO  @ Mon, 08 Apr 2024 16:00:03:
+	 Creating Folder CRISPResso_on_mNGplate19_sorted_A2_DDX6-C 
+
+INFO  @ Mon, 08 Apr 2024 16:00:03:
+	 Computing quantification windows 
+
+INFO  @ Mon, 08 Apr 2024 16:00:03:
+	 Estimating average read length... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:03:
+	 Merging paired sequences with Flash... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:03:
+	 Running FLASH command: flash "/hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz" "/hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz" --min-overlap 10 --max-overlap 100 --allow-outies -z -d CRISPResso_on_mNGplate19_sorted_A2_DDX6-C -o out >>CRISPResso_on_mNGplate19_sorted_A2_DDX6-C/CRISPResso_RUNNING_LOG.txt 2>&1 
+
+INFO  @ Mon, 08 Apr 2024 16:00:04:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:04:
+	 Aligning sequences... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:04:
+	 Processing reads; N_TOT_READS: 0 N_COMPUTED_ALN: 0 N_CACHED_ALN: 0 N_COMPUTED_NOTALN: 0 N_CACHED_NOTALN: 0 
+
+INFO  @ Mon, 08 Apr 2024 16:00:06:
+	 Processing reads; N_TOT_READS: 10000 N_COMPUTED_ALN: 1665 N_CACHED_ALN: 8231 N_COMPUTED_NOTALN: 58 N_CACHED_NOTALN: 46 
+
+INFO  @ Mon, 08 Apr 2024 16:00:08:
+	 Processing reads; N_TOT_READS: 20000 N_COMPUTED_ALN: 2868 N_CACHED_ALN: 16925 N_COMPUTED_NOTALN: 111 N_CACHED_NOTALN: 96 
+
+INFO  @ Mon, 08 Apr 2024 16:00:09:
+	 Processing reads; N_TOT_READS: 30000 N_COMPUTED_ALN: 3982 N_CACHED_ALN: 25721 N_COMPUTED_NOTALN: 151 N_CACHED_NOTALN: 146 
+
+INFO  @ Mon, 08 Apr 2024 16:00:11:
+	 Processing reads; N_TOT_READS: 40000 N_COMPUTED_ALN: 5083 N_CACHED_ALN: 34519 N_COMPUTED_NOTALN: 194 N_CACHED_NOTALN: 204 
+
+INFO  @ Mon, 08 Apr 2024 16:00:11:
+	 Finished reads; N_TOT_READS: 40951 N_COMPUTED_ALN: 5205 N_CACHED_ALN: 35339 N_COMPUTED_NOTALN: 199 N_CACHED_NOTALN: 208 
+
+INFO  @ Mon, 08 Apr 2024 16:00:11:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:11:
+	 Quantifying indels/substitutions... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:13:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:13:
+	 Calculating allele frequencies... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:13:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:13:
+	 Saving processed data... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:13:
+	 Making Plots... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:14:
+	 Begin processing plots for amplicon DDX6 
+
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3578: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3965: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  hdr_nucleotide_percentage_summary_df = pd.DataFrame(nuc_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3977: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  hdr_modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+INFO  @ Mon, 08 Apr 2024 16:00:22:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:22:
+	 Begin processing plots for amplicon HDR 
+
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3578: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duo.peng/.conda/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+INFO  @ Mon, 08 Apr 2024 16:00:29:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:29:
+	 Done! 
+
+INFO  @ Mon, 08 Apr 2024 16:00:29:
+	 Removing Intermediate files... 
+
+INFO  @ Mon, 08 Apr 2024 16:00:29:
+	 Analysis Complete! 
+

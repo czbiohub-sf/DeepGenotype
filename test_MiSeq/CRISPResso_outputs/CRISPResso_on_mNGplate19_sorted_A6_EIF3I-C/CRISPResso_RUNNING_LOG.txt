@@ -1,0 +1,105 @@
+CRISPResso version 2.2.14
+[Command used]:
+/home/duo.peng/.conda/envs/DeepGenotype/bin/CRISPResso --fastq_r1 /hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R1_001.fastq.gz --fastq_r2 /hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R2_001.fastq.gz --amplicon_seq TTTCCCAGAGTAAGCACCTGACTGGTGCCTGGCTATCTTTTTCCAGCTACAGCAGCGGCGGCGAAGATGGTTACGTCCGTATCCATTACTTCGACCCACAGTACTTCGAATTTGAGTTTGAGGCTTAAGAAGCTGGATCTCCTGCCGGGCGTGGTGGCTCATGCCTGTAATCCCACCACTTTTTTTTTAAGGCAGGCGGATCACCTGAGGTCAGGAGTTTAAGACCAGCCTGACCAACATGGAGAAACCTCGTCTCT --expected_hdr_amplicon_seq TTTCCCAGAGTAAGCACCTGACTGGTGCCTGGCTATCTTTTTCCAGCTACAGCAGCGGCGGCGAAGATGGTTACGTCCGTATCCATTACTTCGACCCACAGTACTTCGAATTTGAGTTTGAGGCTGGTGGCGGATTGGAAGTTTTGTTTCAAGGTCCAGGAAGTGGTACCGAGCTCAACTTCAAGGAGTGGCAAAAGGCCTTTACCGATATGATGTAAGAAGCTGGATCTCCTGCCGGGCGTGGTGGCTCATGCCTGTAATCCCACCACTTTTTTTTTAAGGCAGGCGGATCACCTGAGGTCAGGAGTTTAAGACCAGCCTGACCAACATGGAGAAACCTCGTCTCT --amplicon_name EIF3I --guide_seq GAGTTTGAGGCTTAAGAAGC --name mNGplate19_sorted_A6_EIF3I-C --quantification_window_size 50
+
+[Execution log]:
+Computing quantification windows
+Estimating average read length...
+Merging paired sequences with Flash...
+Running FLASH command: flash "/hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R1_001.fastq.gz" "/hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R2_001.fastq.gz" --min-overlap 10 --max-overlap 100 --allow-outies -z -d CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C -o out >>CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/CRISPResso_RUNNING_LOG.txt 2>&1
+[FLASH] Starting FLASH v1.2.11
+[FLASH] Fast Length Adjustment of SHort reads
+[FLASH]  
+[FLASH] Input files:
+[FLASH]     /hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R1_001.fastq.gz
+[FLASH]     /hpc/projects/data.science/duo.peng/DeepGenotype/DeepGenotype/test_MiSeq/fastq/mNGplate19_sorted_A6_EIF3I-C_S94_R2_001.fastq.gz
+[FLASH]  
+[FLASH] Output files:
+[FLASH]     CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/out.extendedFrags.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/out.notCombined_1.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/out.notCombined_2.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/out.hist
+[FLASH]     CRISPResso_on_mNGplate19_sorted_A6_EIF3I-C/out.histogram
+[FLASH]  
+[FLASH] Parameters:
+[FLASH]     Min overlap:           10
+[FLASH]     Max overlap:           100
+[FLASH]     Max mismatch density:  0.250000
+[FLASH]     Allow "outie" pairs:   true
+[FLASH]     Cap mismatch quals:    false
+[FLASH]     Combiner threads:      128
+[FLASH]     Input format:          FASTQ, phred_offset=33
+[FLASH]     Output format:         FASTQ, phred_offset=33, gzip
+[FLASH]  
+[FLASH] Starting reader and writer threads
+[FLASH] Starting 128 combiner threads
+[FLASH] Processed 25000 read pairs
+[FLASH] Processed 50000 read pairs
+[FLASH] Processed 75000 read pairs
+[FLASH] Processed 81734 read pairs
+[FLASH]  
+[FLASH] Read combination statistics:
+[FLASH]     Total pairs:      81734
+[FLASH]     Combined pairs:   76749
+[FLASH]         Innie pairs:   74558 (97.15% of combined)
+[FLASH]         Outie pairs:   2191 (2.85% of combined)
+[FLASH]     Uncombined pairs: 4985
+[FLASH]     Percent combined: 93.90%
+[FLASH]  
+[FLASH] Writing histogram files.
+[FLASH] WARNING: An unexpectedly high proportion of combined pairs (93.59%)
+overlapped by more than 100 bp, the --max-overlap (-M) parameter.  Consider
+increasing this parameter.  (As-is, FLASH is penalizing overlaps longer than
+100 bp when considering them for possible combining!)
+[FLASH]  
+[FLASH] FLASH v1.2.11 complete!
+[FLASH] 2.189 seconds elapsed
+[FLASH] Finished with 1 warning (see above)
+Done!
+Aligning sequences...
+Processing reads; N_TOT_READS: 0 N_COMPUTED_ALN: 0 N_CACHED_ALN: 0 N_COMPUTED_NOTALN: 0 N_CACHED_NOTALN: 0
+Processing reads; N_TOT_READS: 10000 N_COMPUTED_ALN: 2180 N_CACHED_ALN: 7020 N_COMPUTED_NOTALN: 456 N_CACHED_NOTALN: 344
+Processing reads; N_TOT_READS: 20000 N_COMPUTED_ALN: 3861 N_CACHED_ALN: 14580 N_COMPUTED_NOTALN: 837 N_CACHED_NOTALN: 722
+Processing reads; N_TOT_READS: 30000 N_COMPUTED_ALN: 5303 N_CACHED_ALN: 22348 N_COMPUTED_NOTALN: 1214 N_CACHED_NOTALN: 1135
+Processing reads; N_TOT_READS: 40000 N_COMPUTED_ALN: 6653 N_CACHED_ALN: 30220 N_COMPUTED_NOTALN: 1577 N_CACHED_NOTALN: 1550
+Processing reads; N_TOT_READS: 50000 N_COMPUTED_ALN: 8004 N_CACHED_ALN: 38127 N_COMPUTED_NOTALN: 1956 N_CACHED_NOTALN: 1913
+Processing reads; N_TOT_READS: 60000 N_COMPUTED_ALN: 9276 N_CACHED_ALN: 46065 N_COMPUTED_NOTALN: 2315 N_CACHED_NOTALN: 2344
+Processing reads; N_TOT_READS: 70000 N_COMPUTED_ALN: 10584 N_CACHED_ALN: 53966 N_COMPUTED_NOTALN: 2695 N_CACHED_NOTALN: 2755
+Finished reads; N_TOT_READS: 76749 N_COMPUTED_ALN: 11311 N_CACHED_ALN: 59463 N_COMPUTED_NOTALN: 2923 N_CACHED_NOTALN: 3052
+Done!
+Quantifying indels/substitutions...
+Done!
+Calculating allele frequencies...
+Done!
+Saving processed data...
+Making Plots...
+Plotting read bar plot
+Plotting read class pie chart and bar plot
+Begin processing plots for amplicon EIF3I
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA GAGTTTGAGGCTTAAGAAGC for EIF3I
+Plotting indel size distribution for EIF3I
+Plotting frequency deletions/insertions for EIF3I
+Plotting amplication modifications for EIF3I
+Plotting modification frequency for EIF3I
+Plotting quantification window locations for EIF3I
+Plotting position dependent indel for EIF3I
+Plotting global modifications with respect to reference
+Plotting HDR nucleotide quilt
+Plotting allele distribution around cut for EIF3I
+Done!
+Begin processing plots for amplicon HDR
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA GAGTTTGAGGCTTAAGAAGC for HDR
+Plotting indel size distribution for HDR
+Plotting frequency deletions/insertions for HDR
+Plotting amplication modifications for HDR
+Plotting modification frequency for HDR
+Plotting quantification window locations for HDR
+Plotting position dependent indel for HDR
+Plotting global modifications with respect to reference
+Plotting allele distribution around cut for HDR
+Done!
+Done!
+Removing Intermediate files...
+Analysis Complete!
