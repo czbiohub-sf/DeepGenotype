@@ -51,22 +51,28 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 &nbsp;
 ## Installation
 
-## To create an environment and install dependencies:
+create a conda environment and activate it
 ```
 conda create -n DeepGenotype python=3.9
 conda activate DeepGenotype
+```
+install CRISPResso2
+```
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
 conda install CRISPResso2==2.2.14
-pip install biopython==1.78 pandas requests
-git clone https://github.com/czbiohub-sf/DeepGenotype
 ```
-verify CRISPResso2
+verify CRISPResso2 installation
 ```
 CRISPResso -h
 ```
-verify DeepGenotype
+install Python packages and DeepGenotype
+```
+pip install biopython==1.78 pandas requests
+git clone https://github.com/czbiohub-sf/DeepGenotype
+```
+verify DeepGenotype installation
 ```
 cd DeepGenotype
 python DeepGenotype.py
