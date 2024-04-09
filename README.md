@@ -49,6 +49,30 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
   - read-to-genotype assignments information
 
 &nbsp;
+## Installation
+
+## To create an environment and install dependencies:
+```
+conda create -n DeepGenotype python=3.9
+conda activate DeepGenotype
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda install CRISPResso2==2.2.14
+pip install biopython==1.78 pandas requests
+git clone https://github.com/czbiohub-sf/DeepGenotype
+```
+verify CRISPResso2
+```
+CRISPResso -h
+```
+verify DeepGenotype
+```
+cd DeepGenotype
+python DeepGenotype.py
+```
+
+&nbsp;
 ## Usage:
 ```
 python DeepGenotype.py --path2csv example_csv/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
@@ -149,40 +173,7 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 ...
 ```
 
-&nbsp;
-## Dependencies
-- python >= 3.7
 
-#### python packages  
-- biopython  (v1.78)  
-- pandas
-- requests
-
-#### python-based standalone software  
-- CRISPResso2 (v2.2.6) 
-&nbsp;&nbsp;&nbsp;For installation, follow instructions here https://github.com/pinellolab/CRISPResso2  
-&nbsp;&nbsp;&nbsp;It is recommended to create a conda environment to install CRISPREesso2 and other dependencies listed below 
-
-## To create an environment and install dependencies:
-```
-conda create -n DeepGenotype python=3.9
-conda activate DeepGenotype
-conda config --add channels defaults
-conda config --add channels bioconda
-conda config --add channels conda-forge
-conda install CRISPResso2==2.2.6
-pip install biopython==1.78 pandas requests
-git clone https://github.com/czbiohub-sf/DeepGenotype
-```
-verify CRISPResso2
-```
-CRISPResso -h
-```
-verify DeepGenotype
-```
-cd DeepGenotype
-python DeepGenotype.py
-```
 
 &nbsp;
 ## Developed by:
