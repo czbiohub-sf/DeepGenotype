@@ -20,9 +20,9 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
   - gRNA_sequence
   - edit_type (e.g. INS or SNP, note that deletions, DEL is not supported at this point)  
       &nbsp;&nbsp;&nbsp; INS = insertion, SNP = single nucleotide polymorphism, DEL = deletion  
-  - SNP_payload_cluster (e.g. 1 or 2 ...) (TODO: check if this setting is really necessary)  
+  - SNP_payload_cluster (e.g. 1 or 2 ...)
       &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
-      &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload**  
+      &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload** (TODO: clarify how the non-payload SNPs will affect the perfect HDR, and wt-protein rates)  
       &nbsp;&nbsp;&nbsp; Clusters are ordered from left to right in respect to the amplicon sequence.  
       &nbsp;&nbsp;&nbsp; For examplp: there are 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
       
