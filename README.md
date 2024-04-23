@@ -89,7 +89,7 @@ Please make sure the following two python scripts are in the same directory as D
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
 
 
-#### Optional aruments
+#### Optional arguments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
@@ -178,6 +178,40 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 [DeepGenotype.py][INFO]  ...done
 ...
 ```
+&nbsp;
+## Helper commands
+
+### Paginated view of fastq files
+compressed
+```
+gzip -c example.fastq.gz | less
+```
+uncompressed
+```
+less example.fastq
+```
+
+### Count the number of lines in a fastq file (divide by 4 you'll get the read count)
+compressed
+```
+gzip -c example.fastq.gz | wc -l
+```
+uncompressed
+```
+cat example.fastq | wc -l
+```
+
+### Count the number of line with a specific sequence in a fastq file
+compressed
+```
+gzip -c example.fastq.gz | grep -c 'your-sequence-here'
+```
+uncompressed
+```
+cat example.fastq | grep -c 'your-sequence-here'
+```
+for matching sequences at the beginning of the line, add a `^`:  `'^your-sequence-here'`  
+for matching sequences at the end of the line, add a `$`:  `'your-sequence-here$'`
 
 
 
