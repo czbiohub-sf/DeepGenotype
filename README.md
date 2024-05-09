@@ -215,8 +215,5 @@ for matching sequences at the end of the line, add a `$`:  `'your-sequence-here$
 
 
 
-&nbsp;
-## Developed by:
-Duo Peng&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Development)  
-Abigail Glascock &nbsp; &nbsp;                                         (Testing)  
-Joan Wong &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;      (Supervision)  
+# License
+This project is licensed under the BSD 3-Clause license - see the LICENSE file for details.
