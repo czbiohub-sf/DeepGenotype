@@ -12,7 +12,11 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 ## Inputs
 - Fastq files (plain or gzipped)
 - A csv file (examples provided) containing columns with the exact names:
-  - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)
+  - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)  
+    ***Important note***: For paired-end sequencing, only one Sample_ID is needed. We automatically find both R1 and R2 fastq files.   
+     Check fastq file suffix parameters `--fastq_R1_suffix` and `--fastq_R1_suffix` in the `Usage` section.  
+    Also check if you need `Fastq_extra_suffix` (below)
+
   - gene_name (e.g. DDX6)  
   - ENST_id (e.g. ENST00000620157)  
   - WT_amplicon_sequence
@@ -28,7 +32,7 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
       
   - Fastq_extra_suffix (Optional) 
      
-      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq files
+      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq file names.
  
       &nbsp;&nbsp;&nbsp;**Please note that the common (as opposed to extra) suffixes are the following values by default:**  
       &nbsp;&nbsp;&nbsp;"_R1_001.fastq.gz"    
@@ -94,6 +98,7 @@ Please make sure the following two python scripts are in the same directory as D
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
 --quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
+
 
 &nbsp;
 ## To run pacbio test dataset
