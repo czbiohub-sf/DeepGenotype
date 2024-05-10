@@ -196,7 +196,12 @@ def main():
             if edit_type == "INS":
                 writehandle.write(f"Sample_ID,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)\n") #write header
             elif edit_type == "SNP":
-                writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
+                #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
+                writehandle.write("Sample_ID","unedited","edited","edited","edited","edited","edited","edited","edited\n")
+                writehandle.write("Sample_ID","N/A","perfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit\n")
+                writehandle.write("Sample_ID","N/A","a.a change","a.a change","a.a change","a.a change","a.a change","a.a change","no a.a. change\n")
+                writehandle.write("Sample_ID","N/A","intended a.a. change only","intended a.a. change(s) + synomous change(s)","intended a.a change + unintended a.a. change(s)","unintended a.a. change(s)","unintended a.a. change(s)","unintended a.a. change(s)","synomous changes only and no intended a.a change\n")
+                writehandle.write("Sample_ID","wt_allele","HDR_perfect","wtProt_hdrSNP","mutProt_hdrSNP","wtProt_mutSNP","mutProt_wtSNP","mutProt_mutSNP","wtProt_wtSNP\n")
 
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
