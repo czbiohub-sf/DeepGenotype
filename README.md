@@ -73,7 +73,7 @@ CRISPResso -h
 ```
 install Python packages and DeepGenotype
 ```
-pip install biopython==1.78 pandas requests
+pip install biopython==1.78 pandas requests openpyxl==3.1.2
 git clone https://github.com/czbiohub-sf/DeepGenotype
 ```
 verify DeepGenotype installation
@@ -101,7 +101,7 @@ Please make sure the following two python scripts are in the same directory as D
 
 
 &nbsp;
-## To run pacbio test dataset
+## To run pacbio test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -115,14 +115,7 @@ python DeepGenotype.py \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
 ```
-&nbsp;
-## To run pacbio test dataset *in the background* (and thus safe to close the terminal)
-load conda, and activate the DeepGenotype conda environment
-```
-module load anaconda
-conda activate DeepGenotype
-```
-run DeepGenotype in the background
+***NOTE***: to run DeepGenotype in the background (and thus safe to close the terminal), preprend `nohup` and append `&` to the command:
 ```
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
@@ -153,18 +146,18 @@ The completed `nohup.out` should look like this
 ```
 
 &nbsp;
-## To run MiSeq test dataset *in the background* (and thus safe to close the terminal)
+## To run MiSeq test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
 conda activate DeepGenotype
 ```
-run DeepGenotype in the background
+run DeepGenotype in the background (and thus safe to close the terminal)
 ```
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_INS.csv \
---path2workDir test_MiSeq \
---path2fastqDir test_MiSeq/fastq &
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq &
 ```
 To check the terminal output (while running in the background
 ```
@@ -183,6 +176,42 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 [DeepGenotype.py][INFO]  ...done
 ...
 ```
+
+&nbsp;
+## To run MiSeq test dataset (SNP mode)
+load conda, and activate the DeepGenotype conda environment
+```
+module load anaconda
+conda activate DeepGenotype
+```
+run DeepGenotype in the background (and thus safe to close the terminal)
+```
+nohup python DeepGenotype.py \
+--path2csv example_csv/test_MiSeq_SNP.csv \
+--path2workDir test_MiSeq_SNP \
+--path2fastqDir test_MiSeq_SNP/fastq &
+```
+To check the terminal output (while running in the background
+```
+cat nohup.out
+```
+The completed `nohup.out` should look like this (only first 9 lines shown)
+```
+[DeepGenotype.py][INFO]  Genome edit type: INS
+[DeepGenotype.py][INFO]  Processing sample: mNGplate19_sorted_A2_DDX6-C
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+[DeepGenotype.py][INFO]  Processing sample: mNGplate19_sorted_A3_LSM14A-N
+[DeepGenotype.py][INFO]  ...running CRISPResso
+[DeepGenotype.py][INFO]  ...parsing allele frequency table and re-calculating allele frequencies
+[DeepGenotype.py][INFO]  ...done
+...
+```
+
+
+
+
 &nbsp;
 ## Helper commands
 

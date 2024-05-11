@@ -888,7 +888,7 @@ def main():
                             f"{float(genotype_freq['mutProt_noPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutPL']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_mutPL']):.4f}%\n")
+                            f"{float(genotype_freq['wtProt_mutPL']):.4f}%,\n")
 
     except Exception  as e:
         print("Unexpected error:", str(sys.exc_info()))

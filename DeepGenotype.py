@@ -194,10 +194,18 @@ def main():
         out_basename = os.path.basename(path2csv).strip(r".csv")
         with open(os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
             if edit_type == "INS":
-                writehandle.write(f"Sample_ID,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)\n") #write header
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,\n")
+                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)\n") #write header
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,\n")
             elif edit_type == "SNP":
-                writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
-
+                #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,\n")
+                writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,\n")
+                writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,\n")
+                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,(Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
                 fq_ex_suffix = ""
@@ -319,6 +327,12 @@ def main():
                 moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
                 shutil.move(old_zip_path, moved_zip_path)
 
+        # convert csv to xlsx
+        command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "--mode", f"{edit_type}"]
+        p = Popen(command3, universal_newlines=True)
+        p.communicate()  # wait for the commands to process
+        
+        # all done
         log.info(f"Done processing all samples in the csv file")
 
         os.chdir(wd)  # change to the saved working dir

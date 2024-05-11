@@ -1,0 +1,111 @@
+INFO  @ Sat, 11 May 2024 00:19:40:
+	 Creating Folder CRISPResso_on_mNGplate19_sorted_B8_CASP3-C 
+
+INFO  @ Sat, 11 May 2024 00:19:40:
+	 Computing quantification windows 
+
+INFO  @ Sat, 11 May 2024 00:19:40:
+	 Estimating average read length... 
+
+INFO  @ Sat, 11 May 2024 00:19:41:
+	 Merging paired sequences with Flash... 
+
+INFO  @ Sat, 11 May 2024 00:19:41:
+	 Running FLASH command: flash "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B8_CASP3-C_S107_R1_001.fastq.gz" "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B8_CASP3-C_S107_R2_001.fastq.gz" --min-overlap 10 --max-overlap 100 --allow-outies -z -d CRISPResso_on_mNGplate19_sorted_B8_CASP3-C -o out >>CRISPResso_on_mNGplate19_sorted_B8_CASP3-C/CRISPResso_RUNNING_LOG.txt 2>&1 
+
+INFO  @ Sat, 11 May 2024 00:19:42:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:19:42:
+	 Aligning sequences... 
+
+INFO  @ Sat, 11 May 2024 00:19:42:
+	 Processing reads; N_TOT_READS: 0 N_COMPUTED_ALN: 0 N_CACHED_ALN: 0 N_COMPUTED_NOTALN: 0 N_CACHED_NOTALN: 0 
+
+INFO  @ Sat, 11 May 2024 00:19:46:
+	 Processing reads; N_TOT_READS: 10000 N_COMPUTED_ALN: 1546 N_CACHED_ALN: 8299 N_COMPUTED_NOTALN: 155 N_CACHED_NOTALN: 0 
+
+INFO  @ Sat, 11 May 2024 00:19:49:
+	 Processing reads; N_TOT_READS: 20000 N_COMPUTED_ALN: 2678 N_CACHED_ALN: 16995 N_COMPUTED_NOTALN: 327 N_CACHED_NOTALN: 0 
+
+INFO  @ Sat, 11 May 2024 00:19:51:
+	 Processing reads; N_TOT_READS: 30000 N_COMPUTED_ALN: 3706 N_CACHED_ALN: 25811 N_COMPUTED_NOTALN: 483 N_CACHED_NOTALN: 0 
+
+INFO  @ Sat, 11 May 2024 00:19:54:
+	 Processing reads; N_TOT_READS: 40000 N_COMPUTED_ALN: 4569 N_CACHED_ALN: 34780 N_COMPUTED_NOTALN: 650 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:19:56:
+	 Processing reads; N_TOT_READS: 50000 N_COMPUTED_ALN: 5359 N_CACHED_ALN: 43840 N_COMPUTED_NOTALN: 800 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:19:59:
+	 Processing reads; N_TOT_READS: 60000 N_COMPUTED_ALN: 6095 N_CACHED_ALN: 52921 N_COMPUTED_NOTALN: 983 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:20:01:
+	 Processing reads; N_TOT_READS: 70000 N_COMPUTED_ALN: 6867 N_CACHED_ALN: 61952 N_COMPUTED_NOTALN: 1180 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:20:04:
+	 Processing reads; N_TOT_READS: 80000 N_COMPUTED_ALN: 7647 N_CACHED_ALN: 70978 N_COMPUTED_NOTALN: 1374 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:20:06:
+	 Finished reads; N_TOT_READS: 88334 N_COMPUTED_ALN: 8201 N_CACHED_ALN: 78624 N_COMPUTED_NOTALN: 1508 N_CACHED_NOTALN: 1 
+
+INFO  @ Sat, 11 May 2024 00:20:06:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:06:
+	 Quantifying indels/substitutions... 
+
+INFO  @ Sat, 11 May 2024 00:20:08:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:08:
+	 Calculating allele frequencies... 
+
+INFO  @ Sat, 11 May 2024 00:20:08:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:08:
+	 Saving processed data... 
+
+INFO  @ Sat, 11 May 2024 00:20:08:
+	 Making Plots... 
+
+INFO  @ Sat, 11 May 2024 00:20:09:
+	 Begin processing plots for amplicon CASP3 
+
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3578: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3965: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  hdr_nucleotide_percentage_summary_df = pd.DataFrame(nuc_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3977: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  hdr_modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+INFO  @ Sat, 11 May 2024 00:20:15:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:15:
+	 Begin processing plots for amplicon HDR 
+
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoCORE.py:3578: FutureWarning: errors='ignore' is deprecated and will raise in a future version. Use to_numeric without passing `errors` and catch exceptions explicitly instead
+  modification_percentage_summary_df = pd.DataFrame(mod_pcts, columns=colnames).apply(pd.to_numeric, errors='ignore')
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+/home/duopeng/miniforge3/envs/DeepGenotype/lib/python3.9/site-packages/CRISPResso2/CRISPRessoPlot.py:188: FutureWarning: Series.__getitem__ treating keys as positions is deprecated. In a future version, integer keys will always be treated as labels (consistent with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+  ins_pct = float(mod_pct_df_indexed.loc[sampleName,'Insertions_Left'][pos_ind-2])
+INFO  @ Sat, 11 May 2024 00:20:21:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:21:
+	 Done! 
+
+INFO  @ Sat, 11 May 2024 00:20:21:
+	 Removing Intermediate files... 
+
+INFO  @ Sat, 11 May 2024 00:20:21:
+	 Analysis Complete! 
+
