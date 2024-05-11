@@ -1,3 +1,0 @@
-Amplicon	Unmodified%	Modified%	Reads_in_input	Reads_aligned_all_amplicons	Reads_aligned	Unmodified	Modified	Discarded	Insertions	Deletions	Substitutions	Only Insertions	Only Deletions	Only Substitutions	Insertions and Deletions	Insertions and Substitutions	Deletions and Substitutions	Insertions Deletions and Substitutions
-NFKBIA	0.01555694	99.98444306	66421	65260	64280	10	64270	0	1693	38204	64183	1	85	24387	1	1678	38105	13
-HDR	1.12244898	98.87755102	66421	65260	980	11	969	0	161	945	241	15	631	4	82	5	173	59
