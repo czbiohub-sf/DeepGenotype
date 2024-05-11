@@ -1,5 +1,0 @@
-﻿"Sample_ID","unedited","edited","edited","edited","edited","edited","edited","edited"
-"Sample_ID","-","perfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit","imperfect edit"
-"Sample_ID","-","a.a change","a.a change","a.a change","a.a change","a.a change","a.a change","no a.a. change"
-"Sample_ID","-","intended a.a. change only","intended a.a. change(s) + synomous change(s)","intended a.a change + unintended a.a. change(s)","unintended a.a. change(s)","unintended a.a. change(s)","unintended a.a. change(s)","synomous changes only and no intended a.a change"
-"Sample_ID","wt_allele","HDR_perfect","wtProt_hdrSNP","mutProt_hdrSNP","wtProt_mutSNP","mutProt_wtSNP","mutProt_mutSNP","wtProt_wtSNP"

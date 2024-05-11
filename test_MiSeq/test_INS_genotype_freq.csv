@@ -1,4 +1,0 @@
-Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,
-Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,
-Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)
-Sample_ID,-,-,-,-,-,-,-,-,
