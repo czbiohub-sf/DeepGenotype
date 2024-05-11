@@ -950,15 +950,26 @@ def main():
 
         #write genotype to file
         with open(os.path.join(zip_dir,'genotype_frequency.csv'),'w') as writehandle:
-            writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP\n")
+            #THIS IS THE OLD OUTPUTR\
+            #writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP\n")
+            # writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
+            #                 f"{float(genotype_freq['HDR_perfect']):.4f}%,"
+            #                 f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,"  
+            #                 f"{float(genotype_freq['wtProt_hdrSNP']):.4f}%,"
+            #                 f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"               
+            #                 f"{float(genotype_freq['mutProt_hdrSNP']):.4f}%,"
+            #                 f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
+            #                 f"{float(genotype_freq['wtProt_mutSNP']):.4f}%\n")
+            writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP\n")
             writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
                             f"{float(genotype_freq['HDR_perfect']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,"  
                             f"{float(genotype_freq['wtProt_hdrSNP']):.4f}%,"
-                            f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"               
                             f"{float(genotype_freq['mutProt_hdrSNP']):.4f}%,"
+                            f"{float(genotype_freq['wtProt_mutSNP']):.4f}%,"
+                            f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_mutSNP']):.4f}%\n")
+                            f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,\n")  
+                            
 
     except Exception  as e:
         print("Unexpected error:", str(sys.exc_info()))

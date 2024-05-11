@@ -1,0 +1,103 @@
+CRISPResso version 2.2.14
+[Command used]:
+/home/duopeng/miniforge3/envs/DeepGenotype/bin/CRISPResso --fastq_r1 /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R1_001.fastq.gz --fastq_r2 /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R2_001.fastq.gz --amplicon_seq AAAAAGGATTATATTTGGTCTTACTGGTATAATACAGTTTATTCCTGCATGAATTCCATGGTGATAGAATTTTTAAAGTTCATTCTAGTGTTACAGTTTTGTTTTGTTTTGTTTTAATACACAGCTTCAGAATGGCAGAAGATGATCCATATTTGGGAAGGCCTGAACAAGTAAGTGTCATAATCTCACTGATAACTTTATTTAAATATATTCATATTTCAAAAATATGCAAAGGCAACATTAGTAAGTT --expected_hdr_amplicon_seq AAAAAGGATTATATTTGGTCTTACTGGTATAATACAGTTTATTCCTGCATGAATTCCATGGTGATAGAATTTTTAAAGTTCATTCTAGTGTTACAGTTTTGTTTTGTTTTGTTTTAATACACAGCTTCAGAATGACCGAGCTCAACTTCAAGGAGTGGCAAAAGGCCTTTACCGATATGATGGGTGGCGGATTGGAAGTTTTGTTTCAAGGTCCAGGAAGTGGTGCAGAAGATGATCCATATCTTGGAAGGCCTGAACAAGTAAGTGTCATAATCTCACTGATAACTTTATTTAAATATATTCATATTTCAAAAATATGCAAAGGCAACATTAGTAAGTT --amplicon_name NFKB1 --guide_seq GGCAGAAGATGATCCATATT --name mNGplate19_sorted_B2_NFKB1-N --quantification_window_size 50
+
+[Execution log]:
+Computing quantification windows
+Estimating average read length...
+Merging paired sequences with Flash...
+Running FLASH command: flash "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R1_001.fastq.gz" "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R2_001.fastq.gz" --min-overlap 10 --max-overlap 100 --allow-outies -z -d CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N -o out >>CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/CRISPResso_RUNNING_LOG.txt 2>&1
+[FLASH] Starting FLASH v1.2.11
+[FLASH] Fast Length Adjustment of SHort reads
+[FLASH]  
+[FLASH] Input files:
+[FLASH]     /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R1_001.fastq.gz
+[FLASH]     /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B2_NFKB1-N_S101_R2_001.fastq.gz
+[FLASH]  
+[FLASH] Output files:
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/out.extendedFrags.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/out.notCombined_1.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/out.notCombined_2.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/out.hist
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B2_NFKB1-N/out.histogram
+[FLASH]  
+[FLASH] Parameters:
+[FLASH]     Min overlap:           10
+[FLASH]     Max overlap:           100
+[FLASH]     Max mismatch density:  0.250000
+[FLASH]     Allow "outie" pairs:   true
+[FLASH]     Cap mismatch quals:    false
+[FLASH]     Combiner threads:      16
+[FLASH]     Input format:          FASTQ, phred_offset=33
+[FLASH]     Output format:         FASTQ, phred_offset=33, gzip
+[FLASH]  
+[FLASH] Starting reader and writer threads
+[FLASH] Starting 16 combiner threads
+[FLASH] Processed 25000 read pairs
+[FLASH] Processed 50000 read pairs
+[FLASH] Processed 68638 read pairs
+[FLASH]  
+[FLASH] Read combination statistics:
+[FLASH]     Total pairs:      68638
+[FLASH]     Combined pairs:   68236
+[FLASH]         Innie pairs:   59619 (87.37% of combined)
+[FLASH]         Outie pairs:   8617 (12.63% of combined)
+[FLASH]     Uncombined pairs: 402
+[FLASH]     Percent combined: 99.41%
+[FLASH]  
+[FLASH] Writing histogram files.
+[FLASH] WARNING: An unexpectedly high proportion of combined pairs (97.38%)
+overlapped by more than 100 bp, the --max-overlap (-M) parameter.  Consider
+increasing this parameter.  (As-is, FLASH is penalizing overlaps longer than
+100 bp when considering them for possible combining!)
+[FLASH]  
+[FLASH] FLASH v1.2.11 complete!
+[FLASH] 0.931 seconds elapsed
+[FLASH] Finished with 1 warning (see above)
+Done!
+Aligning sequences...
+Processing reads; N_TOT_READS: 0 N_COMPUTED_ALN: 0 N_CACHED_ALN: 0 N_COMPUTED_NOTALN: 0 N_CACHED_NOTALN: 0
+Processing reads; N_TOT_READS: 10000 N_COMPUTED_ALN: 1654 N_CACHED_ALN: 8336 N_COMPUTED_NOTALN: 10 N_CACHED_NOTALN: 0
+Processing reads; N_TOT_READS: 20000 N_COMPUTED_ALN: 2970 N_CACHED_ALN: 17014 N_COMPUTED_NOTALN: 16 N_CACHED_NOTALN: 0
+Processing reads; N_TOT_READS: 30000 N_COMPUTED_ALN: 4121 N_CACHED_ALN: 25854 N_COMPUTED_NOTALN: 24 N_CACHED_NOTALN: 1
+Processing reads; N_TOT_READS: 40000 N_COMPUTED_ALN: 5125 N_CACHED_ALN: 34836 N_COMPUTED_NOTALN: 35 N_CACHED_NOTALN: 4
+Processing reads; N_TOT_READS: 50000 N_COMPUTED_ALN: 6140 N_CACHED_ALN: 43811 N_COMPUTED_NOTALN: 44 N_CACHED_NOTALN: 5
+Processing reads; N_TOT_READS: 60000 N_COMPUTED_ALN: 7061 N_CACHED_ALN: 52882 N_COMPUTED_NOTALN: 50 N_CACHED_NOTALN: 7
+Finished reads; N_TOT_READS: 68236 N_COMPUTED_ALN: 7773 N_CACHED_ALN: 60397 N_COMPUTED_NOTALN: 56 N_CACHED_NOTALN: 10
+Done!
+Quantifying indels/substitutions...
+Done!
+Calculating allele frequencies...
+Done!
+Saving processed data...
+Making Plots...
+Plotting read bar plot
+Plotting read class pie chart and bar plot
+Begin processing plots for amplicon NFKB1
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA GGCAGAAGATGATCCATATT for NFKB1
+Plotting indel size distribution for NFKB1
+Plotting frequency deletions/insertions for NFKB1
+Plotting amplication modifications for NFKB1
+Plotting modification frequency for NFKB1
+Plotting quantification window locations for NFKB1
+Plotting position dependent indel for NFKB1
+Plotting global modifications with respect to reference
+Plotting HDR nucleotide quilt
+Plotting allele distribution around cut for NFKB1
+Done!
+Begin processing plots for amplicon HDR
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA GGCAGAAGATGATCCATATT for HDR
+Plotting indel size distribution for HDR
+Plotting frequency deletions/insertions for HDR
+Plotting amplication modifications for HDR
+Plotting modification frequency for HDR
+Plotting quantification window locations for HDR
+Plotting position dependent indel for HDR
+Plotting global modifications with respect to reference
+Plotting allele distribution around cut for HDR
+Done!
+Done!
+Removing Intermediate files...
+Analysis Complete!

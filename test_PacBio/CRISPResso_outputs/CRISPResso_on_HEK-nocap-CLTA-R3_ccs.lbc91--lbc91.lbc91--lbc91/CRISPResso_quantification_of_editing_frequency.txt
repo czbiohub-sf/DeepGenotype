@@ -1,0 +1,3 @@
+Amplicon	Unmodified%	Modified%	Reads_in_input	Reads_aligned_all_amplicons	Reads_aligned	Unmodified	Modified	Discarded	Insertions	Deletions	Substitutions	Only Insertions	Only Deletions	Only Substitutions	Insertions and Deletions	Insertions and Substitutions	Deletions and Substitutions	Insertions Deletions and Substitutions
+CLTA	0.27886224	99.72113776	10194	8748	7172	20	7152	0	1805	5870	1222	813	4769	39	348	430	539	214
+HDR	0.0	100.0	10194	8748	1576	0	1576	0	768	367	1574	1	1	733	0	475	74	292

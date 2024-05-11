@@ -1,0 +1,102 @@
+CRISPResso version 2.2.14
+[Command used]:
+/home/duopeng/miniforge3/envs/DeepGenotype/bin/CRISPResso --fastq_r1 /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R1_001.fastq.gz --fastq_r2 /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R2_001.fastq.gz --amplicon_seq GGCCGACCGCTCCCTGCGCAGCGCCCGTCGGCGCAGGAAGGGGCGGAAAGCGGCGCGGGGGCTCCCGCCACAGCCGCGGCGGCCCCGGCGATGCCACCCCGCGGGGTCAGAGGGCGACCTCACCGTCCATGGCCGGGGTCCCGGGGGCGGGGCCGGGGTCGCAGCTGGGCCCGCGGCGTGCACTACAGACGAGCCATTCGCCAGAGGCGGAAATGCGCCGCGCGGCCCGCCGTCGCGTCACTGCCCGGAATCC --expected_hdr_amplicon_seq GGCCGACCGCTCCCTGCGCAGCGCCCGTCGGCGCAGGAAGGGGCGGAAAGCGGCGCGGGGGCTCCCGCCACAGCCGCGGCGGCCCCGGCGATGCCACCCCGCGGGGTCAGAGGGCGACCTCACCGTCACCACTTCCTGGACCTTGAAACAAAACTTCCAATCCGCCACCCATCATATCGGTAAAGGCCTTTTGCCACTCCTTGAAGTTGAGCTCGGTCATGGCCGGGGTCCCGGGGGCGGGGCCGGGGTCGCAGCTGGGCCCGCGGCGTGCACTACAGACGAGCCATTCGCCAGAGGCGGAAATGCGCCGCGCGGCCCGCCGTCGCGTCACTGCCCGGAATCC --amplicon_name RELA --guide_seq CCCGGGACCCCGGCCATGGA --name mNGplate19_sorted_B1_RELA-N --quantification_window_size 50
+
+[Execution log]:
+Computing quantification windows
+Estimating average read length...
+Merging paired sequences with Flash...
+Running FLASH command: flash "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R1_001.fastq.gz" "/mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R2_001.fastq.gz" --min-overlap 10 --max-overlap 100 --allow-outies -z -d CRISPResso_on_mNGplate19_sorted_B1_RELA-N -o out >>CRISPResso_on_mNGplate19_sorted_B1_RELA-N/CRISPResso_RUNNING_LOG.txt 2>&1
+[FLASH] Starting FLASH v1.2.11
+[FLASH] Fast Length Adjustment of SHort reads
+[FLASH]  
+[FLASH] Input files:
+[FLASH]     /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R1_001.fastq.gz
+[FLASH]     /mnt/c/Users/duo.peng/Documents/DeepGenotype/test_MiSeq_INS/fastq/mNGplate19_sorted_B1_RELA-N_S100_R2_001.fastq.gz
+[FLASH]  
+[FLASH] Output files:
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B1_RELA-N/out.extendedFrags.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B1_RELA-N/out.notCombined_1.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B1_RELA-N/out.notCombined_2.fastq.gz
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B1_RELA-N/out.hist
+[FLASH]     CRISPResso_on_mNGplate19_sorted_B1_RELA-N/out.histogram
+[FLASH]  
+[FLASH] Parameters:
+[FLASH]     Min overlap:           10
+[FLASH]     Max overlap:           100
+[FLASH]     Max mismatch density:  0.250000
+[FLASH]     Allow "outie" pairs:   true
+[FLASH]     Cap mismatch quals:    false
+[FLASH]     Combiner threads:      16
+[FLASH]     Input format:          FASTQ, phred_offset=33
+[FLASH]     Output format:         FASTQ, phred_offset=33, gzip
+[FLASH]  
+[FLASH] Starting reader and writer threads
+[FLASH] Starting 16 combiner threads
+[FLASH] Processed 25000 read pairs
+[FLASH] Processed 50000 read pairs
+[FLASH] Processed 75000 read pairs
+[FLASH] Processed 80227 read pairs
+[FLASH]  
+[FLASH] Read combination statistics:
+[FLASH]     Total pairs:      80227
+[FLASH]     Combined pairs:   49534
+[FLASH]         Innie pairs:   45181 (91.21% of combined)
+[FLASH]         Outie pairs:   4353 (8.79% of combined)
+[FLASH]     Uncombined pairs: 30693
+[FLASH]     Percent combined: 61.74%
+[FLASH]  
+[FLASH] Writing histogram files.
+[FLASH] WARNING: An unexpectedly high proportion of combined pairs (88.24%)
+overlapped by more than 100 bp, the --max-overlap (-M) parameter.  Consider
+increasing this parameter.  (As-is, FLASH is penalizing overlaps longer than
+100 bp when considering them for possible combining!)
+[FLASH]  
+[FLASH] FLASH v1.2.11 complete!
+[FLASH] 1.546 seconds elapsed
+[FLASH] Finished with 1 warning (see above)
+Done!
+Aligning sequences...
+Processing reads; N_TOT_READS: 0 N_COMPUTED_ALN: 0 N_CACHED_ALN: 0 N_COMPUTED_NOTALN: 0 N_CACHED_NOTALN: 0
+Processing reads; N_TOT_READS: 10000 N_COMPUTED_ALN: 2162 N_CACHED_ALN: 5041 N_COMPUTED_NOTALN: 1901 N_CACHED_NOTALN: 896
+Processing reads; N_TOT_READS: 20000 N_COMPUTED_ALN: 3887 N_CACHED_ALN: 10603 N_COMPUTED_NOTALN: 3586 N_CACHED_NOTALN: 1924
+Processing reads; N_TOT_READS: 30000 N_COMPUTED_ALN: 5381 N_CACHED_ALN: 16354 N_COMPUTED_NOTALN: 5161 N_CACHED_NOTALN: 3104
+Processing reads; N_TOT_READS: 40000 N_COMPUTED_ALN: 6808 N_CACHED_ALN: 22256 N_COMPUTED_NOTALN: 6714 N_CACHED_NOTALN: 4222
+Finished reads; N_TOT_READS: 49534 N_COMPUTED_ALN: 8056 N_CACHED_ALN: 27929 N_COMPUTED_NOTALN: 8176 N_CACHED_NOTALN: 5373
+Done!
+Quantifying indels/substitutions...
+Done!
+Calculating allele frequencies...
+Done!
+Saving processed data...
+Making Plots...
+Plotting read bar plot
+Plotting read class pie chart and bar plot
+Begin processing plots for amplicon RELA
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA CCCGGGACCCCGGCCATGGA for RELA
+Plotting indel size distribution for RELA
+Plotting frequency deletions/insertions for RELA
+Plotting amplication modifications for RELA
+Plotting modification frequency for RELA
+Plotting quantification window locations for RELA
+Plotting position dependent indel for RELA
+Plotting global modifications with respect to reference
+Plotting HDR nucleotide quilt
+Plotting allele distribution around cut for RELA
+Done!
+Begin processing plots for amplicon HDR
+Plotting nucleotide quilt across amplicon
+Plotting nucleotide distribuition around sgRNA CCCGGGACCCCGGCCATGGA for HDR
+Plotting indel size distribution for HDR
+Plotting frequency deletions/insertions for HDR
+Plotting amplication modifications for HDR
+Plotting modification frequency for HDR
+Plotting quantification window locations for HDR
+Plotting position dependent indel for HDR
+Plotting global modifications with respect to reference
+Plotting allele distribution around cut for HDR
+Done!
+Done!
+Removing Intermediate files...
+Analysis Complete!
