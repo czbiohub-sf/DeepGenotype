@@ -12,7 +12,10 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 ## Inputs
 There are *two* required input files:
 - Fastq files (can be gzipped or not)
-- A csv file (examples provided in `example_csv`) containing columns with the exact names:
+- A csv file (examples provided in `example_csv`), see below.
+
+### csv file columns
+The input csv should contain the following columns with the exact names
   - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)  
     ***Important note***: For paired-end sequencing, only one Sample_ID is needed. We automatically find both R1 and R2 fastq files.   
      Check fastq file suffix parameters `--fastq_R1_suffix` and `--fastq_R1_suffix` in the `Usage` section.  
