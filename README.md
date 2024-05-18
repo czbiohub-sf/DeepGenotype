@@ -150,7 +150,7 @@ The completed `nohup.out` should look like this
 ```
 
 &nbsp;
-## To run MiSeq test dataset (insertion mode)
+## Example 1: To run MiSeq test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -182,7 +182,7 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 ```
 
 &nbsp;
-## To run MiSeq test dataset (SNP mode)
+## Example 2: to run MiSeq test dataset (SNP mode)
 load conda, and activate the DeepGenotype conda environment
 ```
 module load anaconda
@@ -212,9 +212,6 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 [DeepGenotype.py][INFO]  ...done
 ...
 ```
-
-
-
 
 &nbsp;
 ## Helper commands
