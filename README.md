@@ -78,7 +78,7 @@ git clone https://github.com/czbiohub-sf/DeepGenotype
 ```
 verify DeepGenotype installation
 ```
-cd DeepGenotype
+cd DeepGenotype/DeepGenotype
 python DeepGenotype.py
 ```
 

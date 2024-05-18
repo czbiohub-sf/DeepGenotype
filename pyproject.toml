@@ -1,0 +1,108 @@
+[build-system]
+requires = [
+  "setuptools >= 42",
+  "wheel",
+  "setuptools_scm[toml]>=3.4"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name =  "DeepGenotype"
+version = "0.1.0"
+description = "Calculate the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.7, <4.0"
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10"
+]
+
+# package dependencies
+dependencies = [
+    "CRISPResso2==2.2.14",
+    "biopython==1.78",
+    "pandas",
+    "requests",
+    "openpyxl==3.1.2",
+]
+
+[project.optional-dependencies]
+# note that dev dependencies are only pinned to major versions
+dev = [
+    "black~=22.3",
+    "flake8~=5.0",
+    "isort~=5.10",
+    "pre-commit~=2.19",
+    "pylint~=2.14",
+    "pytest~=7.1",
+]
+
+build = [
+    "twine",
+    "build",
+]
+
+
+[project.urls]
+homepage = "https://github.com/czbiohub-sf/DeepGenotype"
+documentation = "https://github.com/czbiohub-sf/DeepGenotype"
+repository = "https://github.com/czbiohub-sf/DeepGenotype"
+
+
+# allow use of __file__ to load data files included in the package
+[tool.setuptools]
+zip-safe = false
+
+
+[tool.black]
+line-length = 95
+target-version = ['py38', 'py38', 'py39', 'py310']
+include = '\.pyi?$'
+skip-string-normalization = true
+exclude = '''
+(
+  /(
+      \.eggs
+    | \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | build
+    | dist
+    | notebooks
+    | ignore
+  )/
+  | some/specific/module.py
+)
+'''
+
+
+[tool.isort]
+profile = "black"
+line_length = 95
+lines_between_types = 1
+default_section = "THIRDPARTY"
+no_lines_before = ["STDLIB",]
+ensure_newline_before_comments = true
+
+
+[tool.pylint]
+# disable all conventions, refactors, warnings (C, R, W) and the following:
+# E0401: unable-to-import (since it is possible that no one environment has all required packages)
+# E1136: unsubscriptable-object (anecdotal false positives for numpy objects)
+disable = ["C", "R", "W", "unsubscriptable-object", "import-error"]
+msg-template = "{line},{column},{category},{symbol}:{msg}"
+reports = "n"
+
+
+[tool.pytest.ini_options]
+log_cli = false
