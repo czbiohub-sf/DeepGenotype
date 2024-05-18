@@ -60,29 +60,31 @@ The input csv should contain the following columns with the exact names
 ## Installation
 
 create a conda environment and activate it
-```
+```shell
 conda create -n DeepGenotype python=3.9
 conda activate DeepGenotype
 ```
 install CRISPResso2
-```
+```shell
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
 conda install CRISPResso2==2.2.14
 ```
 verify CRISPResso2 installation
-```
+```shell
 CRISPResso -h
 ```
-install Python packages and DeepGenotype
-```
-pip install biopython==1.78 pandas requests openpyxl==3.1.2
+clone DeepGenotype repo and install dependencies
+```shell
 git clone https://github.com/czbiohub-sf/DeepGenotype
+cd DeepGenotype
+pip install . # or pip install biopython==1.78 pandas requests openpyxl==3.1.2
+
 ```
 verify DeepGenotype installation
-```
-cd DeepGenotype/DeepGenotype
+```shell
+cd DeepGenotype # must be in the DeepGenotype/DeepGenotype directory
 python DeepGenotype.py
 ```
 
@@ -107,12 +109,13 @@ Please make sure the following two python scripts are in the same directory as D
 &nbsp;
 ## To run pacbio test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
-```
+```shell
 module load anaconda
 conda activate DeepGenotype
 ```
 run DeepGenotype
-```
+```shell
+# in DeepGenotype/DeepGenotype directory
 python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
 --path2workDir test_PacBio \
@@ -120,7 +123,7 @@ python DeepGenotype.py \
 --single_fastq_suffix .fastq
 ```
 ***NOTE***: to run DeepGenotype in the background (and thus safe to close the terminal), preprend `nohup` and append `&` to the command:
-```
+```shell
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
 --path2workDir test_PacBio \
@@ -128,7 +131,7 @@ nohup python DeepGenotype.py \
 --single_fastq_suffix .fastq &
 ```
 To check the terminal output (while running in the background
-```
+```shell
 cat nohup.out
 ```
 The completed `nohup.out` should look like this
@@ -152,19 +155,19 @@ The completed `nohup.out` should look like this
 &nbsp;
 ## Example 1: To run MiSeq test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
-```
+```shell
 module load anaconda
 conda activate DeepGenotype
 ```
 run DeepGenotype in the background (and thus safe to close the terminal)
-```
+```shell
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_INS.csv \
 --path2workDir test_MiSeq_INS \
 --path2fastqDir test_MiSeq_INS/fastq &
 ```
 To check the terminal output (while running in the background
-```
+```shell
 cat nohup.out
 ```
 The completed `nohup.out` should look like this (only first 9 lines shown)
@@ -184,19 +187,19 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 &nbsp;
 ## Example 2: to run MiSeq test dataset (SNP mode)
 load conda, and activate the DeepGenotype conda environment
-```
+```shell
 module load anaconda
 conda activate DeepGenotype
 ```
 run DeepGenotype in the background (and thus safe to close the terminal)
-```
+```shell
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_MiSeq_SNP.csv \
 --path2workDir test_MiSeq_SNP \
 --path2fastqDir test_MiSeq_SNP/fastq &
 ```
 To check the terminal output (while running in the background
-```
+```shell
 cat nohup.out
 ```
 The completed `nohup.out` should look like this (only first 9 lines shown)
@@ -218,31 +221,31 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 
 ### Paginated view of fastq files
 compressed
-```
+```shell
 gzip -c example.fastq.gz | less
 ```
 uncompressed
-```
+```shell
 less example.fastq
 ```
 
 ### Count the number of lines in a fastq file (divide by 4 you'll get the read count)
 compressed
-```
+```shell
 gzip -c example.fastq.gz | wc -l
 ```
 uncompressed
-```
+```shell
 cat example.fastq | wc -l
 ```
 
 ### Count the number of line with a specific sequence in a fastq file
 compressed
-```
+```shell
 gzip -c example.fastq.gz | grep -c 'your-sequence-here'
 ```
 uncompressed
-```
+```shell
 cat example.fastq | grep -c 'your-sequence-here'
 ```
 for matching sequences at the beginning of the line, add a `^`:  `'^your-sequence-here'`  
