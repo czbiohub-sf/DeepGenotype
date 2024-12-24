@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument('--wt_amp', default="", type=str, help='sequence of the wt amplicon')
     parser.add_argument('--HDR_amp', default="", type=str, help='sequence of the HDR amplicon')
     parser.add_argument('--ENST_ID', default="", type=str, help='ENST ID')
-    parser.add_argument('--SNP_block_of_interest', default=1, type=int, help='if the SNP is downstream of re-cut-preventing SNP, set this to 2')
+    parser.add_argument('--payload_block_index', default=1, type=int, help='if the SNP is downstream of re-cut-preventing SNP, set this to 2')
 
     config = parser.parse_args()
     if len(sys.argv)==1: # print help message if arguments are not valid
@@ -54,7 +54,7 @@ def main():
         wt_amp = config['wt_amp']
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
-        SNP_block_of_interest = config['SNP_block_of_interest']
+        SNP_block_of_interest = config['payload_block_index']
         SNP_idx = SNP_block_of_interest - 1
 
         #supporting functions

@@ -89,6 +89,8 @@ def parse_args():
     parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
     parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
     parser.add_argument('--single_fastq_suffix', default="", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
+    parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required ', metavar='')
+    parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -111,9 +113,9 @@ path2_allelsFreqTabs = os.path.join(path2workDir, "Alleles_freq_tables_with_geno
 if os.path.isdir(path2_stdout):
     shutil.rmtree(path2_stdout)
 os.makedirs(path2_stdout)
-if os.path.isdir(path2_CRISPResso_out):
+if os.path.isdir(path2_CRISPResso_out) and not config['skip_crispresso']:
     shutil.rmtree(path2_CRISPResso_out)
-os.makedirs(path2_CRISPResso_out)
+os.makedirs(path2_CRISPResso_out, exist_ok=True)
 if os.path.isdir(path2_allelsFreqTabs):
     shutil.rmtree(path2_allelsFreqTabs)
 os.makedirs(path2_allelsFreqTabs)
@@ -184,11 +186,10 @@ def main():
             log.error(f"Missing columns in the input csv file\n Required columns:\"Sample_ID\", \"gene_name\", \"WT_amplicon_sequence\", \"HDR_amplicon_sequence\", \"gRNA_sequence\", \"edit_type\"")
             log.info(f"Please fix the input csv file and try again")
             sys.exit()
-        if edit_type == "SNP":
-            if not "SNP_payload_cluster" in df.columns:
-                log.error(f"Missing the \"SNP_payload_cluster\" column in the input csv file\n This column is required to define the payload SNP")
-                log.info(f"Please fix the input csv file and try again")
-                sys.exit()
+
+        if not "payload_block_index" in df.columns:
+            log.warning(f"The \"payload_block_index\" column in not found in the input csv file\nDefaulting \"payload_block_index\" to 1.\nPlease verify that there is only one block of SNPs or insertion in the HDR_amplicon relative to the wt_amplicon.\nThe first block is assumed to be the payload block.")
+
 
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
@@ -196,7 +197,7 @@ def main():
             if edit_type == "INS":
                 writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,\n")
                 writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,\n")
-                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)\n") #write header
+                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,\n") #write header
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,\n")
             elif edit_type == "SNP":
                 #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
@@ -231,10 +232,10 @@ def main():
                         log.error(f"...{row['Sample_ID']} was not processed")
                         continue
 
-                #check SNP_payload_cluster
-                if edit_type == "SNP":
-                    if not str(row['SNP_payload_cluster']).isdigit():
-                        log.error(f"...the parameter \"SNP_payload_cluster\" needs to take an integer number")
+                #check payload_block_index
+                if 'payload_block_index' in row:
+                    if not str(row['payload_block_index']).isdigit():
+                        log.error(f"...the parameter \"payload_block_index\" needs to take an integer number")
                         log.error(f"...{row['Sample_ID']} was not processed")
                         continue
 
@@ -246,45 +247,56 @@ def main():
                     fastq_list = [f"--fastq_r1", f"{fastq}"]
                 log.debug(f"{fastq_list}")
 
-                # build CRISPResso command
-                command = [f"CRISPResso"] + fastq_list + [
-                           f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
-                           f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
-                           f"--amplicon_name", f"{row['gene_name']}",
-                           f"--guide_seq", f"{row['gRNA_sequence']}",
-                           f"--name", f"{row['Sample_ID']}",
-                           f"--quantification_window_size", f"{quantification_win_size}",
-                           #f"--plot_window_size", "20", # reduce plot size
-                           #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size
-                           ]
+                #get sample name and predict CRISPResso output directory
+                sample_name = row['Sample_ID']
+                #sample_name = slugify(sample_name)
+                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
 
-                log.info(f"Processing sample: {row['Sample_ID']}")
+                #check if CRISPResso results already exist
+                skip_crispresso_flag = config['skip_crispresso']
+                crispresso_results_exist = os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip"))
+                if skip_crispresso_flag and crispresso_results_exist:
+                    log.info(f"...CRISPResso results already exist for {row['Sample_ID']}, skipping CRISPResso")
+                else:
+                    # build CRISPResso command
+                    command = [f"CRISPResso"] + fastq_list + [
+                            f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
+                            f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
+                            f"--amplicon_name", f"{row['gene_name']}",
+                            f"--guide_seq", f"{row['gRNA_sequence']}",
+                            f"--name", f"{row['Sample_ID']}",
+                            f"--quantification_window_size", f"{quantification_win_size}",
+                            f"--n_processes", f"{config['n_processes']}",
+                            #f"--plot_window_size", "20", # reduce plot size
+                            #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size
+                            ]
 
-                #check amplicon length
-                if edit_type == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
-                    if len(row['WT_amplicon_sequence']) != len(row['HDR_amplicon_sequence']):
-                        log.error(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
-                        log.error(f"...{row['Sample_ID']} was not processed")
-                        continue
+                    log.info(f"Processing sample: {row['Sample_ID']}")
 
-                #run CRISPResso
-                path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                mystdput = open(path_to_stdout_file, 'w+')
-                mystderr = open(path_to_stderr_file, 'w+')
-                p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    #check amplicon length
+                    if edit_type == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
+                        if len(row['WT_amplicon_sequence']) != len(row['HDR_amplicon_sequence']):
+                            log.error(f"...for SNP analysis, the length must match between the wt amplicon and the HDR amplicon")
+                            log.error(f"...{row['Sample_ID']} was not processed")
+                            continue
 
-                log.info(f"...running CRISPResso")
-                p.communicate()  # wait for the commands to process
+                    #run CRISPResso
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
 
-                #process allele frequency table
+                    log.info(f"...running CRISPResso")
+                    p.communicate()  # wait for the commands to process
+
+
+                #process CRISPresso result: allele frequency table
 
                 #CRISPResso_out_dir
                 #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
                 #NOTE: upgrading CRISPResso from v2.2.6 to 2.2.14 no longer have the above behavior, thus commenting the following line out
-                sample_name = row['Sample_ID']
-                #sample_name = slugify(sample_name)
-                current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
+
 
                 #build and execute the shell command
                 if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
@@ -295,11 +307,14 @@ def main():
                                 f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
                                 f"--ENST_ID", f"{row['ENST_id']}"
                                 ]
-
-                    if edit_type == "SNP":
-                        command2 = command2 + [f"--SNP_block_of_interest",
-                                             f"{row['SNP_payload_cluster']}"]
-                        log.debug(f"SNP_payload_cluster: {row['SNP_payload_cluster']}")
+                    
+                    if 'payload_block_index' in row:
+                        command2 = command2 + [f"--payload_block_index",
+                                             f"{row['payload_block_index']}"]
+                        log.debug(f"payload_block_index: {row['payload_block_index']}")
+                    else:
+                        command2 = command2 + [f"--payload_block_index",
+                                             f"1"]
 
                     #run command2
                     p = Popen(command2, universal_newlines=True)
@@ -326,6 +341,44 @@ def main():
                 old_zip_path = "_".join([zip_path.rstrip(r'.zip'), "genotype.zip"])
                 moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
                 shutil.move(old_zip_path, moved_zip_path)
+
+            # write genotype explanation
+            writehandle.write(f"\n------------below are the abbreviations and genotype explanations------------\n")
+            if edit_type == "INS":
+                    writehandle.write(f"\nAbbreviations:\n"
+                                    f"    wt = wildtype\n"
+                                    f"    PL = payload\n"
+                                    f"    Prot = protein sequence without the payload (hereafter referred to as \"protein sequence\")\n"
+                                    f"    mut = mutated: not matching neither the wt nor HDR amplicon at the protein level\n"
+                                    f"    HDR = protein sequence matching the HDR amplicon\n"
+                                    f"    okPL = payload whose sequence is correct at the protein level\n"
+                                    f"Genotype explanation:\n"
+                                    f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_noPL: protein sequence matched wt protein sequence. no payload detected\n"
+                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
+                                    f"    mutProt_noPL: protein sequence is mutated (see mut definition above). no payload detected\n"
+                                    f"    mutProt_okPL: protein sequence is mutated (see mut definition above). payload is correct at the protein level\n"
+                                    f"    mutProt_mutPL: protein sequence is mutated. payload is mutated (see mut definition above)\n"
+                                    f"    wtProt_mutPL: protein sequence matched wt protein sequence. payload is mutated (see mut definition above)\n"
+                                        )
+            elif edit_type == "SNP":
+                    writehandle.write(f"\nAbbreviations:\n"
+                                    f"    wt = wildtype\n"
+                                    f"    SNP = SNP-payload\n"
+                                    f"    Prot = protein sequence without the payload (hereafter referred to as \"protein sequence\")\n"
+                                    f"    mut = mutated: not matching neither the wt nor HDR amplicon at the protein level\n"
+                                    f"    HDR = protein sequence matching the HDR amplicon\n"
+                                    f"Genotype explanation:\n"
+                                    f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_hdrSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched the intended change\n"
+                                    f"    mutProt_hdrSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched the intended change\n"
+                                    f"    wtProt_mutSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid is mutated\n"
+                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
+                                    f"    mutProt_mutSNP: protein sequence is mutated. SNP-payload-associated amino acid is mutated (see mut definition above)\n"
+                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
+                                        )
 
         # convert csv to xlsx
         command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "--mode", f"{edit_type}"]

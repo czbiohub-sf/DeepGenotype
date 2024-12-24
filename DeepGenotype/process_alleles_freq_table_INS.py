@@ -27,12 +27,13 @@ class MyParser(argparse.ArgumentParser):
         sys.exit(2)
 
 def parse_args():
-    parser= MyParser(description='This script does processes the allele freq. table output from CRISPResso2')
+    parser= MyParser(description='This script processes the allele freq. table output from CRISPResso2')
     parser.add_argument('--path', default="", type=str, help='path to the allele freq. table output zip file')
     parser.add_argument('--allele_freq_file', default="", type=str, help='the name of the freq. table output zip file')
     parser.add_argument('--wt_amp', default="", type=str, help='sequence of the wt amplicon')
     parser.add_argument('--HDR_amp', default="", type=str, help='sequence of the HDR amplicon')
     parser.add_argument('--ENST_ID', default="", type=str, help='ENST ID')
+    parser.add_argument('--payload_block_index', default=1, type=int, help='1-based index of the insertion block to treat as the payload if multiple are found')
 
     config = parser.parse_args()
     if len(sys.argv)==1: # print help message if arguments are not valid
@@ -53,6 +54,7 @@ def main():
         wt_amp = config['wt_amp']
         HDR_amp = config['HDR_amp']
         ENST_ID = config['ENST_ID']
+        payload_block_index = config['payload_block_index']
 
         #supporting functions
         def revcom(seq):
@@ -507,13 +509,42 @@ def main():
         if mytranscript.annotations['transcript_strand'] == -1:
             payload_strand = "-"
             
+        # Align WT to HDR and look for insertion blocks (gaps in wt_aln)
         aln = align.localms(wt_amp,HDR_amp,2, -1, -.5, -.1)
         wt_aln = format_alignment(*aln[0]).split("\n")[0]
-        for m in re.finditer("-+",wt_aln):
-            if m:
-                payload_len = m.span()[1]-m.span()[0]
-                payload_seq = HDR_amp[m.span()[0]:m.span()[1]]
-                payload_coord_in_HDR_amp = [m.span()[0],m.span()[1]]
+
+        # Gather all gap blocks in the WT portion
+        insertion_blocks = list(re.finditer(r"-+", wt_aln))
+
+        if len(insertion_blocks) == 0:
+            # No insertion blocks found
+            log.warning("No insertion blocks found between WT and HDR. Payload information will be empty.")
+        elif len(insertion_blocks) == 1:
+            # Only one block found — proceed as before
+            m = insertion_blocks[0]
+            payload_len = m.span()[1] - m.span()[0]
+            payload_seq = HDR_amp[m.span()[0] : m.span()[1]]
+            payload_coord_in_HDR_amp = [m.span()[0], m.span()[1]]
+        else:
+            # Multiple insertion blocks found — user must choose
+            log.warning(f"Multiple insertion blocks found ({len(insertion_blocks)}). Using block "
+                        f"#{payload_block_index} as the designated payload.")
+            # Check that the user-specified index is valid
+            if payload_block_index < 1 or payload_block_index > len(insertion_blocks):
+                raise ValueError(f"Invalid payload_block_index={payload_block_index}. Must be between "
+                                f"1 and {len(insertion_blocks)}.")
+            # Select the block corresponding to payload_block_index (1-based)
+            chosen_block = insertion_blocks[payload_block_index - 1]
+            payload_len = chosen_block.span()[1] - chosen_block.span()[0]
+            payload_seq = HDR_amp[chosen_block.span()[0] : chosen_block.span()[1]]
+            payload_coord_in_HDR_amp = [chosen_block.span()[0], chosen_block.span()[1]]
+
+        ## old code, replaced by the new code above
+        # for m in re.finditer("-+",wt_aln):
+        #     if m:
+        #         payload_len = m.span()[1]-m.span()[0]
+        #         payload_seq = HDR_amp[m.span()[0]:m.span()[1]]
+        #         payload_coord_in_HDR_amp = [m.span()[0],m.span()[1]]
 
         #print(f"\npayload coord in HDR amp: {payload_coord_in_HDR_amp}")
         #print(f"payload length: {payload_len}") 

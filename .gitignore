@@ -3,4 +3,8 @@
 *.xml
 docs/build
 build
-protoSpaceJAM.egg-info
+DeepGenotype.egg-info
+2024_Oct_PacBio_LAMP1_3/
+2024_Oct_PacBio_LAMP1_3_run2/
+DeepGenotype/test_PacBio/CRISPResso_outputs/
+DeepGenotype/test_PacBio/CRISPResso_run_logs/

@@ -28,11 +28,11 @@ The input csv should contain the following columns with the exact names
   - gRNA_sequence
   - edit_type (e.g. INS or SNP, note that deletions, DEL is not supported at this point)  
       &nbsp;&nbsp;&nbsp; INS = insertion, SNP = single nucleotide polymorphism, DEL = deletion  
-  - SNP_payload_cluster (e.g. 1 or 2 ...)
-      &nbsp;&nbsp;&nbsp; Only needed when edit_type = SNP   
-      &nbsp;&nbsp;&nbsp; This defines which cluster of SNPs is the **payload** (TODO: clarify how the non-payload SNPs will affect the perfect HDR, and wt-protein rates)  
-      &nbsp;&nbsp;&nbsp; Clusters are ordered from left to right in respect to the amplicon sequence.  
-      &nbsp;&nbsp;&nbsp; For examplp: there are 2 clusters of SNPs, the first cluster is a recut SNP and the second cluster of SNPs is of interest (payload), SNP_cluster should be set to 2, and the first cluster of SNP will only be anlayzed for mutations if its in the coding region. 
+  - payload_block_index (e.g. 1 or 2 ...)  
+      &nbsp;&nbsp;&nbsp; Default is 1. This parameter is only needed when there are multiple blocks of SNPs or insertion/deletions between the wt and HDR amplicon.  
+      &nbsp;&nbsp;&nbsp; This parameter defines which block of SNPs or insertion/deletions is the **payload**  
+      &nbsp;&nbsp;&nbsp; Blocks are ordered from left to right in respect to the amplicon sequence.  
+      &nbsp;&nbsp;&nbsp; For example: there are 2 blocks of SNPs, the first block is a recut SNP and the second block of SNPs are of interest (payload), then `payload_block_index` should be set to 2, and the first block of SNPs will be analyzed for protein-changing mutations if it is in the coding region. 
       
   - Fastq_extra_suffix (Optional) 
      
@@ -90,7 +90,8 @@ python DeepGenotype.py
 
 &nbsp;
 ## Usage:
-```
+```shell
+cd DeepGenotype # must be in the DeepGenotype/DeepGenotype directory
 python DeepGenotype.py --path2csv example_csv/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
 All paths are relative to `DeepGenotype.py`  
@@ -122,7 +123,7 @@ python DeepGenotype.py \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq
 ```
-***NOTE***: to run DeepGenotype in the background (and thus safe to close the terminal), preprend `nohup` and append `&` to the command:
+***NOTE***: to run DeepGenotype in the background (and thus safe to close the terminal), preprend `nohup` and append `&` to the command (or use screen, tmux, etc. instructions not listed here):
 ```shell
 nohup python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
@@ -130,7 +131,7 @@ nohup python DeepGenotype.py \
 --path2fastqDir test_PacBio/fastq \
 --single_fastq_suffix .fastq &
 ```
-To check the terminal output (while running in the background
+To check the terminal output (while running in the background)
 ```shell
 cat nohup.out
 ```
