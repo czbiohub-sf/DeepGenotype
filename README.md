@@ -101,10 +101,15 @@ Please make sure the following two python scripts are in the same directory as D
 
 
 #### Optional arguments
+by default, DeepGenetype looks for paired fastq files, one ends with `_R1_001.fastq.gz` and another ends with `_R2_001.fastq.gz`  
+you can use the following 2 arguments to define alternative suffixes  
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
+  
+if you have single fastq files, use the following argument to specify its suffix
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
---quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
+  
+(note that if you have extra suffix parts that are dynamic and not part of the sample name, you should define it in the `Fastq_extra_suffix` column of the input csv)  
 
 
 &nbsp;
