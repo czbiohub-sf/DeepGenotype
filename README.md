@@ -106,7 +106,7 @@ you can use the following 2 arguments to define alternative suffixes
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
   
-if you have single fastq files, use the following argument to specify its suffix
+if you have single fastq files, use the following argument to specify its suffix  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
   
 (note that if you have extra suffix parts that are dynamic and not part of the sample name, you should define it in the `Fastq_extra_suffix` column of the input csv)  
