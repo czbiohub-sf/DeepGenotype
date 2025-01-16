@@ -89,8 +89,9 @@ def parse_args():
     parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
     parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
     parser.add_argument('--single_fastq_suffix', default="", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
+    parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4", type=str, help='options to pass to fastp, the default is to do quality trimming from both ends of each read, using a slide window of 4 and a mean quality threshold of 20, see fastp documentation for more options', metavar='')
     parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required ', metavar='')
-    parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist', metavar='')
+    parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -105,7 +106,7 @@ quantification_win_size= config['quantification_win_size']
 fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
 single_fastq_suffix= config['single_fastq_suffix']
-
+fastp_options_string= config['fastp_options_string']
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
 path2_allelsFreqTabs = os.path.join(path2workDir, "Alleles_freq_tables_with_genotypes")
@@ -267,6 +268,7 @@ def main():
                             f"--name", f"{row['Sample_ID']}",
                             f"--quantification_window_size", f"{quantification_win_size}",
                             f"--n_processes", f"{config['n_processes']}",
+                            f"--fastp_options_string", f"{config['fastp_options_string']}",
                             #f"--plot_window_size", "20", # reduce plot size
                             #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size
                             ]
