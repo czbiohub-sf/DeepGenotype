@@ -27,6 +27,7 @@ There are *two* required input files:
 
 create a conda environment and activate it
 ```shell
+module load anaconda # if on the hpc
 conda create -n DeepGenotype python=3.9
 conda activate DeepGenotype
 ```
@@ -35,7 +36,7 @@ install CRISPResso2
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
-conda install CRISPResso2==2.2.14
+conda install CRISPResso2==2.3.1
 ```
 verify CRISPResso2 installation
 ```shell
