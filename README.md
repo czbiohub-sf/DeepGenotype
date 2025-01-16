@@ -7,48 +7,13 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 - Supports CRISPR editing types: tagging/insertion and SNP/base-editing  
 - Works with both Illumina and PacBio reads  
 - Automatically finds coding regions  
-- Invokes CRISPResso2 to perform read processing and alignment   
+- Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation   
 
 ## Inputs
 There are *two* required input files:
 - Fastq files (can be gzipped or not)
-- A csv file (examples provided in `example_csv`), see below.
+- A csv file (examples provided in `example_csv`), explanation of the columns is below
 
-### csv file columns
-The input csv should contain the following columns with the exact names
-  - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)  
-    ***Important note***: For paired-end sequencing, only one Sample_ID is needed. We automatically find both R1 and R2 fastq files.   
-     Check fastq file suffix parameters `--fastq_R1_suffix` and `--fastq_R1_suffix` in the `Usage` section.  
-    Also check if you need `Fastq_extra_suffix` (below)
-
-  - gene_name (e.g. DDX6)  
-  - ENST_id (e.g. ENST00000620157)  
-  - WT_amplicon_sequence
-  - HDR_amplicon_sequence
-  - gRNA_sequence
-  - edit_type (e.g. INS or SNP, note that deletions, DEL is not supported at this point)  
-      &nbsp;&nbsp;&nbsp; INS = insertion, SNP = single nucleotide polymorphism, DEL = deletion  
-  - payload_block_index (e.g. 1 or 2 ...)  
-      &nbsp;&nbsp;&nbsp; Default is 1. This parameter is only needed when there are multiple blocks of SNPs or insertion/deletions between the wt and HDR amplicon.  
-      &nbsp;&nbsp;&nbsp; This parameter defines which block of SNPs or insertion/deletions is the **payload**  
-      &nbsp;&nbsp;&nbsp; Blocks are ordered from left to right in respect to the amplicon sequence.  
-      &nbsp;&nbsp;&nbsp; For example: there are 2 blocks of SNPs, the first block is a recut SNP and the second block of SNPs are of interest (payload), then `payload_block_index` should be set to 2, and the first block of SNPs will be analyzed for protein-changing mutations if it is in the coding region. 
-      
-  - Fastq_extra_suffix (Optional) 
-     
-      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq file names.
- 
-      &nbsp;&nbsp;&nbsp;**Please note that the common (as opposed to extra) suffixes are the following values by default:**  
-      &nbsp;&nbsp;&nbsp;"_R1_001.fastq.gz"    
-      &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"
-      
-      &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz"  
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz"  
-      &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C", and "_S90_" is another variable part of the name  
-      &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Fastq_extra_suffix" column  
-
-&nbsp;
 ## Outputs:
 - Protein-level genotype frequencies table in a csv file
 - CRISPResso2 output that includes
@@ -56,8 +21,9 @@ The input csv should contain the following columns with the exact names
   - Sequence-level genotype frequencies table
   - read-to-genotype assignments information
 
-&nbsp;
 ## Installation
+
+**NOTE**: *if you installed DeepGenotype before 2025-01-15, please reinstall DeepGenotype to update CRISPResso2 to 2.3.1 to enable read quality-trimming.*
 
 create a conda environment and activate it
 ```shell
@@ -101,15 +67,10 @@ Please make sure the following two python scripts are in the same directory as D
 
 
 #### Optional arguments
-by default, DeepGenetype looks for paired fastq files, one ends with `_R1_001.fastq.gz` and another ends with `_R2_001.fastq.gz`  
-you can use the following 2 arguments to define alternative suffixes  
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
-  
-if you have single fastq files, use the following argument to specify its suffix  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
-  
-(note that if you have extra suffix parts that are dynamic and not part of the sample name, you should define it in the `Fastq_extra_suffix` column of the input csv)  
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
 
 
 &nbsp;
@@ -221,6 +182,42 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 [DeepGenotype.py][INFO]  ...done
 ...
 ```
+
+&nbsp;
+## Explanation of columns in the input csv file
+The input csv should contain the following columns with the exact names
+  - Sample_ID (e.g. mNGplate19_sorted_A2_DDX6-C)  
+    ***Important note***: For paired-end sequencing, only one Sample_ID is needed. We automatically find both R1 and R2 fastq files.   
+     Check fastq file suffix parameters `--fastq_R1_suffix` and `--fastq_R1_suffix` in the `Usage` section.  
+     For single-ended reads, set `--single_fastq_suffix` to the suffix of the fastq file.  
+     Also check if you need `Fastq_extra_suffix` (below)
+
+  - gene_name (e.g. DDX6)  
+  - ENST_id (e.g. ENST00000620157)  
+  - WT_amplicon_sequence
+  - HDR_amplicon_sequence
+  - gRNA_sequence
+  - edit_type (e.g. INS or SNP, note that deletions, DEL is not supported at this point)  
+      &nbsp;&nbsp;&nbsp; INS = insertion, SNP = single nucleotide polymorphism, DEL = deletion  
+  - payload_block_index (e.g. 1 or 2 ...)  
+      &nbsp;&nbsp;&nbsp; Default is 1. This parameter is only needed when there are multiple blocks of SNPs or insertion/deletions between the wt and HDR amplicon.  
+      &nbsp;&nbsp;&nbsp; This parameter defines which block of SNPs or insertion/deletions is the **payload**  
+      &nbsp;&nbsp;&nbsp; Blocks are ordered from left to right in respect to the amplicon sequence.  
+      &nbsp;&nbsp;&nbsp; For example: there are 2 blocks of SNPs, the first block is a recut SNP and the second block of SNPs are of interest (payload), then `payload_block_index` should be set to 2, and the first block of SNPs will be analyzed for protein-changing mutations if it is in the coding region. 
+      
+  - Fastq_extra_suffix (Optional) 
+     
+      &nbsp;&nbsp;&nbsp;Extra suffix needed for mapping Sample_ID to corresponding fastq file names.
+ 
+      &nbsp;&nbsp;&nbsp;**Please note that the common (as opposed to extra) suffixes are the following values by default:**  
+      &nbsp;&nbsp;&nbsp;"_R1_001.fastq.gz"    
+      &nbsp;&nbsp;&nbsp;"_R2_001.fastq.gz"
+      
+      &nbsp;&nbsp;&nbsp;For example if your fastq file names are:  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R1_001.fastq.gz"  
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz"  
+      &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C", and "_S90_" is another variable part of the name  
+      &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Fastq_extra_suffix" column  
 
 &nbsp;
 ## Helper commands
