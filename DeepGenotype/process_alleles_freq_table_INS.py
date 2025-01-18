@@ -941,7 +941,7 @@ def main():
                             f"mutProt_OKPL,"
                             f"mutProt_mutPL,"
                             f"wtProt_mutPL\n")
-            writehandle.write(f"({int(total_num_reads)}),{float(genotype_freq['wt_allele']):.4f}%,"
+            writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
                             f"{float(genotype_freq['HDR_perfect']):.4f}%,"
                             f"{float(genotype_freq['wtProt_noPL']):.4f}%,"
                             f"{float(genotype_freq['wtProt_OKPL']):.4f}%,"
