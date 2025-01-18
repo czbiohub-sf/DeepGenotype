@@ -89,7 +89,7 @@ def parse_args():
     parser.add_argument('--fastq_R1_suffix', default="_R1_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R1_001.fastq.gz', metavar='')
     parser.add_argument('--fastq_R2_suffix', default="_R2_001.fastq.gz", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
     parser.add_argument('--single_fastq_suffix', default="", type=str, help='(optional) suffix to add to sample ID to map to fastq files, e.g. R2_001.fastq.gz', metavar='')
-    parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4", type=str, help='options to pass to fastp, the default is to do quality trimming from both ends of each read, using a slide window of 4 and a mean quality threshold of 20, see fastp documentation for more options', metavar='')
+    parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30", type=str, help='options to pass to fastp, the default is to do quality trimming from both ends of each read, using a slide window of 4 and a mean quality threshold of 20, see fastp documentation for more options', metavar='')
     parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required ', metavar='')
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist')
     config = parser.parse_args()
@@ -196,18 +196,18 @@ def main():
         out_basename = os.path.basename(path2csv).strip(r".csv")
         with open(os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
             if edit_type == "INS":
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,\n")
-                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,\n") #write header
-                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,\n")
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,\n")
+                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,num_post_filter_reads,weighted_avg_percent_identity,weighted_avg_num_of_mismatches\n") #write header
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-\n")
             elif edit_type == "SNP":
                 #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,\n")
-                writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,\n")
-                writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,\n")
-                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,(Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")
-                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,\n")
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,\n")
+                writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
+                writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
+                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,num_post_filter_reads,weighted_avg_percent_identity,weighted_avg_num_of_mismatches\n")
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
                 fq_ex_suffix = ""
@@ -247,6 +247,8 @@ def main():
                 else:
                     fastq_list = [f"--fastq_r1", f"{fastq}"]
                 log.debug(f"{fastq_list}")
+                num_fastq_files = int(len(fastq_list)/2)
+
 
                 #get sample name and predict CRISPResso output directory
                 sample_name = row['Sample_ID']
@@ -274,6 +276,10 @@ def main():
                             ]
 
                     log.info(f"Processing sample: {row['Sample_ID']}")
+                    if num_fastq_files == 2:
+                        log.info(f"...running CRISPResso on {num_fastq_files} paired fastq files")
+                    else:
+                        log.info(f"...running CRISPResso on {num_fastq_files} fastq file")
 
                     #check amplicon length
                     if edit_type == "SNP": # For SNP, check if length of wt amp and HDR amp are the same
@@ -289,16 +295,13 @@ def main():
                     mystderr = open(path_to_stderr_file, 'w+')
                     p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
 
-                    log.info(f"...running CRISPResso")
                     p.communicate()  # wait for the commands to process
-
 
                 #process CRISPresso result: allele frequency table
 
                 #CRISPResso_out_dir
                 #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
                 #NOTE: upgrading CRISPResso from v2.2.6 to 2.2.14 no longer have the above behavior, thus commenting the following line out
-
 
                 #build and execute the shell command
                 if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
@@ -345,7 +348,7 @@ def main():
                 shutil.move(old_zip_path, moved_zip_path)
 
             # write genotype explanation
-            writehandle.write(f"\n------------below are the abbreviations and genotype explanations------------\n")
+            writehandle.write(f"\n------------------------below are the abbreviations and genotype explanations---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
             if edit_type == "INS":
                     writehandle.write(f"\nAbbreviations:\n"
                                     f"    wt = wildtype\n"
@@ -363,6 +366,10 @@ def main():
                                     f"    mutProt_okPL: protein sequence is mutated (see mut definition above). payload is correct at the protein level\n"
                                     f"    mutProt_mutPL: protein sequence is mutated. payload is mutated (see mut definition above)\n"
                                     f"    wtProt_mutPL: protein sequence matched wt protein sequence. payload is mutated (see mut definition above)\n"
+                                    f"Notes:\n"
+                                    f"    num_post_filter_reads: number of reads that passed the quality filter\n"
+                                    f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"
+                                    f"    weighted_avg_num_of_mismatches: weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)\n"
                                         )
             elif edit_type == "SNP":
                     writehandle.write(f"\nAbbreviations:\n"
@@ -380,15 +387,25 @@ def main():
                                     f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
                                     f"    mutProt_mutSNP: protein sequence is mutated. SNP-payload-associated amino acid is mutated (see mut definition above)\n"
                                     f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
+                                    f"Notes:\n"
+                                    f"    num_post_filter_reads: number of reads that passed the quality filter\n"
+                                    f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"
+                                    f"    weighted_avg_num_of_mismatches: weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)\n"
                                         )
 
         # convert csv to xlsx
-        command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "--mode", f"{edit_type}"]
+        csv_path = os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv")
+        command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", csv_path , "--mode", f"{edit_type}"]
         p = Popen(command3, universal_newlines=True)
         p.communicate()  # wait for the commands to process
         
         # all done
-        log.info(f"Done processing all samples in the csv file")
+        log.info(f"Done processing all samples in the input csv file: {path2csv}")
+        log.info(f"CRISPResso results are in folder: {path2_CRISPResso_out}")
+        excel_path = csv_path.replace(".csv", ".xlsx")
+        log.info(f"DeepGenotype output files are {csv_path} and {os.path.basename(excel_path)}")
+
+
 
         os.chdir(wd)  # change to the saved working dir
 

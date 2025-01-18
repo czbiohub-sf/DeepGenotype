@@ -81,6 +81,9 @@ for col in ws.columns:
 for col, max_len in max_length.items():
     ws.column_dimensions[col].width = max_len
 
+# manually set the width of the first column
+ws.column_dimensions['A'].width = 27
+
 # Apply bold font to the first column
 
 for col in ws.iter_cols(min_col=1, max_col=1, min_row=1, max_row=ws.max_row):
