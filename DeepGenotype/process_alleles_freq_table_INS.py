@@ -471,7 +471,20 @@ def main():
                 
             return record
 
+        def compute_percent_identity(ref, num_of_mismatches):
+            return 100 - (num_of_mismatches / len(ref)) * 100
 
+        def compute_num_of_mismatches(read, ref):
+            return sum(1 for r, t in zip(read, ref) if r != t)
+        
+        def compute_weighted_average(values, weights):
+            if len(values) != len(weights):
+                raise ValueError("The number of values and weights must be the same.")
+            if sum(weights) == 0:
+                raise ValueError("The sum of weights must not be zero.")
+            weighted_sum = sum(v * w for v, w in zip(values, weights))
+            total_weight = sum(weights)
+            return weighted_sum / total_weight
         ##################################################
         #prepration work before processing the alignments#
         ##################################################
@@ -616,6 +629,9 @@ def main():
                         ref = ''.join(ref[idx] for idx in range(len(ref)) if not any([idx in range(st,en) for st,en in trailing_gaps]))
                         read = ''.join(read[idx] for idx in range(len(read)) if not any([idx in range(st,en) for st,en in trailing_gaps]))
                         #print(f"{read}\n{ref}", end='\n')
+                    # compute percentidentity and num_of_mismatches
+                    num_of_mismatches = compute_num_of_mismatches(read, ref)
+                    percent_identity = compute_percent_identity(ref, num_of_mismatches)
                     #############################
                     #Start calculating genotypes#
                     #############################            
@@ -625,7 +641,7 @@ def main():
                     if Reference_Name == "HDR": # 
                         if read == ref:
                             #print("\tHDR allele (perfect HDR edit)", end="\n")
-                            writehandle.write("\tHDR allele (perfect HDR edit)\n")
+                            writehandle.write("\tHDR allele (perfect HDR edit)\t")
                         ##########################
                         #mutations only, no indel#
                         ##########################
@@ -637,16 +653,16 @@ def main():
                             #produce output
                             if (protein_correct==True and payload_correct==True):
                                 #print("\tHDR allele (wt protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + correct payload)\n")
+                                writehandle.write("\tHDR allele (wt protein + correct payload)\t")
                             elif (protein_correct==True and payload_correct==False):
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + mutant payload)\n")
+                                writehandle.write("\tHDR allele (wt protein + mutant payload)\t")
                             elif (protein_correct==False and payload_correct==True):
                                 #print("\tHDR allele (mutant protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + correct payload)\n")    
+                                writehandle.write("\tHDR allele (mutant protein + correct payload)\t")    
                             elif (protein_correct==False and payload_correct==False):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")    
+                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\t")    
                         ########################
                         #indels in HDR allele  #
                         ########################
@@ -669,16 +685,16 @@ def main():
                             #produce output
                             if (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")
+                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\t")
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==True and deletion_in_payload_Flag==False):
                                 #print("\tHDR allele (mutant protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + correct payload)\n")
+                                writehandle.write("\tHDR allele (mutant protein + correct payload)\t")
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==True):
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + mutant payload)\n")    
+                                writehandle.write("\tHDR allele (wt protein + mutant payload)\t")    
                             elif (deletion_in_HDR_amp_cds_noPL_Flag==False and deletion_in_payload_Flag==False):
                                 #print("\tHDR allele (wt protein + correct payload1)", end="\n")   
-                                writehandle.write("\tHDR allele (wt protein + correct payload)\n")      
+                                writehandle.write("\tHDR allele (wt protein + correct payload)\t")      
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in wt cds
                             insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
@@ -701,16 +717,16 @@ def main():
                                 
                             if (insertion_in_HDR_amp_cds_noPL_Flag==True and insertion_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")
+                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\t")
                             elif (insertion_in_HDR_amp_cds_noPL_Flag==True and insertion_in_payload_Flag==False):
                                 #print("\tHDR allele (mutant protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + correct payload)\n")
+                                writehandle.write("\tHDR allele (mutant protein + correct payload)\t")
                             elif (insertion_in_HDR_amp_cds_noPL_Flag==False and insertion_in_payload_Flag==True):
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + mutant payload)\n")
+                                writehandle.write("\tHDR allele (wt protein + mutant payload)\t")
                             elif (insertion_in_HDR_amp_cds_noPL_Flag==False and insertion_in_payload_Flag==False):
                                 #print("\tHDR allele (wt protein + correct payload)", end="\n") 
-                                writehandle.write("\tHDR allele (wt protein + correct payload)\n") 
+                                writehandle.write("\tHDR allele (wt protein + correct payload)\t") 
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
                             #check if insertion are in wt cds
                             insertion_in_HDR_amp_cds_noPL_Flag = check_insertion_in_cds(ref = ref, amp_cds_coords = HDR_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
@@ -745,16 +761,16 @@ def main():
                             #produce output
                             if (indel_in_HDR_amp_cds_noPL_Flag==True and indel_in_payload_Flag==True):
                                 #print("\tHDR allele (mutant protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\n")
+                                writehandle.write("\tHDR allele (mutant protein + mutant payload)\t")
                             elif (indel_in_HDR_amp_cds_noPL_Flag==True and indel_in_payload_Flag==False):
                                 #print("\tHDR allele (mutant protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (mutant protein + correct payload)\n")    
+                                writehandle.write("\tHDR allele (mutant protein + correct payload)\t")    
                             elif (indel_in_HDR_amp_cds_noPL_Flag==False and indel_in_payload_Flag==True):
                                 #print("\tHDR allele (wt protein + mutant payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + mutant payload)\n")    
+                                writehandle.write("\tHDR allele (wt protein + mutant payload)\t")    
                             elif (indel_in_HDR_amp_cds_noPL_Flag==False and indel_in_payload_Flag==False):
                                 #print("\tHDR allele (wt protein + correct payload)", end="\n")
-                                writehandle.write("\tHDR allele (wt protein + correct payload)\n")    
+                                writehandle.write("\tHDR allele (wt protein + correct payload)\t")    
 
                     #############################
                     #read mapped to wt amplicon #
@@ -762,7 +778,7 @@ def main():
                     else: 
                         if read == ref:
                             #print("\twt allele", end="\n")
-                            writehandle.write("\twt allele\n")
+                            writehandle.write("\twt allele\t")
                         ##########################
                         #mutations only, no indel#
                         ##########################
@@ -772,10 +788,10 @@ def main():
                             #produce output
                             if (protein_correct==True):
                                 #print("\twt allele (wt protein + no payload)", end="\n")
-                                writehandle.write("\twt allele (wt protein)\n")
+                                writehandle.write("\twt allele (wt protein)\t")
                             elif (protein_correct==False):
                                 #print("\twt allele (mutant protein + no payload)", end="\n")
-                                writehandle.write("\twt allele (mutant protein)\n")
+                                writehandle.write("\twt allele (mutant protein)\t")
                         #######################
                         #indels in wt allele  #
                         #######################
@@ -791,10 +807,10 @@ def main():
                         
                             if deletion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
-                                writehandle.write("\twt allele (mutant protein)\n")
+                                writehandle.write("\twt allele (mutant protein)\t")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
-                                writehandle.write("\twt allele (wt protein)\n")
+                                writehandle.write("\twt allele (wt protein)\t")
                         elif (int(n_deleted)==0 and int(n_inserted)!=0):  #insertion in the read, no deletion
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
@@ -811,10 +827,10 @@ def main():
                                 
                             if insertion_in_cds_flag == True:
                                 #print("\twt allele (mutant protein)", end="\n")
-                                writehandle.write("\twt allele (mutant protein)\n")
+                                writehandle.write("\twt allele (mutant protein)\t")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
-                                writehandle.write("\twt allele (wt protein)\n")
+                                writehandle.write("\twt allele (wt protein)\t")
                         elif(int(n_deleted)!=0 and int(n_inserted)!=0): #both insertion and deletion in the read
                             #check if insertion are in cds
                             insertion_in_cds_flag = check_insertion_in_cds(ref = ref, amp_cds_coords = wt_amp_cds_coords_PosRef)["insertion_in_cds_flag"]
@@ -834,11 +850,13 @@ def main():
                             
                             if any([insertion_in_cds_flag, deletion_in_cds_flag]):
                                 #print("\twt allele (mutant protein)", end="\n")
-                                writehandle.write("\twt allele (mutant protein)\n")
+                                writehandle.write("\twt allele (mutant protein)\t")
                             else:
                                 #print("\twt allele (wt protein)", end="\n")
-                                writehandle.write("\twt allele (wt protein)\n")
+                                writehandle.write("\twt allele (wt protein)\t")
 
+                    #write percent identity and num_of_mismatches
+                    writehandle.write(f"{percent_identity}\t{num_of_mismatches}\n")
 
         #write the allele frequency table to a new zip file
         new_zip_path = "_".join([zip_path.rstrip(r'.zip'),"genotype.zip"])
@@ -867,6 +885,9 @@ def main():
                         "mutProt_mutPL":0,
                         "wtProt_mutPL":0}
         with zipfile.ZipFile(new_zip_path, 'r') as myzip:
+            total_num_reads = 0
+            perc_identity_list = []
+            num_of_mismatches_list = []
             with myzip.open('Alleles_frequency_table_genotype.txt') as filehandle:
                 next(filehandle) #skip header
                 #print(f"Reference_Name\tRead_Status\tn_Reads\tperc_Reads\tn_deleted\tn_inserted\tn_mutated")
@@ -884,6 +905,14 @@ def main():
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
                     genotype = fields[9]    
+                    perc_identity = fields[10]
+                    num_of_mismatches = fields[11]
+
+                    total_num_reads += int(n_Reads)
+                    if Reference_Name == "HDR": #only consider HDR for weighted average of percent identity and num_of_mismatches
+                        perc_identity_list.append(float(perc_identity))
+                        num_of_mismatches_list.append(int(num_of_mismatches))
+
                     #print(f"{Reference_Name}\t{n_Reads}\t{perc_Reads}\t{n_deleted}\t{n_inserted}\t{n_mutated}\t{genotype}", end='\n')
                     if genotype == "HDR allele (perfect HDR edit)":
                         genotype_freq["HDR_perfect"] += float(perc_Reads)
@@ -912,15 +941,18 @@ def main():
                             f"mutProt_OKPL,"
                             f"mutProt_mutPL,"
                             f"wtProt_mutPL\n")
-            writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
+            writehandle.write(f"({int(total_num_reads)}),{float(genotype_freq['wt_allele']):.4f}%,"
                             f"{float(genotype_freq['HDR_perfect']):.4f}%,"
                             f"{float(genotype_freq['wtProt_noPL']):.4f}%,"
                             f"{float(genotype_freq['wtProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_noPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutPL']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_mutPL']):.4f}%,\n")
-
+                            f"{float(genotype_freq['wtProt_mutPL']):.4f}%,"
+                            f"{int(total_num_reads)},"
+                            f"{compute_weighted_average(perc_identity_list, num_of_mismatches_list):.4f},"
+                            f"{compute_weighted_average(num_of_mismatches_list, num_of_mismatches_list):.4f}\n")  
+                            
     except Exception  as e:
         print("Unexpected error:", str(sys.exc_info()))
         print("additional information:", e)
