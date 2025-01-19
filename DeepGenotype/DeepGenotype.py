@@ -1,14 +1,6 @@
-import argparse
-import sys
-import linecache
+import argparse, sys, os, zipfile, shutil, warnings, logging, re, unicodedata, linecache
 import pandas as pd
-import os
 from subprocess import Popen
-import shutil
-import warnings
-import logging
-import re
-import unicodedata
 warnings.filterwarnings('ignore')
 
 #################
@@ -92,6 +84,7 @@ def parse_args():
     parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30", type=str, help='options to pass to fastp, the default is to do quality trimming from both ends of each read, using a slide window of 4 and a mean quality threshold of 20, see fastp documentation for more options', metavar='')
     parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required ', metavar='')
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist')
+    parser.add_argument('--min_reads_for_crispresso', default=50, type=int, help='minimum number of reads for CRISPResso to be considered successful', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -125,9 +118,9 @@ wd = os.getcwd()  # save current working dir
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
 
 
-###################
-#text manipulation#
-###################
+####################
+# helper functions #
+####################
 
 def slugify(value): #adapted from the Django project
 
@@ -136,6 +129,26 @@ def slugify(value): #adapted from the Django project
     value = re.sub(rb'[-\s]+', b'-', value)
 
     return value.decode('utf-8')
+
+#check if the Alleles_frequency_table.zip file exists and contains at least 50 reads
+def check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+    if not os.path.isfile(path_to_Alleles_frequency_table_zip):
+        return False
+    # check the number of reads in the Alleles_frequency_table.csv file
+    with zipfile.ZipFile(path_to_Alleles_frequency_table_zip, 'r') as myzip:
+        with myzip.open('Alleles_frequency_table.txt') as filehandle:
+            next(filehandle) #skip header
+            num_reads = 0
+            for line in filehandle:
+                line_deco = line.decode()              
+                fields = line_deco.rstrip().split("\t")
+                n_Reads = fields[7]
+                num_reads += int(n_Reads)
+            if num_reads < config['min_reads_for_crispresso']:
+                return False
+            else:
+                return True
+
 
 #####################
 ##      main       ##
@@ -255,24 +268,29 @@ def main():
                 #sample_name = slugify(sample_name)
                 current_CRISPResso_out_dir = os.path.join(path2_CRISPResso_out,f"CRISPResso_on_{sample_name}")
 
+                ###################
+                # run CRISPResso  #
+                ###################
+                # build CRISPResso command
+                basic_command = [f"CRISPResso"] + fastq_list + [
+                        f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
+                        f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
+                        f"--amplicon_name", f"{row['gene_name']}",
+                        f"--guide_seq", f"{row['gRNA_sequence']}",
+                        f"--name", f"{row['Sample_ID']}",
+                        f"--quantification_window_size", f"{quantification_win_size}",
+                        f"--n_processes", f"{config['n_processes']}"
+                        #f"--plot_window_size", "20", # reduce plot size
+                        #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size]
+                ]
                 #check if CRISPResso results already exist
                 skip_crispresso_flag = config['skip_crispresso']
                 crispresso_results_exist = os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip"))
                 if skip_crispresso_flag and crispresso_results_exist:
                     log.info(f"...CRISPResso results already exist for {row['Sample_ID']}, skipping CRISPResso")
                 else:
-                    # build CRISPResso command
-                    command = [f"CRISPResso"] + fastq_list + [
-                            f"--amplicon_seq", f"{row['WT_amplicon_sequence']}",
-                            f"--expected_hdr_amplicon_seq", f"{row['HDR_amplicon_sequence']}",
-                            f"--amplicon_name", f"{row['gene_name']}",
-                            f"--guide_seq", f"{row['gRNA_sequence']}",
-                            f"--name", f"{row['Sample_ID']}",
-                            f"--quantification_window_size", f"{quantification_win_size}",
-                            f"--n_processes", f"{config['n_processes']}",
+                    command = basic_command + [
                             f"--fastp_options_string", f"{config['fastp_options_string']}",
-                            #f"--plot_window_size", "20", # reduce plot size
-                            #f"--max_rows_alleles_around_cut_to_plot", "20" # reduce plot size
                             ]
 
                     log.info(f"Processing sample: {row['Sample_ID']}")
@@ -294,8 +312,59 @@ def main():
                     mystdput = open(path_to_stdout_file, 'w+')
                     mystderr = open(path_to_stderr_file, 'w+')
                     p = Popen(command, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-
                     p.communicate()  # wait for the commands to process
+
+                #################################
+                # retry CRISPResso if it failed #
+                #################################
+                path_to_Alleles_frequency_table_zip = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
+                # check if CRISPResso failed, if so, retry with less stringent quality trimming 
+                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
+                    command_retry = basic_command + [
+                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 20"
+                            ]
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    p.communicate()  # wait for the commands to process
+                # retry #2 with even less stringent quality trimming
+                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
+                    command_retry = basic_command + [
+                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 10"
+                            ]
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    p.communicate()  # wait for the commands to process
+                # retry #3 with even less stringent quality trimming
+                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
+                    command_retry = basic_command + [
+                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4"
+                            ]
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    p.communicate()  # wait for the commands to process
+                # retry #4 with even less stringent quality trimming
+                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with no quality trimming")
+                    command_retry = basic_command # no quality trimming
+                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                    mystdput = open(path_to_stdout_file, 'w+')
+                    mystderr = open(path_to_stderr_file, 'w+')
+                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                    p.communicate()  # wait for the commands to process
+
 
                 #process CRISPresso result: allele frequency table
 
@@ -303,8 +372,11 @@ def main():
                 #CRISPResso changes "." to "_" in the output folder, so we need to account for this behavior here
                 #NOTE: upgrading CRISPResso from v2.2.6 to 2.2.14 no longer have the above behavior, thus commenting the following line out
 
-                #build and execute the shell command
-                if os.path.isfile(os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")):
+                ####################################
+                #process the allele frequency table#
+                ####################################
+                if os.path.isfile(path_to_Alleles_frequency_table_zip):
+                    #run cript process_alleles_freq_table_[INS/SNP].py
                     command2 = [f"{sys.executable}",f"{script_path}",
                                 f"--path", f"{current_CRISPResso_out_dir}",
                                 f"--allele_freq_file", f"Alleles_frequency_table.zip",
@@ -312,7 +384,6 @@ def main():
                                 f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
                                 f"--ENST_ID", f"{row['ENST_id']}"
                                 ]
-                    
                     if 'payload_block_index' in row:
                         command2 = command2 + [f"--payload_block_index",
                                              f"{row['payload_block_index']}"]
@@ -320,33 +391,42 @@ def main():
                     else:
                         command2 = command2 + [f"--payload_block_index",
                                              f"1"]
-
-                    #run command2
                     p = Popen(command2, universal_newlines=True)
                     log.info(f"...parsing allele frequency table and re-calculating allele frequencies")
                     p.communicate()  # wait for the commands to process
+                    # the above command will produce a genotype_frequency.csv file and a Alleles_frequency_table_genotype.zip file
+                    # we will use the genotype_frequency.csv file to write to the master output csv file
+                    # the Alleles_frequency_table_genotype.zip file will be archieved to a folder named Alleles_freq_tables_with_genotypes
+
+                    # process the genotype frequency file (produced by process_alleles_freq_table_[INS/SNP].py)
+                    if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
+                        with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
+                            next(handle)
+                            writehandle.write(f"{row['Sample_ID']},")
+                            writehandle.write(handle.readline())
+                        log.info(f"...done")
+                    else:
+                        current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
+                        log.error(f"cannot find parsing result file {current_result_file}")
+                        log.error(f"...{row['Sample_ID']} was not processed")
+                    
+                    # move the deepgenotype genotype zip file to the archive folder
+                    zip_path = os.path.join(current_CRISPResso_out_dir, "Alleles_frequency_table.zip")
+                    if os.path.isfile(zip_path):
+                        old_zip_path = "_".join([zip_path.rstrip(r'.zip'), "genotype.zip"])
+                        moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
+                        shutil.move(old_zip_path, moved_zip_path)
+                    
                 else:
                     log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip with the following path:")
                     path_not_found = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
                     log.error(f"{path_not_found}")
-                    log.error(f"...{row['Sample_ID']} was not processed")
-                if os.path.isfile(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")):
-                    with open(os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv"), "r") as handle:
-                        next(handle)
-                        writehandle.write(f"{row['Sample_ID']},")
-                        writehandle.write(handle.readline())
-                    log.info(f"...done")
-                else:
-                    current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
-                    log.error(f"cannot find intermediate file {current_result_file}")
+                    log.error(f"CRISPResso failed for {row['Sample_ID']}")
                     log.error(f"...{row['Sample_ID']} was not processed")
 
-                # move the genotype zip file
-                zip_path = os.path.join(current_CRISPResso_out_dir, "Alleles_frequency_table.zip")
-                old_zip_path = "_".join([zip_path.rstrip(r'.zip'), "genotype.zip"])
-                moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
-                shutil.move(old_zip_path, moved_zip_path)
 
+
+            # finished processing all samples,
             # write genotype explanation
             writehandle.write(f"\n------------------------below are the abbreviations and genotype explanations---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
             if edit_type == "INS":

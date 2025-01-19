@@ -594,6 +594,7 @@ def main():
         ########################
         #process the alignments#
         ########################
+        # read the allele frequency table (from CRISPResso) and write an updated table to Alleles_frequency_table_genotype.txt
         with zipfile.ZipFile(zip_path, 'r') as myzip, open(os.path.join(zip_dir,'Alleles_frequency_table_genotype.txt'),'w') as writehandle:
             with myzip.open('Alleles_frequency_table.txt') as filehandle:
                 next(filehandle) #skip header
@@ -858,7 +859,7 @@ def main():
                     #write percent identity and num_of_mismatches
                     writehandle.write(f"{percent_identity}\t{num_of_mismatches}\n")
 
-        #write the allele frequency table to a new zip file
+        #write the allele frequency table to a new zip file (genotype.zip)
         new_zip_path = "_".join([zip_path.rstrip(r'.zip'),"genotype.zip"])
         if os.path.exists(new_zip_path):
             os.remove(new_zip_path)
@@ -874,7 +875,7 @@ def main():
         ############################
         #calculate allele frequency#
         ############################
-        #calculate allele frequency
+        #calculate allele frequency and write to genotype_frequency.csv
         log.info(f"Calculating allele frequency")
         genotype_freq = {"wt_allele":0,
                         "HDR_perfect":0,
