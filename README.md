@@ -2,12 +2,13 @@
 Calculates the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells
 
 ## Features
-- Calculates genotypes with respect to protein/payload expressiblity and correctness  
-- Automatically processes a list of samples 
-- Supports CRISPR editing types: tagging/insertion and SNP/base-editing  
-- Works with both Illumina and PacBio reads  
+- Calculate genotypes with respect to protein/payload expressiblity and correctness  
 - Automatically finds coding regions  
-- Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation   
+- Supported CRISPR editing types: tagging/insertion and SNP/base-editing  
+- Works with both Illumina and PacBio reads
+- Batch process a list of samples 
+- Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation
+
 
 ## Inputs
 There are *two* required input files:
@@ -15,8 +16,12 @@ There are *two* required input files:
 - A csv file (examples provided in `example_csv`), explanation of the columns is below
 
 ## Outputs:
-- Protein-level genotype frequencies table in a csv file
-- CRISPResso2 output that includes
+- A result table in the format of a csv file and a xlsx file, the table contains **sample-wise** information of:
+  - Protein-level genotype frequencies
+  - Two metrics that quantify DNA-level mismatches in edited alleles
+    - weighted average of the percent identity of the reads (that aligned to the HDR amplicon)
+    - weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)
+- CRISPResso2 output that includes (and not limited to) the following:
   - Read aligning rate
   - Sequence-level genotype frequencies table
   - read-to-genotype assignments information
