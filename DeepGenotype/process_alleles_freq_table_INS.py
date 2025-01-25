@@ -482,7 +482,11 @@ def main():
             if len(values) != len(weights):
                 raise ValueError("The number of values and weights must be the same.")
             if sum(weights) == 0:
-                raise ValueError("The sum of weights must not be zero.")
+                if len(values) == 0:
+                    return 0
+                else:
+                    # if the sum of weights is 0, return the average of the values
+                    return sum(values) / len(values)
             weighted_sum = sum(v * w for v, w in zip(values, weights))
             total_weight = sum(weights)
             return weighted_sum / total_weight
