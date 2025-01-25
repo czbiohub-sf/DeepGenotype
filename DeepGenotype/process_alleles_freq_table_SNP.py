@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument('--HDR_amp', default="", type=str, help='sequence of the HDR amplicon')
     parser.add_argument('--ENST_ID', default="", type=str, help='ENST ID')
     parser.add_argument('--payload_block_index', default=1, type=int, help='if the SNP is downstream of re-cut-preventing SNP, set this to 2')
+    parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='minimum number of reads for genotype to be considered successful')
 
     config = parser.parse_args()
     if len(sys.argv)==1: # print help message if arguments are not valid
@@ -657,7 +658,6 @@ def main():
                 writehandle.write(f"Aligned_Sequence	Reference_Sequence\tReference_Name\tRead_Status\tn_deleted\tn_inserted\tn_mutated\t#Reads\t%Reads\tGenotype\t%Identity\t#Mismatches\n")
                 for line in filehandle:
                     line_deco = line.decode()
-                    writehandle.write(line_deco.rstrip())
 
                     fields = line_deco.rstrip().split("\t")
                     read = fields[0]
@@ -669,6 +669,11 @@ def main():
                     n_mutated = fields[6]
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
+
+                    if int(n_Reads) < config['min_reads_for_genotype']:
+                        continue #skip if the number of reads is less than the minimum number of reads for genotype
+
+                    writehandle.write(line_deco.rstrip()) # write the original line
 
                     ###########################################################################################################
                     #TRIM the gaps on both ends of the ref, these those gaps represent extra seq in the reads (not insertions)#
@@ -953,7 +958,7 @@ def main():
                     n_mutated = fields[6]
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
-                    genotype = fields[9]    
+                    genotype = fields[9]
                     perc_identity = fields[10]
                     num_of_mismatches = fields[11]
 
@@ -965,21 +970,28 @@ def main():
 
                     #print(f"{Reference_Name}\t{n_Reads}\t{perc_Reads}\t{n_deleted}\t{n_inserted}\t{n_mutated}\t{genotype}", end='\n')
                     if genotype == "perfect HDR edit":
-                        genotype_freq["HDR_perfect"] += float(perc_Reads)
+                        genotype_freq["HDR_perfect"] += int(n_Reads)
                     elif genotype == "wt protein + HDR SNP":
-                        genotype_freq["wtProt_hdrSNP"] += float(perc_Reads)
+                        genotype_freq["wtProt_hdrSNP"] += int(n_Reads)
                     elif genotype == "wt protein + mutant SNP":
-                        genotype_freq["wtProt_mutSNP"] += float(perc_Reads)  
+                        genotype_freq["wtProt_mutSNP"] += int(n_Reads)  
                     elif genotype == "wt protein + wt SNP":
-                        genotype_freq["wtProt_wtSNP"] += float(perc_Reads)                  
+                        genotype_freq["wtProt_wtSNP"] += int(n_Reads)                  
                     elif genotype == "mutant protein + HDR SNP":
-                        genotype_freq["mutProt_hdrSNP"] += float(perc_Reads)                  
+                        genotype_freq["mutProt_hdrSNP"] += int(n_Reads)                  
                     elif genotype == "mutant protein + mutant SNP":
-                        genotype_freq["mutProt_mutSNP"] += float(perc_Reads)                  
+                        genotype_freq["mutProt_mutSNP"] += int(n_Reads)                  
                     elif genotype == "mutant protein + wt SNP":
-                        genotype_freq["mutProt_wtSNP"] += float(perc_Reads)      
+                        genotype_freq["mutProt_wtSNP"] += int(n_Reads)      
                     elif genotype == "wt allele":
-                        genotype_freq["wt_allele"] += float(perc_Reads)  
+                        genotype_freq["wt_allele"] += int(n_Reads)  
+
+            # compute the percentage of each genotype
+            for key in genotype_freq:
+                if total_num_reads == 0:
+                    genotype_freq[key] = 0
+                else:   
+                    genotype_freq[key] = genotype_freq[key] / total_num_reads * 100
 
 
         #write genotype to file

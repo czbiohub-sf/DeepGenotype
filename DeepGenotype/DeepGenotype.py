@@ -84,7 +84,8 @@ def parse_args():
     parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30", type=str, help='options to pass to fastp, the default is to do quality trimming from both ends of each read, using a slide window of 4 and a mean quality threshold of 20, see fastp documentation for more options', metavar='')
     parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required ', metavar='')
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist')
-    parser.add_argument('--min_reads_for_crispresso', default=50, type=int, help='minimum number of reads for CRISPResso to be considered successful', metavar='')
+    parser.add_argument('--min_reads_post_filter', default=50, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming', metavar='')
+    parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -144,7 +145,7 @@ def check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
                 fields = line_deco.rstrip().split("\t")
                 n_Reads = fields[7]
                 num_reads += int(n_Reads)
-            if num_reads < config['min_reads_for_crispresso']:
+            if num_reads < config['min_reads_post_filter']:
                 return False
             else:
                 return True
@@ -320,7 +321,7 @@ def main():
                 path_to_Alleles_frequency_table_zip = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
                 # check if CRISPResso failed, if so, retry with less stringent quality trimming 
                 if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
                     command_retry = basic_command + [
                             f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 20"
                             ]
@@ -332,7 +333,7 @@ def main():
                     p.communicate()  # wait for the commands to process
                 # retry #2 with even less stringent quality trimming
                 if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
                     command_retry = basic_command + [
                             f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 10"
                             ]
@@ -344,7 +345,7 @@ def main():
                     p.communicate()  # wait for the commands to process
                 # retry #3 with even less stringent quality trimming
                 if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
                     command_retry = basic_command + [
                             f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4"
                             ]
@@ -356,7 +357,7 @@ def main():
                     p.communicate()  # wait for the commands to process
                 # retry #4 with even less stringent quality trimming
                 if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_for_crispresso']} reads for {row['Sample_ID']}, retrying with no quality trimming")
+                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with no quality trimming")
                     command_retry = basic_command # no quality trimming
                     path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
                     path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
@@ -382,7 +383,8 @@ def main():
                                 f"--allele_freq_file", f"Alleles_frequency_table.zip",
                                 f"--wt_amp", f"{row['WT_amplicon_sequence']}",
                                 f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
-                                f"--ENST_ID", f"{row['ENST_id']}"
+                                f"--ENST_ID", f"{row['ENST_id']}",
+                                f"--min_reads_for_genotype", f"{config['min_reads_for_genotype']}"
                                 ]
                     if 'payload_block_index' in row:
                         command2 = command2 + [f"--payload_block_index",
