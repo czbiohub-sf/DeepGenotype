@@ -547,6 +547,7 @@ def main():
             weighted_sum = sum(v * w for v, w in zip(values, weights))
             total_weight = sum(weights)
             return weighted_sum / total_weight
+        
         ##################################################
         #prepration work before processing the alignments#
         ##################################################
