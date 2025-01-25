@@ -34,6 +34,7 @@ def parse_args():
     parser.add_argument('--HDR_amp', default="", type=str, help='sequence of the HDR amplicon')
     parser.add_argument('--ENST_ID', default="", type=str, help='ENST ID')
     parser.add_argument('--payload_block_index', default=1, type=int, help='1-based index of the insertion block to treat as the payload if multiple are found')
+    parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='minimum number of reads for genotype to be considered successful')
 
     config = parser.parse_args()
     if len(sys.argv)==1: # print help message if arguments are not valid
@@ -602,7 +603,6 @@ def main():
                 writehandle.write(f"Aligned_Sequence	Reference_Sequence\tReference_Name\tRead_Status\tn_deleted\tn_inserted\tn_mutated\t#Reads\t%Reads\tGenotype\n")
                 for line in filehandle:
                     line_deco = line.decode()
-                    writehandle.write(line_deco.rstrip())
                     
                     fields = line_deco.rstrip().split("\t")
                     read = fields[0]
@@ -614,7 +614,11 @@ def main():
                     n_mutated = fields[6]
                     n_Reads = fields[7]
                     perc_Reads = fields[8]
-                            
+
+                    if int(n_Reads) < config['min_reads_for_genotype']:
+                        continue #skip if the number of reads is less than the minimum number of reads for genotype
+
+                    writehandle.write(line_deco.rstrip())
                     ###########################################################################################################
                     #TRIM the gaps on both ends of the ref, these those gaps represent extra seq in the reads (not insertions)#
                     ###########################################################################################################
@@ -916,21 +920,28 @@ def main():
 
                     #print(f"{Reference_Name}\t{n_Reads}\t{perc_Reads}\t{n_deleted}\t{n_inserted}\t{n_mutated}\t{genotype}", end='\n')
                     if genotype == "HDR allele (perfect HDR edit)":
-                        genotype_freq["HDR_perfect"] += float(perc_Reads)
+                        genotype_freq["HDR_perfect"] += int(n_Reads)
                     elif genotype == "HDR allele (wt protein + correct payload)":
-                        genotype_freq["wtProt_OKPL"] += float(perc_Reads)
+                        genotype_freq["wtProt_OKPL"] += int(n_Reads)
                     elif genotype == "HDR allele (wt protein + mutant payload)":
-                        genotype_freq["wtProt_mutPL"] += float(perc_Reads)        
+                        genotype_freq["wtProt_mutPL"] += int(n_Reads)        
                     elif genotype == "HDR allele (mutant protein + correct payload)":
-                        genotype_freq["mutProt_OKPL"] += float(perc_Reads)                  
+                        genotype_freq["mutProt_OKPL"] += int(n_Reads)                  
                     elif genotype == "HDR allele (mutant protein + mutant payload)":
-                        genotype_freq["mutProt_mutPL"] += float(perc_Reads)                  
+                        genotype_freq["mutProt_mutPL"] += int(n_Reads)                  
                     elif genotype == "wt allele":
-                        genotype_freq["wt_allele"] += float(perc_Reads)  
+                        genotype_freq["wt_allele"] += int(n_Reads)  
                     elif genotype == "wt allele (wt protein)":
-                        genotype_freq["wtProt_noPL"] += float(perc_Reads)
+                        genotype_freq["wtProt_noPL"] += int(n_Reads)
                     elif genotype == "wt allele (mutant protein)":
-                        genotype_freq["mutProt_noPL"] += float(perc_Reads)    
+                        genotype_freq["mutProt_noPL"] += int(n_Reads)    
+            # compute the percentage of each genotype
+            for key in genotype_freq:
+                if total_num_reads == 0:
+                    genotype_freq[key] = 0
+                else:   
+                    genotype_freq[key] = genotype_freq[key] / total_num_reads * 100
+
                         
         #write genotype to file
         with open(os.path.join(zip_dir,'genotype_frequency.csv'),'w') as writehandle:
