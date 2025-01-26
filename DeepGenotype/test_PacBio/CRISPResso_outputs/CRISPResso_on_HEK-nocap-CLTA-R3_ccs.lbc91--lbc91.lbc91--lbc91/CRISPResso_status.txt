@@ -1,3 +1,0 @@
-48.00% Unexpected error, please check your input.
-
-ERROR: Image size of 147700x400 pixels is too large. It must be less than 2^16 in each direction.
