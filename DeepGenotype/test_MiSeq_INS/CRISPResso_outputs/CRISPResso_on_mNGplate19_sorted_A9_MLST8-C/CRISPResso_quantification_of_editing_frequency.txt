@@ -1,3 +1,0 @@
-Amplicon	Unmodified%	Modified%	Reads_in_input	Reads_aligned_all_amplicons	Reads_aligned	Unmodified	Modified	Discarded	Insertions	Deletions	Substitutions	Only Insertions	Only Deletions	Only Substitutions	Insertions and Deletions	Insertions and Substitutions	Deletions and Substitutions	Insertions Deletions and Substitutions
-MLST8	48.33081307	51.66918693	36851	34485	34388	16620	17768	0	7770	7654	5495	5920	6348	2353	5	1841	1297	4
-HDR	0.0	100.0	36851	34485	97	0	97	0	97	97	97	0	0	0	0	0	0	97
