@@ -16,9 +16,16 @@ DeepGenotype/test_PacBio/CRISPResso_run_logs/
 
 DeepGenotype/test_MiSeq_INS/CRISPResso_outputs/
 DeepGenotype/test_MiSeq_INS/DeepGenotype_outputs/
+DeepGenotype/test_MiSeq_INS/*.csv
+DeepGenotype/test_MiSeq_INS/*.xlsx
+DeepGenotype/test_MiSeq_INS/CRISPResso_run_logs/
 
 DeepGenotype/test_MiSeq_SNP/CRISPResso_outputs/
 DeepGenotype/test_MiSeq_SNP/DeepGenotype_outputs/
+DeepGenotype/test_MiSeq_SNP/*.csv
+DeepGenotype/test_MiSeq_SNP/*.xlsx
+DeepGenotype/test_MiSeq_SNP/CRISPResso_run_logs/
+DeepGenotype/test_MiSeq_SNP/Alleles_freq_tables_with_genotypes/
 
 DeepGenotype/test_C130R/
 DeepGenotype/test_C130R/CRISPResso_outputs/
