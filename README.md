@@ -77,6 +77,11 @@ Please make sure the following two python scripts are in the same directory as D
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
 --quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
+--fastp_options_string &nbsp;&nbsp; options to pass to fastp, [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] which is to do quality trimming from both ends of each read, using a slide window of 30 and a mean quality threshold of 30, see fastp documentation for more options  
+--n_processes &nbsp;&nbsp; number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required [default=1]  
+--skip_crispresso &nbsp;&nbsp; skip CRISPResso if results already exist [default=False]  
+--min_reads_post_filter &nbsp;&nbsp; if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]  
+--min_reads_for_genotype &nbsp;&nbsp; if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]
 
 
 &nbsp;
@@ -224,6 +229,7 @@ The input csv should contain the following columns with the exact names
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "mNGplate19_sorted_A2_DDX6-C_S90_R2_001.fastq.gz"  
       &nbsp;&nbsp;&nbsp; and your sample name is "mNGplate19_sorted_A2_DDX6-C", and "_S90_" is another variable part of the name  
       &nbsp;&nbsp;&nbsp;Then you should add "_S90_" to the "Fastq_extra_suffix" column  
+
 
 &nbsp;
 ## Helper commands
