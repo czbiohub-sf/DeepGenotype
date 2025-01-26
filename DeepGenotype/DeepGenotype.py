@@ -205,23 +205,27 @@ def main():
         if not "payload_block_index" in df.columns:
             log.warning(f"The \"payload_block_index\" column in not found in the input csv file\nDefaulting \"payload_block_index\" to 1.\nPlease verify that there is only one block of SNPs or insertion in the HDR_amplicon relative to the wt_amplicon.\nThe first block is assumed to be the payload block.")
 
-
+        # create a output folder for the genotype results
+        dg_output_dir = os.path.join(path2workDir,f"DeepGenotype_outputs")
+        os.makedirs(dg_output_dir, exist_ok=True)
+        
+        # create a output folder for the genotype results
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
-        with open(os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
+        with open(os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
             if edit_type == "INS":
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,\n")
-                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,num_post_filter_reads,weighted_avg_percent_identity,weighted_avg_num_of_mismatches\n") #write header
-                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-\n")
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,[c]num_reads_in_fq,[c]num_reads_post_QC,[c]num_reads_aligned,num_reads_post_read_group_filter,[c]num_alleles,num_alleles\n") #write header
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             elif edit_type == "SNP":
                 #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,\n")
+                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
                 writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
                 writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
-                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,num_post_filter_reads,weighted_avg_percent_identity,weighted_avg_num_of_mismatches\n")
-                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-\n")
+                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,[c]num_reads_in_fq,[c]num_reads_post_QC,[c]num_reads_aligned,num_reads_post_read_group_filter,[c]num_alleles,num_alleles\n")
+                writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
                 fq_ex_suffix = ""
@@ -427,6 +431,18 @@ def main():
                     log.error(f"...{row['Sample_ID']} was not processed")
 
 
+                # make a subfolder for the current sample
+                sample_output_dir = os.path.join(dg_output_dir,f"{row['Sample_ID']}")
+                os.makedirs(sample_output_dir, exist_ok=True)
+                # move recalculated allele frequency table zip file
+                shutil.move(moved_zip_path, os.path.join(sample_output_dir,f"{row['Sample_ID']}_DeepGenotypeAlleleFreq.zip"))
+                # copy the reads statistics file to the output folder
+                shutil.copy(os.path.join(current_CRISPResso_out_dir,f"CRISPResso_mapping_statistics.txt"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_mapping_statistics.txt"))
+                # copy the fastp report file to the output folder
+                shutil.copy(os.path.join(current_CRISPResso_out_dir,f"fastp_report.html"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_fastp_report.html"))
+                # copy the CRISPResso report file to the output folder
+                shutil.copy(os.path.join(path2_CRISPResso_out, f"CRISPResso_on_{sample_name}.html"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
+
 
             # finished processing all samples,
             # write genotype explanation
@@ -476,17 +492,19 @@ def main():
                                         )
 
         # convert csv to xlsx
-        csv_path = os.path.join(path2workDir,f"{out_basename}_genotype_freq.csv")
+        csv_path = os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv")
         command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", csv_path , "--mode", f"{edit_type}"]
         p = Popen(command3, universal_newlines=True)
         p.communicate()  # wait for the commands to process
-        
+
+        # remove temporary folder Alleles_freq_tables_with_genotypes
+        shutil.rmtree(path2_allelsFreqTabs)
+
         # all done
         log.info(f"Done processing all samples in the input csv file: {path2csv}")
         log.info(f"CRISPResso results are in folder: {path2_CRISPResso_out}")
         excel_path = csv_path.replace(".csv", ".xlsx")
         log.info(f"DeepGenotype output files are {csv_path} and {os.path.basename(excel_path)}")
-
 
 
         os.chdir(wd)  # change to the saved working dir
