@@ -182,13 +182,13 @@ def main():
         # map edit_type to python scripts that process alleles freq tables
         script_path=''
         if edit_type == "INS":
-            script_path = os.path.join(wd, "process_alleles_freq_table_INS.py")
+            script_path = os.path.join(wd, "scripts", "process_alleles_freq_table_INS.py")
             if not os.path.isfile(script_path):  # check script file existence
                 log.error(f"Python script not found, please place file \"process_alleles_freq_table_INS.py\" in the same directory as \"DeepGenotype.py\"")
                 log.error(f"...{row['Sample_ID']} was not processed")
                 sys.exit()
         elif edit_type == "SNP":
-            script_path = os.path.join(wd, "process_alleles_freq_table_SNP.py")
+            script_path = os.path.join(wd, "scripts", "process_alleles_freq_table_SNP.py")
             if not os.path.isfile(script_path):  # check script file existence
                 log.error(f"Python script not found, please place file \"process_alleles_freq_table_INS.py\" in the same directory as \"DeepGenotype.py\"")
                 log.error(f"...{row['Sample_ID']} was not processed")
@@ -493,7 +493,7 @@ def main():
 
         # convert csv to xlsx
         csv_path = os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv")
-        command3 = [f"python", f"{os.path.join(wd,'csv2xlsx.py')}","--path2csv", csv_path , "--mode", f"{edit_type}"]
+        command3 = [f"python", f"{os.path.join(wd,'scripts','csv2xlsx.py')}","--path2csv", csv_path , "--mode", f"{edit_type}"]
         p = Popen(command3, universal_newlines=True)
         p.communicate()  # wait for the commands to process
 
@@ -502,9 +502,9 @@ def main():
 
         # all done
         log.info(f"Done processing all samples in the input csv file: {path2csv}")
-        log.info(f"CRISPResso results are in folder: {path2_CRISPResso_out}")
+        log.info(f"CRISPResso report files are in folder: {path2_CRISPResso_out}")
         excel_path = csv_path.replace(".csv", ".xlsx")
-        log.info(f"DeepGenotype output files are {csv_path} and {os.path.basename(excel_path)}")
+        log.info(f"DeepGenotype report files are in folder: {dg_output_dir}")
 
 
         os.chdir(wd)  # change to the saved working dir
