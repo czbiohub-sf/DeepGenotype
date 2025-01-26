@@ -1,7 +1,0 @@
-Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited
-Perfect_edit_status,N/A,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit
-Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL, (PL=payload; Prot=protein; mut=protein-level-mutant; wt=wildtype; okPL=peptide-sequence-correct-payload)
-Sample_ID,,,,,,,,
-HEK-nocap-CLTA-R1_ccs.lbc89--lbc89.lbc89--lbc89,0.0247%,0.0000%,0.1609%,6.1742%,81.4650%,0.8290%,6.4093%,4.9369%
-HEK-nocap-CLTA-R2_ccs.lbc90--lbc90.lbc90--lbc90,0.0399%,0.0000%,0.0532%,5.4381%,81.6780%,0.8775%,6.5284%,5.3849%
-HEK-nocap-CLTA-R3_ccs.lbc91--lbc91.lbc91--lbc91,0.0343%,0.0000%,0.1486%,5.8756%,81.8016%,1.1774%,6.3672%,4.5953%,

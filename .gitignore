@@ -10,6 +10,9 @@ DeepGenotype.egg-info
 
 DeepGenotype/test_PacBio/CRISPResso_outputs/
 DeepGenotype/test_PacBio/DeepGenotype_outputs/
+DeepGenotype/test_PacBio/*.csv
+DeepGenotype/test_PacBio/*.xlsx
+DeepGenotype/test_PacBio/CRISPResso_run_logs/
 
 DeepGenotype/test_MiSeq_INS/CRISPResso_outputs/
 DeepGenotype/test_MiSeq_INS/DeepGenotype_outputs/
