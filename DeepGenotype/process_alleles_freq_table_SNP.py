@@ -940,7 +940,9 @@ def main():
                         "wtProt_wtSNP":0}
 
         with zipfile.ZipFile(new_zip_path, 'r') as myzip:
-            total_num_reads = 0
+            d_total_num_reads = 0
+            d_num_reads_post_read_group_filter = 0
+            d_num_alleles = 0
             perc_identity_list = []
             num_of_mismatches_list = []
             with myzip.open('Alleles_frequency_table_genotype.txt') as filehandle:
@@ -963,7 +965,11 @@ def main():
                     perc_identity = fields[10]
                     num_of_mismatches = fields[11]
 
-                    total_num_reads += int(n_Reads)
+                    d_total_num_reads += int(n_Reads)
+                    d_num_alleles += 1
+                    if int(n_Reads) >= config['min_reads_for_genotype']:
+                        d_num_reads_post_read_group_filter += int(n_Reads)
+                        
 
                     if Reference_Name == "HDR": #only consider HDR for weighted average of percent identity and num_of_mismatches
                         perc_identity_list.append(float(perc_identity))
@@ -989,10 +995,20 @@ def main():
 
             # compute the percentage of each genotype
             for key in genotype_freq:
-                if total_num_reads == 0:
+                if d_total_num_reads == 0:
                     genotype_freq[key] = 0
                 else:   
-                    genotype_freq[key] = genotype_freq[key] / total_num_reads * 100
+                    genotype_freq[key] = genotype_freq[key] / d_total_num_reads * 100
+
+        # get reads statistics from CRISPResso
+        with open(os.path.join(zip_dir,'CRISPResso_mapping_statistics.txt'),'r') as readstat_file:
+            header_line = next(readstat_file)
+            second_line = next(readstat_file)
+            fields = second_line.rstrip().split("\t")
+            num_reads_in_fq = fields[0]
+            num_reads_post_QC = fields[1]
+            num_reads_aligned = fields[2]
+            num_computed_aln = fields[3]
 
 
         #write genotype to file
@@ -1007,7 +1023,7 @@ def main():
             #                 f"{float(genotype_freq['mutProt_hdrSNP']):.4f}%,"
             #                 f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
             #                 f"{float(genotype_freq['wtProt_mutSNP']):.4f}%\n")
-            writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,num_clean_reads,weighted_avg_perc_identity,weighted_avg_num_of_mismatches\n")
+            writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,num_clean_reads,weighted_avg_perc_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,[dg]num_reads_post_read_group_filter,num_alleles,[dg]num_alleles\n")
             writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
                             f"{float(genotype_freq['HDR_perfect']):.4f}%,"
                             f"{float(genotype_freq['wtProt_hdrSNP']):.4f}%,"
@@ -1016,9 +1032,15 @@ def main():
                             f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
                             f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,"
-                            f"{int(total_num_reads)},"
                             f"{compute_weighted_average(perc_identity_list, num_of_mismatches_list):.4f},"
-                            f"{compute_weighted_average(num_of_mismatches_list, num_of_mismatches_list):.4f}\n")  
+                            f"{compute_weighted_average(num_of_mismatches_list, num_of_mismatches_list):.4f},"
+                            f"{num_reads_in_fq},"
+                            f"{num_reads_post_QC},"
+                            f"{num_reads_aligned},"
+                            f"{d_num_reads_post_read_group_filter},"
+                            f"{num_computed_aln},"
+                            f"{d_num_alleles}\n"
+                            )
                             
 
     except Exception  as e:
