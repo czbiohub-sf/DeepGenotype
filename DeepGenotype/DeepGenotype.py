@@ -216,7 +216,7 @@ def main():
             if edit_type == "INS":
                 writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
                 writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
-                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,[c]num_reads_in_fq,[c]num_reads_post_QC,[c]num_reads_aligned,num_reads_post_read_group_filter,[c]num_alleles,num_alleles\n") #write header
+                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n") #write header
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             elif edit_type == "SNP":
                 #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
@@ -224,7 +224,7 @@ def main():
                 writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
                 writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
                 writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
-                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,[c]num_reads_in_fq,[c]num_reads_post_QC,[c]num_reads_aligned,num_reads_post_read_group_filter,[c]num_alleles,num_alleles\n")
+                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
