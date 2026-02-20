@@ -86,6 +86,8 @@ def parse_args():
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist [default=False]')
     parser.add_argument('--min_reads_post_filter', default=50, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]', metavar='')
     parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]', metavar='')
+    parser.add_argument('--bbduk', default="", type=str, choices=["", "short", "long"],
+                        help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500) [default=disabled]', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -101,6 +103,10 @@ fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
 single_fastq_suffix= config['single_fastq_suffix']
 fastp_options_string= config['fastp_options_string']
+bbduk_mode = config['bbduk']
+if bbduk_mode and not shutil.which("bbduk.sh"):
+    log.error("bbduk.sh not found on PATH. Install BBTools: conda install -c bioconda bbmap")
+    sys.exit(1)
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
 path2_allelsFreqTabs = os.path.join(path2workDir, "Alleles_freq_tables_with_genotypes")
@@ -114,6 +120,9 @@ os.makedirs(path2_CRISPResso_out, exist_ok=True)
 if os.path.isdir(path2_allelsFreqTabs):
     shutil.rmtree(path2_allelsFreqTabs)
 os.makedirs(path2_allelsFreqTabs)
+path2_bbduk_out = os.path.join(path2workDir, "bbduk_trimmed")
+if bbduk_mode:
+    os.makedirs(path2_bbduk_out, exist_ok=True)
 
 wd = os.getcwd()  # save current working dir
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
@@ -130,6 +139,34 @@ def slugify(value): #adapted from the Django project
     value = re.sub(rb'[-\s]+', b'-', value)
 
     return value.decode('utf-8')
+
+def run_bbduk(input_fq, output_fq, mode, input_fq2=None, output_fq2=None,
+              stderr_path=None, stdout_path=None):
+    """Run bbduk.sh with short or long read parameter presets."""
+    # parameter presets
+    if mode == "short":
+        params = ["ktrim=r", "k=27", "hdist=1", "edist=0",
+                  "qtrim=rl", "trimq=20", "minlen=220"]
+    elif mode == "long":
+        params = ["ktrim=r", "k=21", "hdist=1", "edist=0",
+                  "qtrim=rl", "trimq=10", "minlen=500"]
+
+    command = ["bbduk.sh", "-Xmx4g", f"in={input_fq}", f"out={output_fq}",
+               "ref=adapters,phix"] + params
+    if input_fq2 and output_fq2:
+        command.insert(2, f"in2={input_fq2}")
+        command.insert(4, f"out2={output_fq2}")
+
+    fout = open(stdout_path, 'w+') if stdout_path else None
+    ferr = open(stderr_path, 'w+') if stderr_path else None
+    p = Popen(command, stdout=fout, stderr=ferr, universal_newlines=True)
+    p.communicate()
+    if fout:
+        fout.close()
+    if ferr:
+        ferr.close()
+    return p.returncode
+
 
 #check if the Alleles_frequency_table.zip file exists and contains at least 50 reads
 def check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
@@ -258,6 +295,35 @@ def main():
                         log.error(f"...{row['Sample_ID']} was not processed")
                         continue
 
+                #############################
+                # run bbduk if requested    #
+                #############################
+                if bbduk_mode:
+                    log.info(f"...running bbduk ({bbduk_mode} read mode) on {row['Sample_ID']}")
+                    bbduk_stdout = os.path.join(path2_stdout, f"{row['Sample_ID']}.bbduk.stdout.txt")
+                    bbduk_stderr = os.path.join(path2_stdout, f"{row['Sample_ID']}.bbduk.stderr.txt")
+                    if single_fastq_suffix == "":
+                        bbduk_out_r1 = os.path.join(path2_bbduk_out, f"{row['Sample_ID']}_bbduk_R1.fastq.gz")
+                        bbduk_out_r2 = os.path.join(path2_bbduk_out, f"{row['Sample_ID']}_bbduk_R2.fastq.gz")
+                        rc = run_bbduk(fastq_r1, bbduk_out_r1, bbduk_mode,
+                                       input_fq2=fastq_r2, output_fq2=bbduk_out_r2,
+                                       stdout_path=bbduk_stdout, stderr_path=bbduk_stderr)
+                        if rc != 0:
+                            log.error(f"...bbduk failed for {row['Sample_ID']}, see {bbduk_stderr}")
+                            log.error(f"...{row['Sample_ID']} was not processed")
+                            continue
+                        fastq_r1 = bbduk_out_r1
+                        fastq_r2 = bbduk_out_r2
+                    else:
+                        bbduk_out = os.path.join(path2_bbduk_out, f"{row['Sample_ID']}_bbduk.fastq.gz")
+                        rc = run_bbduk(fastq, bbduk_out, bbduk_mode,
+                                       stdout_path=bbduk_stdout, stderr_path=bbduk_stderr)
+                        if rc != 0:
+                            log.error(f"...bbduk failed for {row['Sample_ID']}, see {bbduk_stderr}")
+                            log.error(f"...{row['Sample_ID']} was not processed")
+                            continue
+                        fastq = bbduk_out
+
                 #create fastq list for building the CRISPResso command
                 if single_fastq_suffix == "":
                     fastq_list = [f"--fastq_r1", f"{fastq_r1}",
@@ -294,9 +360,13 @@ def main():
                 if skip_crispresso_flag and crispresso_results_exist:
                     log.info(f"...CRISPResso results already exist for {row['Sample_ID']}, skipping CRISPResso")
                 else:
-                    command = basic_command + [
-                            f"--fastp_options_string", f"{config['fastp_options_string']}",
-                            ]
+                    # when bbduk is active, skip fastp quality trimming to avoid double-trimming
+                    if bbduk_mode:
+                        command = basic_command
+                    else:
+                        command = basic_command + [
+                                f"--fastp_options_string", f"{config['fastp_options_string']}",
+                                ]
 
                     log.info(f"Processing sample: {row['Sample_ID']}")
                     if num_fastq_files == 2:
@@ -322,53 +392,55 @@ def main():
                 #################################
                 # retry CRISPResso if it failed #
                 #################################
+                # when bbduk is active, skip fastp retry logic (trimming already done by bbduk)
                 path_to_Alleles_frequency_table_zip = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
-                # check if CRISPResso failed, if so, retry with less stringent quality trimming 
-                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
-                    command_retry = basic_command + [
-                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 20"
-                            ]
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-                    p.communicate()  # wait for the commands to process
-                # retry #2 with even less stringent quality trimming
-                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
-                    command_retry = basic_command + [
-                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 10"
-                            ]
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-                    p.communicate()  # wait for the commands to process
-                # retry #3 with even less stringent quality trimming
-                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
-                    command_retry = basic_command + [
-                            f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4"
-                            ]
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-                    p.communicate()  # wait for the commands to process
-                # retry #4 with even less stringent quality trimming
-                if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                    log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with no quality trimming")
-                    command_retry = basic_command # no quality trimming
-                    path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
-                    path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
-                    mystdput = open(path_to_stdout_file, 'w+')
-                    mystderr = open(path_to_stderr_file, 'w+')
-                    p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
-                    p.communicate()  # wait for the commands to process
+                if not bbduk_mode:
+                    # check if CRISPResso failed, if so, retry with less stringent quality trimming
+                    if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
+                        command_retry = basic_command + [
+                                f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 20"
+                                ]
+                        path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                        path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                        mystdput = open(path_to_stdout_file, 'w+')
+                        mystderr = open(path_to_stderr_file, 'w+')
+                        p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                        p.communicate()  # wait for the commands to process
+                    # retry #2 with even less stringent quality trimming
+                    if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
+                        command_retry = basic_command + [
+                                f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 10"
+                                ]
+                        path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                        path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                        mystdput = open(path_to_stdout_file, 'w+')
+                        mystderr = open(path_to_stderr_file, 'w+')
+                        p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                        p.communicate()  # wait for the commands to process
+                    # retry #3 with even less stringent quality trimming
+                    if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
+                        command_retry = basic_command + [
+                                f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4"
+                                ]
+                        path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                        path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                        mystdput = open(path_to_stdout_file, 'w+')
+                        mystderr = open(path_to_stderr_file, 'w+')
+                        p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                        p.communicate()  # wait for the commands to process
+                    # retry #4 with even less stringent quality trimming
+                    if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
+                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with no quality trimming")
+                        command_retry = basic_command # no quality trimming
+                        path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
+                        path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
+                        mystdput = open(path_to_stdout_file, 'w+')
+                        mystderr = open(path_to_stderr_file, 'w+')
+                        p = Popen(command_retry, stdout=mystdput, stderr=mystderr, universal_newlines=True)
+                        p.communicate()  # wait for the commands to process
 
 
                 #process CRISPresso result: allele frequency table
@@ -429,6 +501,7 @@ def main():
                     log.error(f"{path_not_found}")
                     log.error(f"CRISPResso failed for {row['Sample_ID']}")
                     log.error(f"...{row['Sample_ID']} was not processed")
+                    continue
 
 
                 # make a subfolder for the current sample

@@ -9,39 +9,33 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 - Batch process a list of samples 
 - Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation
 
-
-## Inputs
-There are *two* required input files:
-- Fastq files (can be gzipped or not)
-- A csv file (examples provided in `example_csv`), explanation of the columns is below
-
-## Outputs:
-- A result table in the format of a csv file and a xlsx file, the table contains **sample-wise** information of:
-  - Protein-level genotype frequencies
-  - Two metrics that quantify DNA-level mismatches in edited alleles
-    - weighted average of the percent identity of the reads (that aligned to the HDR amplicon)
-    - weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)
-- CRISPResso2 output that includes (and not limited to) the following:
-  - Read aligning rate
-  - Sequence-level genotype frequencies table
-  - read-to-genotype assignments information
-
 ## Installation
 
 **NOTE**: *if you installed DeepGenotype before 2025-01-15, please reinstall DeepGenotype to update CRISPResso2 to 2.3.1 to enable read quality-trimming.*
 
+### Option A: Install using environment.yml (recommended)
+```shell
+module load anaconda # if on the hpc
+git clone https://github.com/czbiohub-sf/DeepGenotype
+cd DeepGenotype
+conda env create -f environment.yml
+conda activate DeepGenotype
+pip install .
+```
+
+### Option B: Manual installation
 create a conda environment and activate it
 ```shell
 module load anaconda # if on the hpc
 conda create -n DeepGenotype python=3.9
 conda activate DeepGenotype
 ```
-install CRISPResso2
+install CRISPResso2 and BBTools (includes bbduk.sh)
 ```shell
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
-conda install CRISPResso2==2.3.1
+conda install CRISPResso2==2.3.1 bbmap
 ```
 verify CRISPResso2 installation
 ```shell
@@ -54,6 +48,8 @@ cd DeepGenotype
 pip install . # or pip install biopython==1.78 pandas requests openpyxl==3.1.2
 
 ```
+
+### Verify installation
 verify DeepGenotype installation
 ```shell
 cd DeepGenotype # must be in the DeepGenotype/DeepGenotype directory
@@ -72,20 +68,100 @@ Please make sure the following two python scripts are in the same directory as D
  &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
 
 
-#### Optional arguments
+#### Notable optional arguments
 --fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
---single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
---quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)   
---fastp_options_string &nbsp;&nbsp; options to pass to fastp, [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] which is to do quality trimming from both ends of each read, using a slide window of 30 and a mean quality threshold of 30, see fastp documentation for more options  
---n_processes &nbsp;&nbsp; number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required [default=1]  
---skip_crispresso &nbsp;&nbsp; skip CRISPResso if results already exist [default=False]  
---min_reads_post_filter &nbsp;&nbsp; if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]  
---min_reads_for_genotype &nbsp;&nbsp; if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]
+--single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
+--bbduk &nbsp;&nbsp; run BBDuk preprocessing before CRISPResso, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below) [default=disabled]  
+--fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used when `--bbduk` is **not** set), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options) below  
+
+
+### Read filtering options
+
+DeepGenotype supports two mutually exclusive approaches for read quality filtering. Only one is active per run.
+
+#### Option 1: BBDuk preprocessing (activate with `--bbduk short` or `--bbduk long`)
+
+When `--bbduk` is set, [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) (part of BBTools) runs **before** CRISPResso on each sample's fastq files. It performs adapter trimming, quality trimming, and short-read filtering in a single pass. CRISPResso's built-in fastp trimming is skipped to avoid double-trimming.
+
+Two parameter presets are available:
+
+| Parameter | `--bbduk short` (Illumina/MiSeq) | `--bbduk long` (PacBio) |
+|---|---|---|
+| Adapter reference | TruSeq, Nextera & PhiX (`ref=adapters,phix`) | TruSeq, Nextera & PhiX (`ref=adapters,phix`) |
+| Trim direction | right end (`ktrim=r`) | right end (`ktrim=r`) |
+| Kmer length | 27 (`k=27`) | 21 (`k=21`) |
+| Max substitutions | 1 (`hdist=1`) | 1 (`hdist=1`) |
+| Max substitutions+indels | 0 (`edist=0`) | 0 (`edist=0`) |
+| Quality trim | both ends (`qtrim=rl`) | both ends (`qtrim=rl`) |
+| Min quality | 20 (`trimq=20`) | 10 (`trimq=10`) |
+| Min read length | 220 bp (`minlen=220`) | 500 bp (`minlen=500`) |
+
+Example — MiSeq paired-end reads with BBDuk:
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq \
+--bbduk short
+```
+
+Example — PacBio single-end reads with BBDuk:
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_pacbio.csv \
+--path2workDir test_PacBio \
+--path2fastqDir test_PacBio/fastq \
+--single_fastq_suffix .fastq \
+--bbduk long
+```
+
+#### Option 2: fastp via CRISPResso (default, no `--bbduk` flag needed)
+
+When `--bbduk` is **not** set, CRISPResso2's built-in [fastp](https://github.com/OpenGene/fastp) integration handles quality trimming. This is the default behavior.
+
+Default fastp options: `--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30`
+(quality trimming from both ends, sliding window of 30 bp, mean quality threshold of 30)
+
+You can customize fastp parameters with `--fastp_options_string`:
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq \
+--fastp_options_string "--cut_front --cut_tail --cut_mean_quality 25 --cut_window_size 20"
+```
+
+**Automatic retry logic**: if CRISPResso returns fewer than `--min_reads_post_filter` reads (default 50), it automatically retries with progressively less stringent fastp settings:
+1. `--cut_mean_quality 30 --cut_window_size 20`
+2. `--cut_mean_quality 20 --cut_window_size 10`
+3. `--cut_mean_quality 20 --cut_window_size 4`
+4. No quality trimming
+
+This retry logic is **only** active in fastp mode. When `--bbduk` is set, trimming is handled entirely by BBDuk and no retries are performed.
+
+
+
+## Inputs
+There are *two* required input files:
+- Fastq files (can be gzipped or not)
+- A csv file (examples provided in `example_csv`), explanation of the columns is below
+
+## Outputs:
+- A result table in the format of a csv file and a xlsx file, the table contains **sample-wise** information of:
+  - Protein-level genotype frequencies
+  - Two metrics that quantify DNA-level mismatches in edited alleles
+    - weighted average of the percent identity of the reads (that aligned to the HDR amplicon)
+    - weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)
+- CRISPResso2 output that includes (and not limited to) the following:
+  - Read aligning rate
+  - Sequence-level genotype frequencies table
+  - read-to-genotype assignments information
 
 
 &nbsp;
-## To run pacbio test dataset (insertion mode)
+## Example 1: To run Pacbio test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
 ```shell
 module load anaconda
@@ -131,7 +207,7 @@ The completed `nohup.out` should look like this
 ```
 
 &nbsp;
-## Example 1: To run MiSeq test dataset (insertion mode)
+## Example 2: To run MiSeq test dataset (insertion mode)
 load conda, and activate the DeepGenotype conda environment
 ```shell
 module load anaconda
@@ -163,7 +239,7 @@ The completed `nohup.out` should look like this (only first 9 lines shown)
 ```
 
 &nbsp;
-## Example 2: to run MiSeq test dataset (SNP mode)
+## Example 3: to run MiSeq test dataset (SNP mode)
 load conda, and activate the DeepGenotype conda environment
 ```shell
 module load anaconda

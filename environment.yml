@@ -1,0 +1,15 @@
+name: DeepGenotype
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - CRISPResso2=2.3.1
+  - bbmap
+  - pip
+  - pip:
+    - biopython==1.78
+    - pandas
+    - requests
+    - openpyxl==3.1.2
