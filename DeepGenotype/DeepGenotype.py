@@ -86,8 +86,8 @@ def parse_args():
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist [default=False]')
     parser.add_argument('--min_reads_post_filter', default=50, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]', metavar='')
     parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]', metavar='')
-    parser.add_argument('--bbduk', default="", type=str, choices=["", "short", "long"],
-                        help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500) [default=disabled]', metavar='')
+    parser.add_argument('--bbduk', default="short", type=str, choices=["", "short", "long"],
+                        help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500), "" to disable [default=short]', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -487,14 +487,19 @@ def main():
                         current_result_file = os.path.join(current_CRISPResso_out_dir, "genotype_frequency.csv")
                         log.error(f"cannot find parsing result file {current_result_file}")
                         log.error(f"...{row['Sample_ID']} was not processed")
-                    
+                        continue
+
                     # move the deepgenotype genotype zip file to the archive folder
                     zip_path = os.path.join(current_CRISPResso_out_dir, "Alleles_frequency_table.zip")
+                    moved_zip_path = None
                     if os.path.isfile(zip_path):
                         old_zip_path = "_".join([zip_path.rstrip(r'.zip'), "genotype.zip"])
-                        moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
-                        shutil.move(old_zip_path, moved_zip_path)
-                    
+                        if os.path.isfile(old_zip_path):
+                            moved_zip_path = os.path.join(path2_allelsFreqTabs,f"{row['Sample_ID']}_alFreqRecal.zip")
+                            shutil.move(old_zip_path, moved_zip_path)
+                        else:
+                            log.warning(f"...genotype zip file not found: {old_zip_path}")
+
                 else:
                     log.error(f"...cannot find CRISPResso output file: Alleles_frequency_table.zip with the following path:")
                     path_not_found = os.path.join(current_CRISPResso_out_dir,"Alleles_frequency_table.zip")
@@ -508,13 +513,20 @@ def main():
                 sample_output_dir = os.path.join(dg_output_dir,f"{row['Sample_ID']}")
                 os.makedirs(sample_output_dir, exist_ok=True)
                 # move recalculated allele frequency table zip file
-                shutil.move(moved_zip_path, os.path.join(sample_output_dir,f"{row['Sample_ID']}_DeepGenotypeAlleleFreq.zip"))
+                if moved_zip_path and os.path.isfile(moved_zip_path):
+                    shutil.move(moved_zip_path, os.path.join(sample_output_dir,f"{row['Sample_ID']}_DeepGenotypeAlleleFreq.zip"))
                 # copy the reads statistics file to the output folder
-                shutil.copy(os.path.join(current_CRISPResso_out_dir,f"CRISPResso_mapping_statistics.txt"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_mapping_statistics.txt"))
-                # copy the fastp report file to the output folder
-                shutil.copy(os.path.join(current_CRISPResso_out_dir,f"fastp_report.html"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_fastp_report.html"))
+                mapping_stats = os.path.join(current_CRISPResso_out_dir,f"CRISPResso_mapping_statistics.txt")
+                if os.path.isfile(mapping_stats):
+                    shutil.copy(mapping_stats, os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_mapping_statistics.txt"))
+                # copy the fastp report file to the output folder (not present when bbduk is used)
+                fastp_report = os.path.join(current_CRISPResso_out_dir,f"fastp_report.html")
+                if os.path.isfile(fastp_report):
+                    shutil.copy(fastp_report, os.path.join(sample_output_dir,f"{row['Sample_ID']}_fastp_report.html"))
                 # copy the CRISPResso report file to the output folder
-                shutil.copy(os.path.join(path2_CRISPResso_out, f"CRISPResso_on_{sample_name}.html"), os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
+                crispresso_report = os.path.join(path2_CRISPResso_out, f"CRISPResso_on_{sample_name}.html")
+                if os.path.isfile(crispresso_report):
+                    shutil.copy(crispresso_report, os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
 
 
             # finished processing all samples,

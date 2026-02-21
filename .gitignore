@@ -29,6 +29,8 @@ DeepGenotype/test_SWE/*
 
 DeepGenotype/test_csv/*
 
+DeepGenotype/comparison/*
+
 nohup.out
 cmds.txt
 *.pyc
