@@ -73,19 +73,20 @@ Please make sure the following two python scripts are in the same directory as D
 --fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
 --single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)
 --quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
---bbduk &nbsp;&nbsp; run BBDuk preprocessing before CRISPResso, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below) [default=disabled]  
---fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used when `--bbduk` is **not** set), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options) below  
+--bbduk &nbsp;&nbsp; BBDuk preprocessing mode, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below) [default=short]
+--fastp &nbsp;&nbsp; use fastp (via CRISPResso) for read filtering instead of BBDuk (see [Read filtering options](#read-filtering-options) below) [default=False]
+--fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used with `--fastp`), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options) below
 
 
 ### Read filtering options
 
 DeepGenotype supports two mutually exclusive approaches for read quality filtering. Only one is active per run.
 
-#### Option 1: BBDuk preprocessing (activate with `--bbduk short` or `--bbduk long`)
+#### Option 1: BBDuk preprocessing (default)
 
-When `--bbduk` is set, [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) (part of BBTools) runs **before** CRISPResso on each sample's fastq files. It performs adapter trimming, quality trimming, and short-read filtering in a single pass. CRISPResso's built-in fastp trimming is skipped to avoid double-trimming.
+By default, [BBDuk](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/bbduk-guide/) (part of BBTools) runs **before** CRISPResso on each sample's fastq files. It performs adapter trimming, quality trimming, and short-read filtering in a single pass. CRISPResso's built-in fastp trimming is skipped to avoid double-trimming.
 
-Two parameter presets are available:
+Two parameter presets are available (`--bbduk short` is the default):
 
 | Parameter | `--bbduk short` (Illumina/MiSeq) | `--bbduk long` (PacBio) |
 |---|---|---|
@@ -98,16 +99,15 @@ Two parameter presets are available:
 | Min quality | 20 (`trimq=20`) | 10 (`trimq=10`) |
 | Min read length | 220 bp (`minlen=220`) | 500 bp (`minlen=500`) |
 
-Example — MiSeq paired-end reads with BBDuk:
+Example — MiSeq paired-end reads (default, no extra flags needed):
 ```shell
 python DeepGenotype.py \
 --path2csv example_csv/test_INS.csv \
 --path2workDir test_MiSeq_INS \
---path2fastqDir test_MiSeq_INS/fastq \
---bbduk short
+--path2fastqDir test_MiSeq_INS/fastq
 ```
 
-Example — PacBio single-end reads with BBDuk:
+Example — PacBio single-end reads with BBDuk long read mode:
 ```shell
 python DeepGenotype.py \
 --path2csv example_csv/test_pacbio.csv \
@@ -117,12 +117,20 @@ python DeepGenotype.py \
 --bbduk long
 ```
 
-#### Option 2: fastp via CRISPResso (default, no `--bbduk` flag needed)
+#### Option 2: fastp via CRISPResso (activate with `--fastp`)
 
-When `--bbduk` is **not** set, CRISPResso2's built-in [fastp](https://github.com/OpenGene/fastp) integration handles quality trimming. This is the default behavior.
+Pass `--fastp` to disable BBDuk and use CRISPResso2's built-in [fastp](https://github.com/OpenGene/fastp) integration for quality trimming instead.
 
 Default fastp options: `--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30`
 (quality trimming from both ends, sliding window of 30 bp, mean quality threshold of 30)
+
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq \
+--fastp
+```
 
 You can customize fastp parameters with `--fastp_options_string`:
 ```shell
@@ -130,6 +138,7 @@ python DeepGenotype.py \
 --path2csv example_csv/test_INS.csv \
 --path2workDir test_MiSeq_INS \
 --path2fastqDir test_MiSeq_INS/fastq \
+--fastp \
 --fastp_options_string "--cut_front --cut_tail --cut_mean_quality 25 --cut_window_size 20"
 ```
 
@@ -139,7 +148,7 @@ python DeepGenotype.py \
 3. `--cut_mean_quality 20 --cut_window_size 4`
 4. No quality trimming
 
-This retry logic is **only** active in fastp mode. When `--bbduk` is set, trimming is handled entirely by BBDuk and no retries are performed.
+This retry logic is **only** active in fastp mode. When BBDuk is active (default), trimming is handled entirely by BBDuk and no retries are performed.
 
 
 

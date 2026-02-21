@@ -86,8 +86,10 @@ def parse_args():
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist [default=False]')
     parser.add_argument('--min_reads_post_filter', default=50, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]', metavar='')
     parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]', metavar='')
-    parser.add_argument('--bbduk', default="short", type=str, choices=["", "short", "long"],
-                        help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500), "" to disable [default=short]', metavar='')
+    parser.add_argument('--bbduk', default="short", type=str, choices=["short", "long"],
+                        help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500) [default=short]', metavar='')
+    parser.add_argument('--fastp', action='store_true', default=False,
+                        help='use fastp (via CRISPResso) for read filtering instead of bbduk [default=False]')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -103,7 +105,7 @@ fastq_R1_suffix= config['fastq_R1_suffix']
 fastq_R2_suffix= config['fastq_R2_suffix']
 single_fastq_suffix= config['single_fastq_suffix']
 fastp_options_string= config['fastp_options_string']
-bbduk_mode = config['bbduk']
+bbduk_mode = "" if config['fastp'] else config['bbduk']
 if bbduk_mode and not shutil.which("bbduk.sh"):
     log.error("bbduk.sh not found on PATH. Install BBTools: conda install -c bioconda bbmap")
     sys.exit(1)
