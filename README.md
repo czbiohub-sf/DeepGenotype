@@ -8,6 +8,7 @@ Calculates the frequencies of protein-level mutations from deep-sequencing reads
 - Works with both Illumina and PacBio reads
 - Batch process a list of samples 
 - Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation
+- Consensus grouping: clusters similar reads to correct sequencing errors before genotyping
 
 ## Installation
 
@@ -76,6 +77,8 @@ Please make sure the following two python scripts are in the same directory as D
 --bbduk &nbsp;&nbsp; BBDuk preprocessing mode, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below) [default=short]
 --fastp &nbsp;&nbsp; use fastp (via CRISPResso) for read filtering instead of BBDuk (see [Read filtering options](#read-filtering-options) below) [default=False]
 --fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used with `--fastp`), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options) below
+--skip_consensus &nbsp;&nbsp; skip the consensus grouping step [default=False] (see [Consensus grouping](#consensus-grouping) below)
+--consensus_max_edit_distance &nbsp;&nbsp; maximum edit distance for consensus read grouping [default=3] (see [Consensus grouping](#consensus-grouping) below)
 
 
 ### Read filtering options
@@ -151,6 +154,53 @@ python DeepGenotype.py \
 This retry logic is **only** active in fastp mode. When BBDuk is active (default), trimming is handled entirely by BBDuk and no retries are performed.
 
 
+### Consensus grouping
+
+By default, DeepGenotype performs **consensus grouping** to correct sequencing errors before genotyping. Individual reads with minor imperfections (e.g., single-base sequencing errors) that support the same underlying biological sequence are clustered into **consensus groups**. A consensus sequence is derived for each group via weighted majority vote, and genotyping is performed on the consensus sequences.
+
+This produces a second set of **consensus-adjusted genotype frequencies** alongside the standard results, allowing side-by-side comparison.
+
+#### How it works
+
+1. After CRISPResso alignment, reads are separated by reference (WT-aligned and HDR-aligned reads are clustered independently)
+2. Within each reference group, reads are clustered using a greedy edit-distance algorithm (seeded from the most abundant read)
+3. Reads within the edit distance threshold (default: 3) of a cluster seed are merged into that cluster
+4. For each cluster, a consensus sequence is formed by weighted majority vote at each position
+5. The consensus sequences are genotyped using the same protein-level classification logic as the standard pipeline
+
+#### Output
+
+Consensus grouping produces:
+- A separate CSV file: `*_consensus_genotype_freq.csv` with consensus-adjusted genotype frequencies
+- A second sheet ("Consensus Genotypes") in the output XLSX file
+- Per-sample diagnostic files: `*_consensus_groups_diagnostic.tsv` showing the composition of each consensus group (member reads, read counts, consensus sequence)
+
+#### Configuration
+
+| Argument | Default | Description |
+|---|---|---|
+| `--skip_consensus` | `False` | Skip consensus grouping entirely |
+| `--consensus_max_edit_distance` | `3` | Maximum edit distance for clustering reads. Higher values merge more aggressively; lower values are more conservative |
+
+Example — disable consensus grouping:
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq \
+--skip_consensus
+```
+
+Example — use a stricter edit distance threshold:
+```shell
+python DeepGenotype.py \
+--path2csv example_csv/test_INS.csv \
+--path2workDir test_MiSeq_INS \
+--path2fastqDir test_MiSeq_INS/fastq \
+--consensus_max_edit_distance 1
+```
+
+
 
 ## Inputs
 There are *two* required input files:
@@ -163,6 +213,10 @@ There are *two* required input files:
   - Two metrics that quantify DNA-level mismatches in edited alleles
     - weighted average of the percent identity of the reads (that aligned to the HDR amplicon)
     - weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)
+- Consensus-adjusted genotype frequencies (unless `--skip_consensus` is used):
+  - A separate csv file (`*_consensus_genotype_freq.csv`) with consensus-adjusted genotype frequencies
+  - A "Consensus Genotypes" sheet in the xlsx file
+  - Per-sample diagnostic files (`*_consensus_groups_diagnostic.tsv`) showing consensus group membership
 - CRISPResso2 output that includes (and not limited to) the following:
   - Read aligning rate
   - Sequence-level genotype frequencies table

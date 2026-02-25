@@ -30,6 +30,8 @@ DeepGenotype/test_SWE/*
 DeepGenotype/test_csv/*
 
 DeepGenotype/comparison/*
+DeepGenotype/comparison_w_groupDenoise/*
+DeepGenotype/comparison_bk_2026_02_23/*
 
 nohup.out
 cmds.txt
