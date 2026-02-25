@@ -90,6 +90,10 @@ def parse_args():
                         help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500) [default=short]', metavar='')
     parser.add_argument('--fastp', action='store_true', default=False,
                         help='use fastp (via CRISPResso) for read filtering instead of bbduk [default=False]')
+    parser.add_argument('--skip_consensus', action='store_true', default=False,
+                        help='skip consensus grouping step [default=False]')
+    parser.add_argument('--consensus_max_edit_distance', default=3, type=int,
+                        help='max edit distance for consensus read grouping [default=3]', metavar='')
     config = parser.parse_args()
     if len(sys.argv) == 1:  # print help message if arguments are not valid
         parser.print_help()
@@ -109,6 +113,8 @@ bbduk_mode = "" if config['fastp'] else config['bbduk']
 if bbduk_mode and not shutil.which("bbduk.sh"):
     log.error("bbduk.sh not found on PATH. Install BBTools: conda install -c bioconda bbmap")
     sys.exit(1)
+skip_consensus = config['skip_consensus']
+consensus_max_edit_distance = config['consensus_max_edit_distance']
 path2_stdout = os.path.join(path2workDir, "CRISPResso_run_logs")
 path2_CRISPResso_out = os.path.join(path2workDir, "CRISPResso_outputs")
 path2_allelsFreqTabs = os.path.join(path2workDir, "Alleles_freq_tables_with_genotypes")
@@ -234,6 +240,13 @@ def main():
                 sys.exit()
         log.debug(f"script path: {script_path}")
 
+        # check consensus grouping script
+        consensus_script_path = os.path.join(wd, "scripts", "consensus_grouping.py")
+        if not skip_consensus and not os.path.isfile(consensus_script_path):
+            log.error(f"Consensus grouping script not found: {consensus_script_path}")
+            log.info("Use --skip_consensus to disable consensus grouping")
+            sys.exit()
+
         #check csv columns
         keys2check = set(['Sample_ID','gene_name','WT_amplicon_sequence','HDR_amplicon_sequence', 'gRNA_sequence','edit_type'])
         if not keys2check.issubset(df.columns):
@@ -251,12 +264,23 @@ def main():
         # create a output folder for the genotype results
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
+        consensus_csv_path_final = os.path.join(dg_output_dir,f"{out_basename}_consensus_genotype_freq.csv")
         with open(os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
+            # Open consensus CSV file handle (if consensus is enabled)
+            consensus_writehandle = None
+            if not skip_consensus:
+                consensus_writehandle = open(consensus_csv_path_final, "w", buffering=1)
+
             if edit_type == "INS":
                 writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
                 writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
                 writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n") #write header
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
+                if consensus_writehandle:
+                    consensus_writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                    consensus_writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                    consensus_writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
+                    consensus_writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             elif edit_type == "SNP":
                 #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
                 writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
@@ -265,6 +289,13 @@ def main():
                 writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
                 writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
+                if consensus_writehandle:
+                    consensus_writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                    consensus_writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                    consensus_writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
+                    consensus_writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
+                    consensus_writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
+                    consensus_writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
                 fq_ex_suffix = ""
@@ -530,6 +561,64 @@ def main():
                 if os.path.isfile(crispresso_report):
                     shutil.copy(crispresso_report, os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
 
+                ##################################
+                # consensus grouping and re-genotyping
+                ##################################
+                if not skip_consensus and os.path.isfile(path_to_Alleles_frequency_table_zip):
+                    log.info(f"...running consensus grouping (max edit distance={consensus_max_edit_distance})")
+                    consensus_pass_dir = os.path.join(current_CRISPResso_out_dir, "consensus_pass")
+                    os.makedirs(consensus_pass_dir, exist_ok=True)
+
+                    # copy CRISPResso_mapping_statistics.txt to consensus_pass dir
+                    mapping_stats_src = os.path.join(current_CRISPResso_out_dir, "CRISPResso_mapping_statistics.txt")
+                    if os.path.isfile(mapping_stats_src):
+                        shutil.copy(mapping_stats_src, os.path.join(consensus_pass_dir, "CRISPResso_mapping_statistics.txt"))
+
+                    # run consensus grouping
+                    command_consensus = [f"{sys.executable}", f"{consensus_script_path}",
+                                        f"--input_zip", f"{path_to_Alleles_frequency_table_zip}",
+                                        f"--output_dir", f"{consensus_pass_dir}",
+                                        f"--max_edit_distance", f"{consensus_max_edit_distance}"]
+                    p = Popen(command_consensus, universal_newlines=True)
+                    p.communicate()
+
+                    # run genotyping on consensus allele freq table
+                    consensus_allele_freq_zip = os.path.join(consensus_pass_dir, "Alleles_frequency_table.zip")
+                    if os.path.isfile(consensus_allele_freq_zip):
+                        command_consensus_genotype = [f"{sys.executable}", f"{script_path}",
+                                    f"--path", f"{consensus_pass_dir}",
+                                    f"--allele_freq_file", f"Alleles_frequency_table.zip",
+                                    f"--wt_amp", f"{row['WT_amplicon_sequence']}",
+                                    f"--HDR_amp", f"{row['HDR_amplicon_sequence']}",
+                                    f"--ENST_ID", f"{row['ENST_id']}",
+                                    f"--min_reads_for_genotype", f"{config['min_reads_for_genotype']}"
+                                    ]
+                        if 'payload_block_index' in row:
+                            command_consensus_genotype += [f"--payload_block_index", f"{row['payload_block_index']}"]
+                        else:
+                            command_consensus_genotype += [f"--payload_block_index", f"1"]
+                        log.info(f"...genotyping consensus allele frequency table")
+                        p = Popen(command_consensus_genotype, universal_newlines=True)
+                        p.communicate()
+
+                        # read consensus genotype frequency and write to consensus master CSV
+                        consensus_geno_freq = os.path.join(consensus_pass_dir, "genotype_frequency.csv")
+                        if os.path.isfile(consensus_geno_freq) and consensus_writehandle:
+                            with open(consensus_geno_freq, "r") as handle:
+                                next(handle)
+                                consensus_writehandle.write(f"{row['Sample_ID']},")
+                                consensus_writehandle.write(handle.readline())
+                            log.info(f"...consensus genotyping done")
+                        else:
+                            log.warning(f"...consensus genotype frequency file not produced for {row['Sample_ID']}")
+                    else:
+                        log.warning(f"...consensus allele frequency table not produced for {row['Sample_ID']}")
+
+                    # move diagnostic file to per-sample output dir
+                    diag_file = os.path.join(consensus_pass_dir, "consensus_groups_diagnostic.tsv")
+                    if os.path.isfile(diag_file):
+                        shutil.copy(diag_file, os.path.join(sample_output_dir, f"{row['Sample_ID']}_consensus_groups_diagnostic.tsv"))
+
 
             # finished processing all samples,
             # write genotype explanation
@@ -578,9 +667,23 @@ def main():
                                     f"    weighted_avg_num_of_mismatches: weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)\n"
                                         )
 
+            # write consensus explanation footer and close handle
+            if consensus_writehandle:
+                consensus_writehandle.write(f"\n------------------------below are the notes for consensus-adjusted genotypes---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
+                consensus_writehandle.write(f"\nConsensus-adjusted genotypes:\n"
+                                           f"    These genotype frequencies are derived from consensus sequences rather than individual read sequences.\n"
+                                           f"    Similar reads (within {consensus_max_edit_distance} edit distance) are clustered together, and a consensus sequence is formed\n"
+                                           f"    via weighted majority vote. The consensus sequence is then genotyped using the same logic as the standard genotypes.\n"
+                                           f"    This approach corrects sequencing errors by merging near-identical reads before genotyping.\n"
+                                           f"    See the per-sample *_consensus_groups_diagnostic.tsv files for details on the consensus groups.\n"
+                                           )
+                consensus_writehandle.close()
+
         # convert csv to xlsx
         csv_path = os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv")
         command3 = [f"python", f"{os.path.join(wd,'scripts','csv2xlsx.py')}","--path2csv", csv_path , "--mode", f"{edit_type}"]
+        if not skip_consensus and os.path.isfile(consensus_csv_path_final):
+            command3 += ["--path2csv_consensus", consensus_csv_path_final]
         p = Popen(command3, universal_newlines=True)
         p.communicate()  # wait for the commands to process
 
