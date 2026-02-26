@@ -1,15 +1,17 @@
 # DeepGenotype
 Calculates the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells
 
+&nbsp;
 ## Features
-- Calculate genotypes with respect to protein/payload expressiblity and correctness  
-- Automatically finds coding regions  
-- Supported CRISPR editing types: tagging/insertion and SNP/base-editing  
-- Works with both Illumina and PacBio reads
-- Batch process a list of samples 
-- Invokes CRISPResso2 to perform read quality-trimming, alignment, and DNA-level genotype calculation
-- Consensus grouping: clusters similar reads to correct sequencing errors before genotyping
+- Compute genotypes for protein/payload expressibility and amino acid sequence correctness (automatically detects coding regions)
+- Sophisticated read error correction using consensus grouping
+- Multiple modes:
+  - Edit types: tagging/insertion and SNP/base-editing
+  - Sequencing: short (Illumina) and long (PacBio) reads
+- Batch processing a large list of samples/clones
 
+  
+&nbsp;
 ## Installation
 
 **NOTE**: *if you installed DeepGenotype before 2025-01-15, please reinstall DeepGenotype to update CRISPResso2 to 2.3.1 to enable read quality-trimming.*
@@ -38,10 +40,6 @@ conda config --add channels bioconda
 conda config --add channels conda-forge
 conda install CRISPResso2==2.3.1 bbmap
 ```
-verify CRISPResso2 installation
-```shell
-CRISPResso -h
-```
 clone DeepGenotype repo and install dependencies
 ```shell
 git clone https://github.com/czbiohub-sf/DeepGenotype
@@ -49,8 +47,11 @@ cd DeepGenotype
 pip install . # or pip install biopython==1.78 pandas requests openpyxl==3.1.2
 
 ```
-
 ### Verify installation
+verify CRISPResso2 installation
+```shell
+CRISPResso -h
+```
 verify DeepGenotype installation
 ```shell
 cd DeepGenotype # must be in the DeepGenotype/DeepGenotype directory
@@ -60,29 +61,16 @@ python DeepGenotype.py
 &nbsp;
 ## Usage:
 ```shell
-cd DeepGenotype # must be in the DeepGenotype/DeepGenotype directory
+cd DeepGenotype # cd into the DeepGenotype/DeepGenotype directory
 python DeepGenotype.py --path2csv example_csv/test.csv --path2workDir test_dir/ --path2fastqDir test_dir/fastq_dir/
 ```
-All paths are relative to `DeepGenotype.py`  
-Please make sure the following two python scripts are in the same directory as DeepGenotype.py:  
- &nbsp;&nbsp;&nbsp; process_alleles_freq_table_INS.py  
- &nbsp;&nbsp;&nbsp; process_alleles_freq_table_SNP.py  
+All paths are relative to `DeepGenotype.py`, and please make sure the following two python scripts are in the same directory as DeepGenotype.py:  
+`process_alleles_freq_table_INS.py`  
+`process_alleles_freq_table_SNP.py`  
 
 
-#### Notable optional arguments
---fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
---fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
---single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)
---quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
---bbduk &nbsp;&nbsp; BBDuk preprocessing mode, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below) [default=short]
---fastp &nbsp;&nbsp; use fastp (via CRISPResso) for read filtering instead of BBDuk (see [Read filtering options](#read-filtering-options) below) [default=False]
---fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used with `--fastp`), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options) below
---skip_consensus &nbsp;&nbsp; skip the consensus grouping step [default=False] (see [Consensus grouping](#consensus-grouping) below)
---consensus_max_edit_distance &nbsp;&nbsp; maximum edit distance for consensus read grouping [default=3] (see [Consensus grouping](#consensus-grouping) below)
-
-
-### Read filtering options
-
+&nbsp;
+## Read quality trimming options
 DeepGenotype supports two mutually exclusive approaches for read quality filtering. Only one is active per run.
 
 #### Option 1: BBDuk preprocessing (default)
@@ -102,24 +90,7 @@ Two parameter presets are available (`--bbduk short` is the default):
 | Min quality | 20 (`trimq=20`) | 10 (`trimq=10`) |
 | Min read length | 220 bp (`minlen=220`) | 500 bp (`minlen=500`) |
 
-Example — MiSeq paired-end reads (default, no extra flags needed):
-```shell
-python DeepGenotype.py \
---path2csv example_csv/test_INS.csv \
---path2workDir test_MiSeq_INS \
---path2fastqDir test_MiSeq_INS/fastq
-```
-
-Example — PacBio single-end reads with BBDuk long read mode:
-```shell
-python DeepGenotype.py \
---path2csv example_csv/test_pacbio.csv \
---path2workDir test_PacBio \
---path2fastqDir test_PacBio/fastq \
---single_fastq_suffix .fastq \
---bbduk long
-```
-
+&nbsp;
 #### Option 2: fastp via CRISPResso (activate with `--fastp`)
 
 Pass `--fastp` to disable BBDuk and use CRISPResso2's built-in [fastp](https://github.com/OpenGene/fastp) integration for quality trimming instead.
@@ -149,12 +120,11 @@ python DeepGenotype.py \
 1. `--cut_mean_quality 30 --cut_window_size 20`
 2. `--cut_mean_quality 20 --cut_window_size 10`
 3. `--cut_mean_quality 20 --cut_window_size 4`
-4. No quality trimming
 
-This retry logic is **only** active in fastp mode. When BBDuk is active (default), trimming is handled entirely by BBDuk and no retries are performed.
+This retry logic applies **only** in fastp mode. When BBDuk is enabled (default), it handles trimming and no retries occur. However, if BBDuk fails or yields fewer than 50 reads, trimming falls back to fastp.
 
-
-### Consensus grouping
+&nbsp;
+## Consensus grouping
 
 By default, DeepGenotype performs **consensus grouping** to correct sequencing errors before genotyping. Individual reads with minor imperfections (e.g., single-base sequencing errors) that support the same underlying biological sequence are clustered into **consensus groups**. A consensus sequence is derived for each group via weighted majority vote, and genotyping is performed on the consensus sequences.
 
@@ -201,12 +171,26 @@ python DeepGenotype.py \
 ```
 
 
+&nbsp;
+## Notable optional arguments
+--fastq_R1_suffix &nbsp;&nbsp; (default "_R1_001.fastq.gz")  
+--fastq_R2_suffix &nbsp;&nbsp; (default "_R2_001.fastq.gz")  
+--single_fastq_suffix &nbsp;&nbsp; (use this option for **single-ended** reads as well as **pacbio** reads, need to specific the suffix, e.g.: fastq.gz)  
+--quantification_window_size &nbsp;&nbsp; (default 50, which overrides CRISPResso2's default of 1)  
+--bbduk &nbsp;&nbsp; BBDuk preprocessing mode, accepts `short` or `long` (see [Read filtering options](#read-filtering-options) below [default=short]  
+--fastp &nbsp;&nbsp; use fastp (via CRISPResso) for read filtering instead of BBDuk (see [Read filtering options](#read-filtering-options) below) [default=False]  
+--fastp_options_string &nbsp;&nbsp; options to pass to fastp (only used with `--fastp`), [default = '--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30'] see [Read filtering options](#read-filtering-options)  
+--skip_consensus &nbsp;&nbsp; skip the consensus grouping step [default=False] (see [Consensus grouping](#consensus-grouping) below)  
+--consensus_max_edit_distance &nbsp;&nbsp; maximum edit distance for consensus read grouping [default=3] (see [Consensus grouping](#consensus-grouping) below)  
 
+
+&nbsp;
 ## Inputs
 There are *two* required input files:
 - Fastq files (can be gzipped or not)
 - A csv file (examples provided in `example_csv`), explanation of the columns is below
 
+&nbsp;
 ## Outputs:
 - A result table in the format of a csv file and a xlsx file, the table contains **sample-wise** information of:
   - Protein-level genotype frequencies
