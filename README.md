@@ -121,7 +121,7 @@ python DeepGenotype.py \
 2. `--cut_mean_quality 20 --cut_window_size 10`
 3. `--cut_mean_quality 20 --cut_window_size 4`
 
-This retry logic applies **only** in fastp mode. When BBDuk is enabled (default), it handles trimming and no retries occur. However, if BBDuk fails or yields fewer than 50 reads, trimming falls back to fastp.
+This retry logic applies **only** in fastp mode.
 
 &nbsp;
 ## Consensus grouping
