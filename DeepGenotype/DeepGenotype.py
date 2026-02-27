@@ -84,7 +84,7 @@ def parse_args():
     parser.add_argument('--fastp_options_string', default="--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30", type=str, help='options to pass to fastp, [default = "--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 30"] which is to do quality trimming from both ends of each read, using a slide window of 30 and a mean quality threshold of 30, see fastp documentation for more options', metavar='')
     parser.add_argument('--n_processes', default=1, type=int, help='number of cores to use for parallel processing, use with caution since increasing this parameter will significantly increase the memory required [default=1]', metavar='')
     parser.add_argument('--skip_crispresso', action='store_true', default=False, help='skip CRISPResso if results already exist [default=False]')
-    parser.add_argument('--min_reads_post_filter', default=50, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=50]', metavar='')
+    parser.add_argument('--min_reads_post_filter', default=30, type=int, help='if minimum number of reads post filtering is unmet, CRISPResso will be run again with less stringent quality trimming [default=30]', metavar='')
     parser.add_argument('--min_reads_for_genotype', default=3, type=int, help='if minimum number of reads for genotype is unmet, the genotype together with its reads will be dropped [default=3]', metavar='')
     parser.add_argument('--bbduk', default="short", type=str, choices=["short", "long"],
                         help='run bbduk preprocessing before CRISPResso. "short" for Illumina/MiSeq reads (ktrim=r k=27 hdist=1 edist=0 qtrim=rl trimq=20 minlen=220), "long" for PacBio reads (ktrim=r k=21 hdist=1 edist=0 qtrim=rl trimq=10 minlen=500) [default=short]', metavar='')
@@ -398,6 +398,7 @@ def main():
                         command = basic_command
                     else:
                         command = basic_command + [
+                                f"--trim_sequences",
                                 f"--fastp_options_string", f"{config['fastp_options_string']}",
                                 ]
 
@@ -432,6 +433,7 @@ def main():
                     if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
                         log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 30 --cut_window_size 20")
                         command_retry = basic_command + [
+                                f"--trim_sequences",
                                 f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 30 --cut_window_size 20"
                                 ]
                         path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
@@ -444,6 +446,7 @@ def main():
                     if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
                         log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 10")
                         command_retry = basic_command + [
+                                f"--trim_sequences",
                                 f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 10"
                                 ]
                         path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
@@ -456,6 +459,7 @@ def main():
                     if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
                         log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with less stringent quality trimming: --cut_mean_quality 20 --cut_window_size 4")
                         command_retry = basic_command + [
+                                f"--trim_sequences",
                                 f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 20 --cut_window_size 4"
                                 ]
                         path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
@@ -466,8 +470,11 @@ def main():
                         p.communicate()  # wait for the commands to process
                     # retry #4 with even less stringent quality trimming
                     if not check_crispresso_read_count(path_to_Alleles_frequency_table_zip):
-                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with no quality trimming")
-                        command_retry = basic_command # no quality trimming
+                        log.warning(f"...CRISPResso failed or returned less than {config['min_reads_post_filter']} reads for {row['Sample_ID']}, retrying with least stringent quality trimming")
+                        command_retry = basic_command + [
+                                f"--trim_sequences",
+                                f"--fastp_options_string", f"--cut_front --cut_tail --cut_mean_quality 10 --cut_window_size 2"
+                                ]
                         path_to_stderr_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stderr.txt")
                         path_to_stdout_file = os.path.join(path2_stdout, f"{row['Sample_ID']}.stdout.txt")
                         mystdput = open(path_to_stdout_file, 'w+')
