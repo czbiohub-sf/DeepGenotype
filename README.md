@@ -126,9 +126,9 @@ This retry logic applies **only** in fastp mode.
 &nbsp;
 ## Consensus grouping
 
-By default, DeepGenotype performs **consensus grouping** to correct sequencing errors before genotyping. Individual reads with minor imperfections (e.g., single-base sequencing errors) that support the same underlying biological sequence are clustered into **consensus groups**. A consensus sequence is derived for each group via weighted majority vote, and genotyping is performed on the consensus sequences.
+By default, DeepGenotype performs **read-level consensus grouping** to correct sequencing errors before genotyping. Individual reads with minor imperfections (e.g., single-base sequencing errors) that support the same underlying biological sequence are clustered into **consensus groups**. A consensus sequence is derived for each group via weighted majority vote, and genotyping is performed on the consensus sequences.
 
-This produces a second set of **consensus-adjusted genotype frequencies** alongside the standard results, allowing side-by-side comparison.
+This produces a second set of **error-corrected genotype frequencies** alongside the standard results, allowing side-by-side comparison.
 
 #### How it works
 
@@ -141,8 +141,8 @@ This produces a second set of **consensus-adjusted genotype frequencies** alongs
 #### Output
 
 Consensus grouping produces:
-- A separate CSV file: `*_consensus_genotype_freq.csv` with consensus-adjusted genotype frequencies
-- A second sheet ("Consensus Genotypes") in the output XLSX file
+- A separate CSV file: `*_consensus_genotype_freq.csv` with error-corrected genotype frequencies
+- A second sheet ("error-corrected Genotypes") in the output XLSX file
 - Per-sample diagnostic files: `*_consensus_groups_diagnostic.tsv` showing the composition of each consensus group (member reads, read counts, consensus sequence)
 
 #### Configuration
@@ -197,9 +197,9 @@ There are *two* required input files:
   - Two metrics that quantify DNA-level mismatches in edited alleles
     - weighted average of the percent identity of the reads (that aligned to the HDR amplicon)
     - weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)
-- Consensus-adjusted genotype frequencies (unless `--skip_consensus` is used):
-  - A separate csv file (`*_consensus_genotype_freq.csv`) with consensus-adjusted genotype frequencies
-  - A "Consensus Genotypes" sheet in the xlsx file
+- Error-corrected genotype frequencies (unless `--skip_consensus` is used):
+  - A separate csv file (`*_consensus_genotype_freq.csv`) with error-corrected genotype frequencies
+  - A "Error-corrected Genotypes" sheet in the xlsx file
   - Per-sample diagnostic files (`*_consensus_groups_diagnostic.tsv`) showing consensus group membership
 - CRISPResso2 output that includes (and not limited to) the following:
   - Read aligning rate
