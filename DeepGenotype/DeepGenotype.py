@@ -264,7 +264,7 @@ def main():
         # create a output folder for the genotype results
         #start processing samples through CRISPResso and recalculate allele frequency
         out_basename = os.path.basename(path2csv).strip(r".csv")
-        consensus_csv_path_final = os.path.join(dg_output_dir,f"{out_basename}_consensus_genotype_freq.csv")
+        consensus_csv_path_final = os.path.join(dg_output_dir,f"{out_basename}_error_corrected_genotype_freq.csv")
         with open(os.path.join(dg_output_dir,f"{out_basename}_genotype_freq.csv"), "w", buffering=1) as writehandle:
             # Open consensus CSV file handle (if consensus is enabled)
             consensus_writehandle = None
@@ -604,20 +604,20 @@ def main():
                             command_consensus_genotype += [f"--payload_block_index", f"{row['payload_block_index']}"]
                         else:
                             command_consensus_genotype += [f"--payload_block_index", f"1"]
-                        log.info(f"...genotyping consensus allele frequency table")
+                        log.info(f"...genotyping error-corrected allele frequency table")
                         p = Popen(command_consensus_genotype, universal_newlines=True)
                         p.communicate()
 
-                        # read consensus genotype frequency and write to consensus master CSV
+                        # read error-corrected genotype frequency and write to master CSV
                         consensus_geno_freq = os.path.join(consensus_pass_dir, "genotype_frequency.csv")
                         if os.path.isfile(consensus_geno_freq) and consensus_writehandle:
                             with open(consensus_geno_freq, "r") as handle:
                                 next(handle)
                                 consensus_writehandle.write(f"{row['Sample_ID']},")
                                 consensus_writehandle.write(handle.readline())
-                            log.info(f"...consensus genotyping done")
+                            log.info(f"...error-corrected genotyping done")
                         else:
-                            log.warning(f"...consensus genotype frequency file not produced for {row['Sample_ID']}")
+                            log.warning(f"...error-corrected genotype frequency file not produced for {row['Sample_ID']}")
                     else:
                         log.warning(f"...consensus allele frequency table not produced for {row['Sample_ID']}")
 
@@ -676,8 +676,8 @@ def main():
 
             # write consensus explanation footer and close handle
             if consensus_writehandle:
-                consensus_writehandle.write(f"\n------------------------below are the notes for consensus-adjusted genotypes---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
-                consensus_writehandle.write(f"\nConsensus-adjusted genotypes:\n"
+                consensus_writehandle.write(f"\n------------------------below are the notes for error-corrected genotypes---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
+                consensus_writehandle.write(f"\nError-corrected genotypes:\n"
                                            f"    These genotype frequencies are derived from consensus sequences rather than individual read sequences.\n"
                                            f"    Similar reads (within {consensus_max_edit_distance} edit distance) are clustered together, and a consensus sequence is formed\n"
                                            f"    via weighted majority vote. The consensus sequence is then genotyped using the same logic as the standard genotypes.\n"

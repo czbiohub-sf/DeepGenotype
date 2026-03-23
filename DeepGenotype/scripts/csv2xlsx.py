@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('--mode', default="", type=str,
                         help='mode, possible values are SNP, INS', metavar='')
     parser.add_argument('--path2csv_consensus', default="", type=str,
-                        help='(optional) path to the consensus genotype result csv file', metavar='')
+                        help='(optional) path to the error-corrected genotype result csv file', metavar='')
 
     config = parser.parse_args()
     if len(sys.argv) <= 2:  # print help message if arguments are not valid
@@ -113,10 +113,10 @@ if has_consensus:
 # Format the standard genotypes sheet
 format_worksheet(ws, config["mode"])
 
-# Add consensus genotypes sheet if consensus CSV is provided
+# Add error-corrected genotypes sheet if consensus CSV is provided
 if has_consensus:
     df_consensus = pd.read_csv(config["path2csv_consensus"], header=None)
-    ws2 = wb.create_sheet(title="Consensus Genotypes")
+    ws2 = wb.create_sheet(title="Error-Corrected Genotypes")
 
     # Write consensus DataFrame to the new sheet
     for r_idx, row in enumerate(dataframe_to_rows(df_consensus, index=False, header=False), 1):
