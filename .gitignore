@@ -33,6 +33,9 @@ DeepGenotype/comparison/*
 DeepGenotype/comparison_w_groupDenoise/*
 DeepGenotype/comparison_bk_2026_02_23/*
 
+DeepGenotype/commands*
+DeepGenotype/mutant_line_screening_prod_run
+
 nohup.out
 cmds.txt
 *.pyc
