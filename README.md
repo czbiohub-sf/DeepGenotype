@@ -1,5 +1,12 @@
-# DeepGenotype
-Calculates the frequencies of protein-level mutations from deep-sequencing reads of CRISPR-edited cells
+# DeepGenotype  
+
+<p align="center">
+  <img src="./DeepGenotype/images/DeepGenotype_logo.jpg" alt="DeepGenotype logo" width="180">
+</p>
+
+<p align="center">
+  Quantifies protein-level mutation frequencies from deep-sequencing reads of CRISPR-edited cells.
+</p>
 
 &nbsp;
 ## Features
