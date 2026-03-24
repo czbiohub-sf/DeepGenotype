@@ -1,7 +1,7 @@
 # DeepGenotype  
 
 <p align="center">
-  <img src="./DeepGenotype/images/DeepGenotype_logo.jpg" alt="DeepGenotype logo" width="180">
+  <img src="./DeepGenotype/images/DeepGenotype_logo.jpg" alt="DeepGenotype logo" width="250">
 </p>
 
 <p align="center">
