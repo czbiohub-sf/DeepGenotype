@@ -676,7 +676,50 @@ def main():
 
             # write consensus explanation footer and close handle
             if consensus_writehandle:
-                consensus_writehandle.write(f"\n------------------------below are the notes for error-corrected genotypes---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
+                consensus_writehandle.write(f"\n------------------------below are the abbreviations and genotype explanations---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n")
+                if edit_type == "INS":
+                    consensus_writehandle.write(f"\nAbbreviations:\n"
+                                    f"    wt = wildtype\n"
+                                    f"    PL = payload\n"
+                                    f"    Prot = protein sequence without the payload (hereafter referred to as \"protein sequence\")\n"
+                                    f"    mut = mutated: not matching neither the wt nor HDR amplicon at the protein level\n"
+                                    f"    HDR = protein sequence matching the HDR amplicon\n"
+                                    f"    okPL = payload whose sequence is correct at the protein level\n"
+                                    f"Genotype explanation:\n"
+                                    f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_noPL: protein sequence matched wt protein sequence. no payload detected\n"
+                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
+                                    f"    mutProt_noPL: protein sequence is mutated (see mut definition above). no payload detected\n"
+                                    f"    mutProt_okPL: protein sequence is mutated (see mut definition above). payload is correct at the protein level\n"
+                                    f"    mutProt_mutPL: protein sequence is mutated. payload is mutated (see mut definition above)\n"
+                                    f"    wtProt_mutPL: protein sequence matched wt protein sequence. payload is mutated (see mut definition above)\n"
+                                    f"Notes:\n"
+                                    f"    num_post_filter_reads: number of reads that passed the quality filter\n"
+                                    f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"
+                                    f"    weighted_avg_num_of_mismatches: weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)\n"
+                                        )
+                elif edit_type == "SNP":
+                    consensus_writehandle.write(f"\nAbbreviations:\n"
+                                    f"    wt = wildtype\n"
+                                    f"    SNP = SNP-payload\n"
+                                    f"    Prot = protein sequence without the payload (hereafter referred to as \"protein sequence\")\n"
+                                    f"    mut = mutated: not matching neither the wt nor HDR amplicon at the protein level\n"
+                                    f"    HDR = protein sequence matching the HDR amplicon\n"
+                                    f"Genotype explanation:\n"
+                                    f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_hdrSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched the intended change\n"
+                                    f"    mutProt_hdrSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched the intended change\n"
+                                    f"    wtProt_mutSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid is mutated\n"
+                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
+                                    f"    mutProt_mutSNP: protein sequence is mutated. SNP-payload-associated amino acid is mutated (see mut definition above)\n"
+                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
+                                    f"Notes:\n"
+                                    f"    num_post_filter_reads: number of reads that passed the quality filter\n"
+                                    f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"
+                                    f"    weighted_avg_num_of_mismatches: weighted average of the number of mismatches of the reads (that aligned to the HDR amplicon)\n"
+                                        )
                 consensus_writehandle.write(f"\nError-corrected genotypes:\n"
                                            f"    These genotype frequencies are derived from consensus sequences rather than individual read sequences.\n"
                                            f"    Similar reads (within {consensus_max_edit_distance} edit distance) are clustered together, and a consensus sequence is formed\n"
@@ -693,6 +736,12 @@ def main():
             command3 += ["--path2csv_consensus", consensus_csv_path_final]
         p = Popen(command3, universal_newlines=True)
         p.communicate()  # wait for the commands to process
+
+        # also create a standalone xlsx for the error-corrected genotype CSV
+        if not skip_consensus and os.path.isfile(consensus_csv_path_final):
+            command4 = [f"python", f"{os.path.join(wd,'scripts','csv2xlsx.py')}", "--path2csv", consensus_csv_path_final, "--mode", f"{edit_type}"]
+            p = Popen(command4, universal_newlines=True)
+            p.communicate()
 
         # remove temporary folder Alleles_freq_tables_with_genotypes
         shutil.rmtree(path2_allelsFreqTabs)
