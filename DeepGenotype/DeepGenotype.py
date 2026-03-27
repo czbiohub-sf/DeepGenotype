@@ -133,6 +133,8 @@ if bbduk_mode:
     os.makedirs(path2_bbduk_out, exist_ok=True)
 
 wd = os.getcwd()  # save current working dir
+sys.path.insert(0, os.path.join(wd, "scripts"))
+from utils import write_alignment_files
 os.chdir(path2_CRISPResso_out)  # change to the the folder containng the file to be zipped
 
 
@@ -568,6 +570,16 @@ def main():
                 if os.path.isfile(crispresso_report):
                     shutil.copy(crispresso_report, os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
 
+                # Write read group alignment files
+                readgroups_genotype_zip = os.path.join(
+                    sample_output_dir, f"{row['Sample_ID']}_DeepGenotypeAlleleFreq.zip"
+                )
+                if os.path.isfile(readgroups_genotype_zip):
+                    readgroups_aln_dir = os.path.join(sample_output_dir, "alignments", "readgroups_w_template")
+                    os.makedirs(readgroups_aln_dir, exist_ok=True)
+                    write_alignment_files(readgroups_genotype_zip, readgroups_aln_dir, edit_type)
+                    log.info(f"...wrote read group alignment files")
+
                 ##################################
                 # consensus grouping and re-genotyping
                 ##################################
@@ -620,6 +632,14 @@ def main():
                             log.warning(f"...error-corrected genotype frequency file not produced for {row['Sample_ID']}")
                     else:
                         log.warning(f"...consensus allele frequency table not produced for {row['Sample_ID']}")
+
+                    # Write consensus alignment files
+                    consensus_genotype_zip = os.path.join(consensus_pass_dir, "Alleles_frequency_table_genotype.zip")
+                    if os.path.isfile(consensus_genotype_zip):
+                        consensus_aln_dir = os.path.join(sample_output_dir, "alignments", "consensus_w_template")
+                        os.makedirs(consensus_aln_dir, exist_ok=True)
+                        write_alignment_files(consensus_genotype_zip, consensus_aln_dir, edit_type)
+                        log.info(f"...wrote consensus alignment files")
 
                     # move diagnostic file to per-sample output dir
                     diag_file = os.path.join(consensus_pass_dir, "consensus_groups_diagnostic.tsv")

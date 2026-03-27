@@ -1,5 +1,5 @@
 #load packages
-import sys, linecache, re, requests, logging
+import sys, linecache, re, requests, logging, zipfile, os
 from Bio.pairwise2 import align
 from Bio.pairwise2 import format_alignment
 from Bio.SeqFeature import SeqFeature
@@ -529,3 +529,105 @@ def check_protein_correctness(read,wt_or_HDR_amp_cds_coords,wt_or_HDR_translatio
         protein_correct=True
     return({"payload_correct":payload_correct,
             "protein_correct":protein_correct})
+
+
+def _make_match_line(read, template):
+    """Return a string of '|' for matches and ' ' for mismatches/gaps."""
+    line = []
+    for r, t in zip(read, template):
+        if r == t and r != '-':
+            line.append('|')
+        else:
+            line.append(' ')
+    return ''.join(line)
+
+
+def write_alignment_files(genotype_zip_path, output_dir, edit_type):
+    """
+    Parse a genotyped allele frequency table zip and write per-genotype
+    alignment files showing each read group aligned to its template.
+
+    Parameters
+    ----------
+    genotype_zip_path : str
+        Path to the Alleles_frequency_table_genotype.zip file.
+    output_dir : str
+        Directory to write per-genotype alignment text files.
+    edit_type : str
+        "INS" or "SNP" -- determines the genotype-to-filename mapping.
+    """
+    log = logging.getLogger("DeepGenotype.py")
+
+    INS_MAPPING = {
+        "HDR allele (perfect HDR edit)": "HDR_perfect.txt",
+        "HDR allele (wt protein + correct payload)": "wtProt_okPL.txt",
+        "HDR allele (wt protein + mutant payload)": "wtProt_mutPL.txt",
+        "HDR allele (mutant protein + correct payload)": "mutProt_okPL.txt",
+        "HDR allele (mutant protein + mutant payload)": "mutProt_mutPL.txt",
+        "wt allele": "wt_allele.txt",
+        "wt allele (wt protein)": "wtProt_noPL.txt",
+        "wt allele (mutant protein)": "mutProt_noPL.txt",
+    }
+
+    SNP_MAPPING = {
+        "perfect HDR edit": "HDR_perfect.txt",
+        "wt protein + HDR SNP": "wtProt_hdrSNP.txt",
+        "wt protein + mutant SNP": "wtProt_mutSNP.txt",
+        "wt protein + wt SNP": "wtProt_wtSNP.txt",
+        "mutant protein + HDR SNP": "mutProt_hdrSNP.txt",
+        "mutant protein + mutant SNP": "mutProt_mutSNP.txt",
+        "mutant protein + wt SNP": "mutProt_wtSNP.txt",
+        "wt allele": "wt_allele.txt",
+    }
+
+    mapping = INS_MAPPING if edit_type == "INS" else SNP_MAPPING
+
+    try:
+        # group rows by genotype filename
+        groups = {}  # filename -> list of (aligned_seq, ref_seq, ref_name, n_reads, perc_reads, genotype_label)
+        with zipfile.ZipFile(genotype_zip_path, 'r') as myzip:
+            with myzip.open('Alleles_frequency_table_genotype.txt') as fh:
+                next(fh)  # skip header
+                for line in fh:
+                    fields = line.decode().rstrip().split("\t")
+                    aligned_seq = fields[0]
+                    ref_seq = fields[1]
+                    ref_name = fields[2]
+                    n_reads = int(fields[7])
+                    perc_reads = fields[8]
+                    genotype_label = fields[9]
+
+                    filename = mapping.get(genotype_label)
+                    if filename is None:
+                        # fallback: sanitize the label
+                        sanitized = re.sub(r'[^a-zA-Z0-9_]', '_', genotype_label).strip('_')
+                        filename = f"{sanitized}.txt"
+
+                    if filename not in groups:
+                        groups[filename] = []
+                    groups[filename].append((aligned_seq, ref_seq, ref_name, n_reads, perc_reads, genotype_label))
+
+        # write one file per genotype
+        for filename, entries in groups.items():
+            entries.sort(key=lambda x: x[3], reverse=True)  # sort by n_reads desc
+            total_reads = sum(e[3] for e in entries)
+            total_groups = len(entries)
+            genotype_display = entries[0][5]  # use the genotype label from the first entry
+
+            filepath = os.path.join(output_dir, filename)
+            with open(filepath, 'w') as fh:
+                fh.write(f"# Genotype: {genotype_display}\n")
+                fh.write(f"# Total read groups: {total_groups}\n")
+                fh.write(f"# Total reads: {total_reads:,}\n")
+                fh.write(f"#\n")
+
+                for i, (aligned_seq, ref_seq, ref_name, n_reads, perc_reads, _) in enumerate(entries, 1):
+                    fh.write(f"# --- Read Group {i} of {total_groups} | Reads: {n_reads:,} ({perc_reads}%) | Reference: {ref_name} ---\n")
+                    match_line = _make_match_line(aligned_seq, ref_seq)
+                    fh.write(f"Template  {ref_seq}\n")
+                    fh.write(f"          {match_line}\n")
+                    fh.write(f"Read      {aligned_seq}\n")
+                    fh.write(f"\n")
+
+    except (FileNotFoundError, zipfile.BadZipFile, KeyError) as e:
+        log.warning(f"Could not write alignment files from {genotype_zip_path}: {e}")

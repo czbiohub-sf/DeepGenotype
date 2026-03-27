@@ -208,6 +208,10 @@ There are *two* required input files:
   - A separate csv file (`*_error_corrected_genotype_freq.csv`) with error-corrected genotype frequencies
   - An "Error-Corrected Genotypes" sheet in the xlsx file
   - Per-sample diagnostic files (`*_consensus_groups_diagnostic.tsv`) showing consensus group membership
+- Per-sample alignment files organized by genotype outcome, located in `DeepGenotype_outputs/{Sample_ID}/alignments/`:
+  - `readgroups_w_template/` — Alignments from the standard genotyping pass. Each read group is a unique alignment pattern from CRISPResso (individual sequencing reads that share the exact same aligned sequence are collapsed into one entry with a read count). These are the raw aligned sequences and may include sequencing errors.
+  - `consensus_w_template/` — Alignments from the error-corrected (consensus) genotyping pass. Similar read groups (within the edit distance threshold) are clustered together, and a consensus sequence is formed via weighted majority vote before genotyping. This produces fewer, cleaner entries with sequencing errors collapsed. Only present when consensus grouping is enabled.
+  - Each subfolder contains one text file per observed genotype (e.g., `wt_allele.txt`, `HDR_perfect.txt`), with pairwise alignments showing each read/consensus sequence against its reference template.
 - CRISPResso2 output that includes (and not limited to) the following:
   - Read aligning rate
   - Sequence-level genotype frequencies table
