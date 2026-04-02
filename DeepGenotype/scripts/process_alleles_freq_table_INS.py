@@ -525,19 +525,19 @@ def main():
         #write genotype to file
         with open(os.path.join(zip_dir,'genotype_frequency.csv'),'w') as writehandle:
             writehandle.write(f"wt_allele,"
-                            f"HDR_perfect,"
                             f"wtProt_noPL,"
-                            f"wtProt_OKPL,"
                             f"mutProt_noPL,"
+                            f"HDR_perfect,"
+                            f"wtProt_OKPL,"
                             f"mutProt_OKPL,"
                             f"mutProt_mutPL,"
                             f"wtProt_mutPL,"
                             f",num_reads_in_fq,num_reads_post_QC,num_reads_aligned,[dg]num_reads_post_read_group_filter,num_alleles,[dg]num_alleles\n")
             writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
-                            f"{float(genotype_freq['HDR_perfect']):.4f}%,"
                             f"{float(genotype_freq['wtProt_noPL']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_noPL']):.4f}%,"
+                            f"{float(genotype_freq['HDR_perfect']):.4f}%,"
+                            f"{float(genotype_freq['wtProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_OKPL']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutPL']):.4f}%,"
                             f"{float(genotype_freq['wtProt_mutPL']):.4f}%,"

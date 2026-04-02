@@ -274,29 +274,28 @@ def main():
                 consensus_writehandle = open(consensus_csv_path_final, "w", buffering=1)
 
             if edit_type == "INS":
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
-                writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n") #write header
+                writehandle.write("Edit_status,unedited,unedited,unedited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                writehandle.write("Perfect_edit_status,-,-,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                writehandle.write(f"Protein-level_genotype,wt_allele,wtProt_noPL,mutProt_noPL,HDR_perfect,wtProt_okPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n") #write header
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
                 if consensus_writehandle:
-                    consensus_writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
-                    consensus_writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
-                    consensus_writehandle.write(f"Protein-level_genotype,wt_allele,HDR_perfect,wtProt_noPL,wtProt_okPL,mutProt_noPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
+                    consensus_writehandle.write("Edit_status,unedited,unedited,unedited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                    consensus_writehandle.write("Perfect_edit_status,-,-,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                    consensus_writehandle.write(f"Protein-level_genotype,wt_allele,wtProt_noPL,mutProt_noPL,HDR_perfect,wtProt_okPL,mutProt_okPL,mutProt_mutPL,wtProt_mutPL,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
                     consensus_writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             elif edit_type == "SNP":
-                #THIS IS THE OLD OUTPUT HEADER: writehandle.write("Sample_ID,wt_allele,HDR_perfect,wtProt_wtSNP,wtProt_hdrSNP,mutProt_wtSNP,mutProt_hdrSNP,mutProt_mutSNP,wtProt_mutSNP, (Prot=protein; SNP=SNP-of-interest; mutProt=mutation-in-protein-exclusing-SNP-site; hdrSNP=intended-protein-sequence-change-by-SNP; mutSNP=unintended-protein-sequence-change-by-SNP; wtSNP=unchanged-DNA-sequence-at-SNP-site)\n")  # write header
-                writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
-                writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
-                writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
-                writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
-                writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
+                writehandle.write("Edit_status,unedited,unedited,unedited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                writehandle.write("Perfect_edit_status,-,-,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                writehandle.write("Amino_acid_change_status,-,-,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),,,\n")
+                writehandle.write("Intended_edit_status,-,-,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),,,\n")
+                writehandle.write("Protein-level_genotype,wt_allele,wtProt_wtSNP,mutProt_wtSNP,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_mutSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
                 writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
                 if consensus_writehandle:
-                    consensus_writehandle.write("Edit_status,unedited,edited,edited,edited,edited,edited,edited,edited,,,,,,,,\n")
-                    consensus_writehandle.write("Perfect_edit_status,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
-                    consensus_writehandle.write("Amino_acid_change_status,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),no a.a. change,,,\n")
-                    consensus_writehandle.write("Intended_edit_status,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),synomous changes only and no intended a.a change,,,\n")
-                    consensus_writehandle.write("Protein-level_genotype,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
+                    consensus_writehandle.write("Edit_status,unedited,unedited,unedited,edited,edited,edited,edited,edited,,,,,,,,\n")
+                    consensus_writehandle.write("Perfect_edit_status,-,-,-,perfect edit,imperfect edit,imperfect edit,imperfect edit,imperfect edit,,,,,,,\n")
+                    consensus_writehandle.write("Amino_acid_change_status,-,-,-,a.a change(s),a.a change(s),a.a change(s),a.a change(s),a.a change(s),,,\n")
+                    consensus_writehandle.write("Intended_edit_status,-,-,-,intended a.a. change(s) only,intended a.a. change(s) + synomous change(s),intended a.a change + unintended a.a. change(s),unintended a.a. change(s),unintended a.a. change(s),,,\n")
+                    consensus_writehandle.write("Protein-level_genotype,wt_allele,wtProt_wtSNP,mutProt_wtSNP,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_mutSNP,weighted_avg_percent_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,num_reads_post_read-group_filter,num_alleles(read-group)_before_filter,num_alleles(read-group)_after_filter  \n")
                     consensus_writehandle.write("Sample_ID,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-\n")
             # run CRISPResso for each sample_ID
             for index, row in df.iterrows():
@@ -570,16 +569,6 @@ def main():
                 if os.path.isfile(crispresso_report):
                     shutil.copy(crispresso_report, os.path.join(sample_output_dir,f"{row['Sample_ID']}_CRISPResso_report.html"))
 
-                # Write read group alignment files
-                readgroups_genotype_zip = os.path.join(
-                    sample_output_dir, f"{row['Sample_ID']}_DeepGenotypeAlleleFreq.zip"
-                )
-                if os.path.isfile(readgroups_genotype_zip):
-                    readgroups_aln_dir = os.path.join(sample_output_dir, "alignments", "readgroups_w_template")
-                    os.makedirs(readgroups_aln_dir, exist_ok=True)
-                    write_alignment_files(readgroups_genotype_zip, readgroups_aln_dir, edit_type)
-                    log.info(f"...wrote read group alignment files")
-
                 ##################################
                 # consensus grouping and re-genotyping
                 ##################################
@@ -636,7 +625,7 @@ def main():
                     # Write consensus alignment files
                     consensus_genotype_zip = os.path.join(consensus_pass_dir, "Alleles_frequency_table_genotype.zip")
                     if os.path.isfile(consensus_genotype_zip):
-                        consensus_aln_dir = os.path.join(sample_output_dir, "alignments", "consensus_w_template")
+                        consensus_aln_dir = os.path.join(sample_output_dir, "alignments", "consensus_seq_against_template")
                         os.makedirs(consensus_aln_dir, exist_ok=True)
                         write_alignment_files(consensus_genotype_zip, consensus_aln_dir, edit_type)
                         log.info(f"...wrote consensus alignment files")
@@ -660,10 +649,10 @@ def main():
                                     f"    okPL = payload whose sequence is correct at the protein level\n"
                                     f"Genotype explanation:\n"
                                     f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
-                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
                                     f"    wtProt_noPL: protein sequence matched wt protein sequence. no payload detected\n"
-                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
                                     f"    mutProt_noPL: protein sequence is mutated (see mut definition above). no payload detected\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
                                     f"    mutProt_okPL: protein sequence is mutated (see mut definition above). payload is correct at the protein level\n"
                                     f"    mutProt_mutPL: protein sequence is mutated. payload is mutated (see mut definition above)\n"
                                     f"    wtProt_mutPL: protein sequence matched wt protein sequence. payload is mutated (see mut definition above)\n"
@@ -681,13 +670,13 @@ def main():
                                     f"    HDR = protein sequence matching the HDR amplicon\n"
                                     f"Genotype explanation:\n"
                                     f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
+                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
                                     f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
                                     f"    wtProt_hdrSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched the intended change\n"
                                     f"    mutProt_hdrSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched the intended change\n"
                                     f"    wtProt_mutSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid is mutated\n"
-                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
                                     f"    mutProt_mutSNP: protein sequence is mutated. SNP-payload-associated amino acid is mutated (see mut definition above)\n"
-                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
                                     f"Notes:\n"
                                     f"    num_post_filter_reads: number of reads that passed the quality filter\n"
                                     f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"
@@ -707,10 +696,10 @@ def main():
                                     f"    okPL = payload whose sequence is correct at the protein level\n"
                                     f"Genotype explanation:\n"
                                     f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
-                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
                                     f"    wtProt_noPL: protein sequence matched wt protein sequence. no payload detected\n"
-                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
                                     f"    mutProt_noPL: protein sequence is mutated (see mut definition above). no payload detected\n"
+                                    f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
+                                    f"    wtProt_okPL: protein sequence matched wt protein sequence. payload is correct at the protein level\n"
                                     f"    mutProt_okPL: protein sequence is mutated (see mut definition above). payload is correct at the protein level\n"
                                     f"    mutProt_mutPL: protein sequence is mutated. payload is mutated (see mut definition above)\n"
                                     f"    wtProt_mutPL: protein sequence matched wt protein sequence. payload is mutated (see mut definition above)\n"
@@ -728,13 +717,13 @@ def main():
                                     f"    HDR = protein sequence matching the HDR amplicon\n"
                                     f"Genotype explanation:\n"
                                     f"    wt_allele: wildtype allele - the *whole* amplicon sequence perfectly matched the wt amplicon at the *nucleotide* level\n"
+                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
+                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
                                     f"    HDR_perfect: the *whole* amplicon sequence perfectly matched the HDR amplicon at the *nucleotide* level. Please note that the 'HDR perfect' in CRISPResso results only looks at the payload sequence.\n"
                                     f"    wtProt_hdrSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched the intended change\n"
                                     f"    mutProt_hdrSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched the intended change\n"
                                     f"    wtProt_mutSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid is mutated\n"
-                                    f"    mutProt_wtSNP: protein sequence is mutated (see mut definition above). SNP-payload-associated amino acid matched wt\n"
                                     f"    mutProt_mutSNP: protein sequence is mutated. SNP-payload-associated amino acid is mutated (see mut definition above)\n"
-                                    f"    wtProt_wtSNP: protein sequence matched wt protein sequence. SNP-payload-associated amino acid matched wt\n"
                                     f"Notes:\n"
                                     f"    num_post_filter_reads: number of reads that passed the quality filter\n"
                                     f"    weighted_avg_percent_identity: weighted average of the percent identity of the reads (that aligned to the HDR amplicon)\n"

@@ -524,15 +524,15 @@ def main():
             #                 f"{float(genotype_freq['mutProt_hdrSNP']):.4f}%,"
             #                 f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
             #                 f"{float(genotype_freq['wtProt_mutSNP']):.4f}%\n")
-            writehandle.write("Sample,wt_allele,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_wtSNP,mutProt_mutSNP,wtProt_wtSNP,num_clean_reads,weighted_avg_perc_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,[dg]num_reads_post_read_group_filter,num_alleles,[dg]num_alleles\n")
+            writehandle.write("Sample,wt_allele,wtProt_wtSNP,mutProt_wtSNP,HDR_perfect,wtProt_hdrSNP,mutProt_hdrSNP,wtProt_mutSNP,mutProt_mutSNP,num_clean_reads,weighted_avg_perc_identity,weighted_avg_num_of_mismatches,num_reads_in_fq,num_reads_post_QC,num_reads_aligned,[dg]num_reads_post_read_group_filter,num_alleles,[dg]num_alleles\n")
             writehandle.write(f"{float(genotype_freq['wt_allele']):.4f}%,"
+                            f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,"
+                            f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"
                             f"{float(genotype_freq['HDR_perfect']):.4f}%,"
                             f"{float(genotype_freq['wtProt_hdrSNP']):.4f}%,"
                             f"{float(genotype_freq['mutProt_hdrSNP']):.4f}%,"
                             f"{float(genotype_freq['wtProt_mutSNP']):.4f}%,"
-                            f"{float(genotype_freq['mutProt_wtSNP']):.4f}%,"
                             f"{float(genotype_freq['mutProt_mutSNP']):.4f}%,"
-                            f"{float(genotype_freq['wtProt_wtSNP']):.4f}%,"
                             f"{compute_weighted_average(perc_identity_list, num_of_mismatches_list):.4f},"
                             f"{compute_weighted_average(num_of_mismatches_list, num_of_mismatches_list):.4f},"
                             f"{num_reads_in_fq},"
